@@ -197,6 +197,7 @@ table.cmp td:first-child{font:600 10px "Barlow Condensed",sans-serif;letter-spac
  <div id="side">
   <button class="rb gold hide" id="bExit" title="Sair do ambiente">✕</button>
   <button class="rb gold hide" id="bWalk" title="Caminhar em primeira pessoa">👣</button>
+  <button class="rb hide" id="bGlb" title="Modelo detalhado / modelo técnico">3D</button>
   <button class="rb" id="bNight" title="Dia / noite">☾</button>
   <button class="rb" id="bBP" title="Alternar blueprint / realista">BP</button>
   <button class="rb" id="bHome" title="Reenquadrar">⟲</button>
@@ -226,6 +227,8 @@ table.cmp td:first-child{font:600 10px "Barlow Condensed",sans-serif;letter-spac
  <div id="load">CARREGANDO PLANOS…</div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/meshopt_decoder.js"></script>
 <script>
 (function(){'use strict';
 /* ===== MÓDULO 1 — núcleo, texturas, forma do casco, exterior ===== */
@@ -410,8 +413,54 @@ const props=[];
   for(let k=0;k<3;k++){const pv=G();pv.rotation.x=k*PI*2/3;const b=new T.Mesh(new T.SphereGeometry(1,12,8),mBronze);b.scale.set(r*.04,r*.45,r*.27);b.position.y=r*.53;b.rotation.y=q[4]*.55;pv.add(b);p.add(pv);}
   g.add(p);props.push({o:p,s:q[4],k:q[5]});});add('helice',g,{ex:V(-12,-28,0),layer:'maq',clip:false});}
 /* mar, grade, cotas, estrelas, iceberg da demonstração da gávea */
-const seaT=ctex(256,256,(c,w,h)=>{c.fillStyle='#0d3552';c.fillRect(0,0,w,h);for(let i=0;i<260;i++){c.fillStyle='rgba(190,225,255,'+(Math.random()*.1)+')';c.fillRect(Math.random()*w,Math.random()*h,8+Math.random()*40,1);}},40,40);
-const sea=new T.Mesh(new T.CircleGeometry(1500,72),new T.MeshStandardMaterial({map:seaT,transparent:true,opacity:.8,roughness:.75,metalness:0,side:DS}));sea.rotation.x=-PI/2;sea.position.y=WL;sea.userData.noPick=true;scene.add(sea);sea.material.clippingPlanes=CLIP;
+/* ===== oceano dinâmico (shader): ondulação, sistema de ondas do casco, espuma e esteira ===== */
+const SEA_H=`
+uniform float uT,uV,uR,uRc,uN;
+float hw(float x){float u=(x+134.5)/269.;if(u<0.||u>1.)return 0.;float f=1.;if(u>.72){float s=(u-.72)/.28;f=max(0.,1.-pow(s,2.1));}else if(u<.14){float s=(.14-u)/.14;f=pow(max(0.,1.-pow(s,2.6)),.55);}return 13.9*f;}
+float amb(vec2 p){float t=uT;vec2 q=p+vec2(uV*t,0.);float h=.26*sin(dot(q,vec2(.045,.021))+t*.62);h+=.19*sin(dot(q,vec2(-.031,.058))+t*.81+1.3);h+=.11*sin(dot(q,vec2(.11,-.085))+t*1.25+.7);h+=.07*sin(dot(q,vec2(.19,.16))+t*1.7+2.1);h+=.04*sin(dot(q,vec2(-.33,.21))+t*2.3);return h;}
+float kelv(vec2 p,float x0,float amp){float V=max(uV,2.5),d=x0-p.x;if(d<0.)return 0.;float az=abs(p.y),zc=d*.3536+3.,kt=9.81/(V*V),e=exp(-pow((az-zc)/(5.+d*.06),2.));
+ float h=amp*e*sin(kt*1.5*(d*.577+az*.816))*exp(-d/700.)*smoothstep(0.,18.,d);
+ h+=amp*.38*sin(kt*d)*smoothstep(zc,zc*.45,az)/sqrt(1.+d/160.)*smoothstep(0.,40.,d);return h;}
+float shipH(vec2 p){float A=min(1.3,uV*uV/120.);if(A<.002)return 0.;float az=abs(p.y);
+ float h=A*1.25*exp(-pow((p.x-137.)/9.,2.))*exp(-pow(az/8.,2.));
+ h+=A*.5*exp(-pow((az-hw(p.x)-1.5)/3.,2.))*smoothstep(40.,130.,p.x);
+ h+=kelv(p,134.,A*.85)+kelv(p,-118.,A*.5);return h;}
+float seaH(vec2 p){return amb(p)*(1.-.35*min(1.,uN))+shipH(p);}
+`;
+const seaMat=new T.ShaderMaterial({transparent:true,clipping:true,clippingPlanes:CLIP,side:DS,uniforms:{uT:{value:0},uV:{value:0},uR:{value:0},uRc:{value:0},uN:{value:0},uSun:{value:V(160,220,180).normalize()},uCam:{value:V(0,0,0)}},
+vertexShader:SEA_H+`#include <clipping_planes_pars_vertex>
+varying vec3 vP;void main(){vec3 p=position;p.y+=seaH(p.xz);vec4 wp=modelMatrix*vec4(p,1.);vP=vec3(position.x,wp.y,position.z);vec4 mvPosition=viewMatrix*wp;gl_Position=projectionMatrix*mvPosition;
+#include <clipping_planes_vertex>
+}`,
+fragmentShader:SEA_H+`#include <clipping_planes_pars_fragment>
+uniform vec3 uSun,uCam;varying vec3 vP;
+float hsh(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hsh(i),hsh(i+vec2(1,0)),f.x),mix(hsh(i+vec2(0,1)),hsh(i+vec2(1,1)),f.x),f.y);}
+float fbm(vec2 p){return .5*vn(p)+.3*vn(p*2.1+7.)+.2*vn(p*4.3+3.);}
+void main(){
+#include <clipping_planes_fragment>
+ vec2 p=vP.xz;float e=.9;float h0=seaH(p),hx=seaH(p+vec2(e,0.)),hz=seaH(p+vec2(0.,e));
+ vec3 n=normalize(vec3(h0-hx,e,h0-hz));vec2 mp=p+vec2(uV*uT,0.);float dist=length(vP-uCam),nd=smoothstep(700.,40.,dist);n=normalize(n+vec3(vn(mp*.55+uT*.5)-.5,0.,vn(mp*.55-uT*.4+9.)-.5)*.2*nd);
+ vec3 v=normalize(uCam-vec3(p.x,vP.y,p.y));float fr=.03+.97*pow(1.-max(dot(n,v),0.),5.);
+ vec3 deep=mix(vec3(.012,.085,.16),vec3(.004,.012,.03),uN),sky=mix(mix(vec3(.62,.74,.86),vec3(.27,.5,.8),clamp(reflect(-v,n).y,0.,1.)),vec3(.03,.045,.08),uN);
+ vec3 col=mix(deep,sky,fr);col+=mix(vec3(.02,.1,.11),vec3(0.),uN)*max(0.,h0)*.35;
+ col+=mix(vec3(1.,.95,.82),vec3(.25,.3,.4),uN)*pow(max(dot(reflect(-uSun,n),v),0.),90.)*(.25+.75*nd)*(1.-.85*uN);
+ /* espuma: contato com o casco, onda de proa, cristas do sistema de ondas, esteira das três hélices */
+ float A=min(1.,uV*uV/120.),az=abs(p.y),w=hw(p.x),f=0.,nz=fbm(mp*.35),nf=fbm(mp*1.3+nz*2.);
+ float band=smoothstep(4.5,0.,az-w)*step(-134.5,p.x)*step(p.x,138.);f+=band*A*(.35+1.1*smoothstep(55.,134.,p.x)+.5*smoothstep(-95.,-134.,p.x))*(.45+nf);
+ float d=134.-p.x,zc=d*.3536+3.;f+=A*1.2*exp(-pow((az-zc)/(3.+d*.035),2.))*exp(-d/150.)*smoothstep(0.,6.,d)*(.3+nf);
+ f+=A*.7*smoothstep(.55,1.1,shipH(p))*(.4+nf);
+ float dw=-118.-p.x;if(dw>0.){float R=clamp(abs(uR)/75.,0.,1.),Rc=clamp(uRc/165.,0.,1.),sp=1.7+dw*.055;vec2 q=vec2(p.x*.25+uT*(1.5+2.5*R),p.y*.6);
+  float s3=R*(exp(-pow((p.y-6.4)/sp,2.))+exp(-pow((p.y+6.4)/sp,2.)))+max(Rc,R*.15)*exp(-pow(p.y/sp,2.));float ww=11.+dw*.085,wide=smoothstep(ww,ww*.35,az)*max(R,A*.6);
+  float sw=.5+.5*sin(dw*.55-uT*(2.+6.*R)+6.*vn(q*1.7)+p.y*.9);float tur=fbm(q*2.2+vec2(sw*.6,uT*.4));
+  float wk=mix(s3*(.35+.75*sw),wide*.8,smoothstep(45.,190.,dw))*exp(-dw/420.)*smoothstep(0.,5.,dw);f+=wk*(.3+1.15*tur);col=mix(col,mix(vec3(.05,.33,.36),vec3(.02,.06,.08),uN),clamp(wk*.55,0.,.6));}
+ f=clamp(f-.28,0.,1.);f=smoothstep(0.,.75,f);col=mix(col,mix(vec3(.93,.96,.97),vec3(.3,.34,.4),uN),f);
+ col=mix(col,mix(vec3(.6,.72,.84),vec3(.03,.045,.08),uN),smoothstep(900.,3800.,dist));
+ gl_FragColor=vec4(col,mix(.9,1.,max(f,smoothstep(300.,1500.,dist))));}`});
+const sea=(()=>{const N=190,pos=[],idx=[],wr=c=>Math.sign(c)*Math.pow(Math.abs(c),2.4)*4200;for(let i=0;i<=N;i++)for(let j=0;j<=N;j++)pos.push(wr(i/N*2-1),0,wr(j/N*2-1));for(let i=0;i<N;i++)for(let j=0;j<N;j++){const a=i*(N+1)+j,b=a+N+1;idx.push(a,a+1,b,a+1,b+1,b);}
+ const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(pos,3));g.setIndex(idx);const m=new T.Mesh(g,seaMat);m.position.y=WL;m.frustumCulled=false;m.userData.noPick=true;scene.add(m);return m;})();
+const sky=new T.Mesh(new T.SphereGeometry(6500,24,12),new T.ShaderMaterial({side:T.BackSide,depthWrite:false,uniforms:{uN:{value:0},uSun:{value:V(160,220,180).normalize()}},vertexShader:'varying vec3 vD;void main(){vD=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+ fragmentShader:'uniform float uN;uniform vec3 uSun;varying vec3 vD;void main(){float y=clamp(vD.y,0.,1.);vec3 c=mix(vec3(.6,.72,.84),vec3(.2,.42,.74),pow(y,.55));c+=vec3(1.,.9,.7)*pow(max(dot(normalize(vD),uSun),0.),300.)*1.5;c=mix(c,mix(vec3(.03,.045,.08),vec3(.008,.012,.03),pow(y,.5)),uN);if(vD.y<0.)c=mix(c,mix(vec3(.02,.09,.16),vec3(.004,.012,.03),uN),smoothstep(0.,-.06,vD.y));gl_FragColor=vec4(c,1.);}'}));sky.renderOrder=-10;sky.visible=false;scene.add(sky);
 const grid=new T.GridHelper(600,60,0x8fd3ff,0x2b6aa8);grid.position.y=-2;grid.material.transparent=true;grid.material.opacity=.35;grid.visible=false;scene.add(grid);
 const dimL=lines([-134.5,-5,20,134.5,-5,20,-134.5,-6.5,20,-134.5,-3.5,20,134.5,-6.5,20,134.5,-3.5,20, 142,0,-14.1,142,0,14.1,142,0,-14.1,139,0,-14.1,142,0,14.1,139,0,14.1, -142,0,0,-142,53.3,0,-144,0,0,-140,0,0,-144,53.3,0,-140,53.3,0, 142,0,18,142,10.5,18,140.5,10.5,18,143.5,10.5,18],0xcfeaff,scene);dimL.visible=false;
 const DIMS=[[V(0,-5,20),'COMPRIMENTO 269,1 m (882 pés 9 pol.)'],[V(142,0,0),'BOCA 28,2 m'],[V(-142,28,0),'QUILHA AO TOPO DAS CHAMINÉS 53,3 m'],[V(142,5.2,18),'CALADO 10,5 m']];
@@ -925,10 +974,11 @@ function applyLook(){const bp=S.bp,conv=S.mode==='conveses';if(bp&&!edgesBuilt)b
  glowM.forEach(m=>{m.userData.real.emissiveIntensity=S.night&&!S.dark?.8:0;});
  lineObjs.forEach(l=>{if(l.userData.bpOnly){l.visible=bp;return;}l.material.color.setHex(bp?0x9bd8ff:l.userData.rc);l.material.opacity=((S.ghost||conv)&&l.userData.it.shell&&!bp)?.08:.8;});
  items.forEach(it=>{let v=true;if(it.layer==='zone')v=conv&&it.deck===S.deck;else if(it.layer==='flood')v=S.tab==='flood';else if(conv)v=it.deck===S.deck||it.id==='casco'||(S.deck==='T'&&it.layer==='maq');else if(S.ghost&&!bp&&it.shell&&(S.walk||it.id!=='casco'))v=false;it.o.visible=v;});
+ const gS=glbShown();if(glb){glb.visible=gS;glbMats.forEach(mm=>{if(mm.userData.gl)mm.emissiveIntensity=S.night?1:0;});}items.forEach(it=>{it.hg=false;if(gS&&it.layer!=='zone'&&it.layer!=='flood'&&it.o.visible){it.o.visible=false;it.hg=true;}});const bg=$('#bGlb');if(bg){bg.classList.toggle('on',S.glbOn&&!!glb);bg.classList.toggle('hide',!glb);}
  const inS=!!S.visit;root.visible=!inS;setsG.visible=inS;
  sea.visible=!bp&&!S.ghost&&!conv&&S.exT===0&&!inS;grid.visible=bp&&!inS;dimL.visible=bp&&S.exT===0&&!inS;stars.visible=S.night&&!bp&&!inS;berg.visible=S.gavea;
  const app=$('#app');app.classList.toggle('bp',bp&&!inS);app.classList.toggle('night',S.night&&!bp&&!inS);app.classList.toggle('in',inS);$('#bBP').classList.toggle('on',bp);$('#bNight').classList.toggle('on',S.night);
- const n=S.night&&!inS;hemi.intensity=inS?.8:n?.2:.95;sun.intensity=inS?.45:n?.1:1;fillL.intensity=n?.12:.35;sea.material.color.setHex(n?0x3a4a66:0xffffff);
+ const n=S.night&&!inS;hemi.intensity=inS?.8:n?.2:.95;sun.intensity=inS?.45:n?.1:1;fillL.intensity=n?.12:.35;seaMat.uniforms.uN.value=sky.material.uniforms.uN.value=S.night?1:0;sky.visible=sea.visible;
  if(S.cut&&!inS){if(S.ax==='z'){clip.normal.set(0,0,-1);clip.constant=(S.cutV-50)*.29;}else{clip.normal.set(-1,0,0);clip.constant=(S.cutV-50)*2.7;}}else clip.constant=1e4;
  $('#cutbar').classList.toggle('show',S.cut&&!inS);$('#deckbar').classList.toggle('show',conv&&!inS);
  $$('#cutbar [data-ax]').forEach(b=>b.classList.toggle('on',b.dataset.ax===S.ax));$$('#deckbar .chip').forEach(b=>b.classList.toggle('on',b.dataset.d===S.deck));
@@ -1002,7 +1052,7 @@ function pick(x,y){const r=cv.getBoundingClientRect();ndc.set((x-r.left)/r.width
  if(S.visit){const hs=ray.intersectObjects(SETS[S.visit].meshes,false);for(let i=0;i<hs.length;i++){if(hs[i].object.userData.door){travel(hs[i].object.userData.door,S.visit);return;}let p=hs[i].object,id=null;while(p){if(p.userData.part){id=p.userData.part;break;}p=p.parent;}if(id&&P[id]){S.sel=[id];openTab('ficha');return;}if(hs[i].object.material.opacity>.5)break;}return;}
  if(S.gavea)return;
  const hs=ray.intersectObjects(meshes,false),conv=S.mode==='conveses';
- for(let i=0;i<hs.length;i++){const h=hs[i],m=h.object,it=m.userData.it;if(m.userData.noPick||!m.visible||!it.o.visible)continue;if((S.ghost||conv)&&it.shell&&!S.bp&&!(conv&&it.deck===S.deck))continue;if(conv&&it.layer!=='zone'&&it.layer!=='maq')continue;
+ for(let i=0;i<hs.length;i++){const h=hs[i],m=h.object,it=m.userData.it;if(m.userData.noPick||!m.visible||(!it.o.visible&&!it.hg))continue;if((S.ghost||conv)&&it.shell&&!S.bp&&!(conv&&it.deck===S.deck))continue;if(conv&&it.layer!=='zone'&&it.layer!=='maq')continue;
   if(it.clip&&S.cut&&clip.distanceToPoint(h.point)<0)continue;let id=m.userData.pid;if(id==='casco'){const px=h.point.x;if(px>95)id='proa';else if(px<-104)id='popa';}
   if(!P[id])continue;select([id]);return;}
  select([]);}
@@ -1046,6 +1096,7 @@ $$('#tools .chip').forEach(b=>b.addEventListener('click',()=>{ac();if(S.tab===b.
 $$('#modes button').forEach(b=>b.addEventListener('click',()=>{if(S.tab==='flood'||S.tab==='sink')closeSheet();setMode(b.dataset.m);}));
 $('#bBP').addEventListener('click',()=>{if(S.visit)return;S.bp=!S.bp;applyLook();});
 $('#bNight').addEventListener('click',()=>{S.night=!S.night;applyLook();});
+$('#bGlb').addEventListener('click',()=>{S.glbOn=!S.glbOn;S.glbKeep=true;applyLook();});
 $('#bHome').addEventListener('click',()=>{if(S.visit){const s=SETS[S.visit];S.fp=false;applyLook();fly({t:s.O.clone().add(V(s.c[0],s.c[1],s.c[2])),r:Math.max(s.r,rFor(s.r)*.8),th:.9,ph:1});}else if(!S.fp)fly(preset(S.mode));});
 $('#bPlay').addEventListener('click',()=>{S.run=!S.run;$('#bPlay').textContent=S.run?'❚❚':'▶';});
 $('#bExit').addEventListener('click',exitAll);
@@ -1091,7 +1142,7 @@ function renderTab(){const t=S.tab;let h='';
  else if(t==='sink'){h='<div class="skTop"><div class="skrow"><div><div id="skc">23h38</div><div class="note" style="margin:0" id="skd">14 de abril</div></div><button class="btn on" id="skp">▶ Reproduzir</button><button class="btn" id="sk0">⏮</button></div><div class="skch"><button class="btn" data-ch="0">Colisão</button><button class="btn" data-ch="1">Naufrágio</button><button class="btn" data-ch="2">Descida</button><button class="btn" data-ch="3">Destroços</button></div><input id="skr" type="range" min="-2" max="176" step="0.5" value="-2"><div class="kv"><div><span id="skA">0°</span><small>inclinação</small></div><div><span id="skB">intacto</span><small>casco</small></div><div><span id="skL">acesas</span><small>luzes</small></div><div><span id="skN">0 / 20</span><small>botes na água</small></div></div></div><div id="skev">'+SK.map((e,i)=>'<div class="ev" data-sk="'+e[0]+'"><b>'+e[1]+'</b><p style="display:block">'+esc(e[2])+'</p></div>').join('')+'<p class="note"><b>Reconstituição:</b> os horários são os de bordo e seguem os inquéritos de 1912 e estudos posteriores; alguns são aproximados e discutidos. Os últimos cinco minutos passam em câmera lenta. Ângulos, a ordem exata da queda das chaminés e o movimento das duas metades são aproximações: a ruptura é mostrada como um corte limpo entre a 3ª e a 4ª chaminés. Os botes deixam os turcos no horário aproximado de cada um; suas posições na água são ilustrativas. Na colisão, o tamanho e a forma do iceberg são supostos. Na descida, a altura da coluna d’água está comprimida (400 m no modelo para 3.800 m reais); no fundo, a distância entre proa e popa está em escala, e a popa aparece apenas achatada, sem o detalhe real dos danos. Das cerca de 2.200 pessoas a bordo, perto de 710 sobreviveram.</p></div>';}
  else if(t==='sobre'){h='<h4>Como ler as fichas</h4><div class="tags"><span class="tg D">Documentado</span><span class="tg R">Reconstrução visual</span><span class="tg S">Simplificação</span></div><p class="note" style="color:var(--ink)">Dimensões, máquinas, caldeiras, botes e organização dos conveses seguem os registros do Titanic em abril de 1912. Toda a geometria 3D é reconstrução feita por código: o casco é gerado por fórmulas e os interiores foram montados a partir de descrições e fotografias de época, muitas do gêmeo Olympic.</p>'+
   '<h4>Implementado nesta versão</h4><p class="note">Exterior completo · 10 conveses com planta e 45 ambientes localizados · 19 cenários internos em 3D com caminhada: Grande Escadaria com elevadores em movimento, ponte, aposentos do comandante, sala Marconi, lounge, sala de leitura, salão de fumar, restaurante, Café Parisien, corredor, ginásio, piscina, banhos turcos, squash, biblioteca, salas da 3ª classe, cabines e salões de jantar · passagem a pé entre ambientes pelas portas e pelo elevador · gávea · caldeiras, máquinas, turbina, dínamos e hélices animados · telégrafo · Morse · alagamento · reconstituição do naufrágio · rota · dia/noite · blueprint, corte e vista explodida · busca.</p>'+
-  '<h4>Limites desta versão</h4><p class="note"><b>Passagens:</b> cada porta leva diretamente ao ambiente vizinho; os corredores intermediários não são percorridos, com exceção de um trecho do corredor do convés B. As ligações são plausíveis, não a planta exata.<br><b>Fotografias:</b> não estão embutidas — este museu não pode carregar imagens externas. As fichas dos ambientes trazem um atalho para fotografias de época no Wikimedia Commons.<br><b>Modelos GLTF:</b> não há; toda a geometria é gerada por código.<br><b>Naufrágio:</b> ruptura, queda das chaminés e posição dos botes na água são representações esquemáticas.<br><b>Ainda sem cenário:</b> escadaria de ré, Verandah Café, sala de fumar da 2ª classe.</p>'+
+  '<h4>Limites desta versão</h4><p class="note"><b>Passagens:</b> cada porta leva diretamente ao ambiente vizinho; os corredores intermediários não são percorridos, com exceção de um trecho do corredor do convés B. As ligações são plausíveis, não a planta exata.<br><b>Fotografias:</b> não estão embutidas — este museu não pode carregar imagens externas. As fichas dos ambientes trazem um atalho para fotografias de época no Wikimedia Commons.<br><b>Modelo externo detalhado:</b> no modo Navio é usado o modelo “RMS Titanic 1912”, de Renan_1912 (<a href="https://sketchfab.com/3d-models/rms-titanic-1912-fe1019b8f4bf46eea28cdb7a866f05e0" target="_blank" rel="noopener">Sketchfab</a>, licença <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>), aqui comprimido, com as linhas de aresta ocultas e o casco escurecido. O botão 3D alterna com o modelo técnico gerado por código, que continua sendo usado à noite (por ter as janelas iluminadas), nos cortes, no blueprint, na vista explodida, na gávea e no naufrágio. As hélices do modelo detalhado são fixas; sua rotação aparece na esteira.<br><b>Oceano:</b> ondulação, ondas de proa e de esteira (padrão de Kelvin, com comprimento de onda ligado à velocidade) e espuma são calculados por shader; é uma aproximação visual, não uma simulação de fluidos.<br><b>Naufrágio:</b> ruptura, queda das chaminés e posição dos botes na água são representações esquemáticas.<br><b>Ainda sem cenário:</b> escadaria de ré, Verandah Café, sala de fumar da 2ª classe.</p>'+
   '<h4>Fontes para consulta</h4><p class="note"><a href="https://www.encyclopedia-titanica.org/" target="_blank" rel="noopener">Encyclopedia Titanica</a> · <a href="https://www.titanicinquiry.org/" target="_blank" rel="noopener">Titanic Inquiry Project</a> (inquéritos de 1912) · <a href="https://www.norwayheritage.com/p_ship.asp?sh=titan" target="_blank" rel="noopener">Norway Heritage</a> (descrição técnica de época) · <a href="https://en.wikipedia.org/wiki/Titanic" target="_blank" rel="noopener">Wikipedia — Titanic</a> · revista The Shipbuilder, número especial de 1911.</p>';}
  pDyn.innerHTML=h;
  if(t==='busca'){const q=$('#q'),run=()=>{S.q=q.value;const n=norm(S.q);$('#qr').innerHTML=n.length<2?'':ORDER.filter(id=>norm(P[id].n+' '+P[id].en+' '+(P[id].t||'')).indexOf(n)>=0).slice(0,24).map(id=>'<button data-go="'+id+'"><i>'+P[id].i+'</i>'+esc(P[id].n)+'</button>').join('')||'<p class="note">Nada encontrado.</p>';};q.addEventListener('input',run);run();}
@@ -1170,7 +1221,7 @@ function sinkApply(){const t=sk.t;let bow,st,deg;const uw=t>=161.5,yaw=t<0?.1*sm
  else{const vb=kf(SKB,t),vs=kf(SKS,t),a0=-19.5*PI/180,w0=xfm(-15,a0,-15,WL-9.6),wx=w0.x+(-85*Math.cos(a0)-WL*Math.sin(a0)),wy=w0.y+(-85*Math.sin(a0)+WL*Math.cos(a0));deg=vs[0];bow=xfm(-15,-vb[0]*PI/180,-15,WL-vb[1]);st=xfm(-85,-vs[0]*PI/180,wx,wy-vs[1]);}
  sk.bow=bow;sk.st=st;root.rotation.set(0,bow.ry||0,bow.a);root.position.set(bow.x,bow.y,0);root.scale.set(1,1,1);root.visible=true;
  /* ambiente: superfície ou fundo */
- sea.visible=!uw;stars.visible=!uw;wb.visible=!uw;bedG.visible=uw;snow.visible=uw&&t<171;$('#app').classList.toggle('deep',uw);hemi.intensity=uw?.62:.2;hemi.color.setHex(uw?0x7fb0d0:0xd6e6ff);sun.intensity=uw?.25:.1;gash.visible=t>=-.1;
+ sea.visible=!uw;sky.visible=!uw;stars.visible=!uw;wb.visible=!uw;bedG.visible=uw;snow.visible=uw&&t<171;$('#app').classList.toggle('deep',uw);hemi.intensity=uw?.62:.2;hemi.color.setHex(uw?0x7fb0d0:0xd6e6ff);sun.intensity=uw?.25:.1;gash.visible=t>=-.1;
  if(uw&&snow.visible){const p=snow.geometry.attributes.position;for(let i=0;i<p.count;i++){p.setY(i,BED+((p.getY(i)-BED+ (sk.play?9:0))%440));}p.needsUpdate=true;}
  wlab.forEach(l=>{l.on=t>=171;});
  /* iceberg da colisão */
@@ -1217,7 +1268,7 @@ function animate(dt,time){const run=S.run;
  const hz=-(tel.ord-4)*.5;telM.userData.h0.rotation.z=telM.userData.h1.rotation.z=-(tel.eng-4)*.5;
  const ps=SETS.ponte.g;if(ps&&ps.visible){ps.userData.handles.forEach(h=>h.rotation.z=hz);}
  const rs=SETS.radio.g;if(rs&&rs.visible&&mor.on)rs.userData.disc.rotation.z+=dt*40;
- seaT.offset.x-=dt*sim.kn*.0015*(run?1:0);
+ {const u=seaMat.uniforms;if(run)u.uT.value+=dt;u.uV.value=S.tab==='sink'&&sk.t>=0?0:Math.max(0,sim.kn)*.5144;u.uR.value=sim.rpm;u.uRc.value=sim.trpm;u.uCam.value.copy(cam.position);}
  const smOn=!S.bp&&exOK&&S.mode!=='conveses'&&S.tab!=='flood'&&S.tab!=='sink';
  smoke.forEach(sp=>{const u=sp.userData;if(run)u.life+=dt/6;if(u.life>=1){u.life=0;const f=funnelTops[u.f];sp.position.set(f.x+Math.random(),f.y+.5+Math.random(),(Math.random()-.5)*2);u.v.set(-(2+Math.abs(sim.kn)*.5)-Math.random(),3.6+Math.random(),(Math.random()-.5));u.on=Math.random()<.15+sim.burn;}
   if(run)sp.position.addScaledVector(u.v,dt);const k=u.life;sp.scale.setScalar(4+20*k);sp.material.opacity=u.on?.42*Math.sin(PI*k)*Math.min(1,.2+sim.burn):0;sp.visible=smOn;});
@@ -1227,16 +1278,32 @@ function animate(dt,time){const run=S.run;
  hudT+=dt;if(hudT>.15){hudT=0;$('#hO').textContent=ORDERS[tel.ack].replace(' Ahead',' ▲').replace(' Astern',' ▼');$('#hR').textContent=Math.round(sim.rpm);$('#hK').textContent=nf(Math.abs(sim.kn),1);
   if(S.tab==='tele'){const e=(id,v)=>{const x=document.getElementById(id);if(x)x.textContent=v;};e('kA',Math.round(sim.rpm));e('kT',Math.round(sim.trpm));e('kK',nf(Math.abs(sim.kn),1));e('kC',Math.round(40+600*Math.pow(Math.abs(sim.rpm)/75,3)));}}}
 
+/* ================= MODELO DETALHADO (GLB de Renan_1912, CC BY 4.0) ================= */
+let glb=null,glbMats=[];S.glbOn=true;S.glbState='';
+function glbShown(){return !!glb&&S.glbOn&&!S.night&&S.mode==='navio'&&!S.bp&&!S.cut&&S.exT===0&&!S.ghost&&!S.visit&&!S.gavea&&S.tab!=='flood'&&S.tab!=='sink';}
+function loadGLB(){if(!T.GLTFLoader||typeof MeshoptDecoder==='undefined'){S.glbState='indisponível';return;}S.glbState='carregando…';const cib=window.createImageBitmap;try{window.createImageBitmap=undefined;}catch(e){}
+ const done=()=>{try{window.createImageBitmap=cib;}catch(e){}};
+ const hn=$('#hint'),say=t=>{if(hn){hn.textContent=t;hn.style.opacity=t?1:0;}},fail=()=>{done();S.glbState='erro';say('');};
+ const onG=g=>{done();try{const o=g.scene,w=new T.Group();w.add(o);o.updateMatrixWorld(true);let b=new T.Box3().setFromObject(o),sz=b.getSize(new T.Vector3());
+   if(sz.z>sz.x){o.rotation.y=PI/2;o.updateMatrixWorld(true);b=new T.Box3().setFromObject(o);sz=b.getSize(new T.Vector3());}
+   const s=GLB_FIT.len/sz.x;w.scale.setScalar(s);const c=b.getCenter(new T.Vector3());w.position.set(-c.x*s+GLB_FIT.dx,-b.min.y*s+GLB_FIT.dy,-c.z*s+GLB_FIT.dz);if(GLB_FIT.flip){const f=new T.Group();f.rotation.y=PI;f.add(w);glb=f;}else glb=w;
+   o.traverse(m=>{if(m.isLine||m.isLineSegments||m.isPoints){m.visible=false;return;}if(m.isMesh){m.frustumCulled=true;(Array.isArray(m.material)?m.material:[m.material]).forEach(mm=>{if(glbMats.indexOf(mm)<0){glbMats.push(mm);mm.clippingPlanes=CLIP;if(/glass/i.test(mm.name||'')){mm.userData.gl=true;mm.emissive=new T.Color(0xffd58a);mm.emissiveIntensity=0;}else if(mm.color&&!mm.map){const c=mm.color,l=(c.r+c.g+c.b)/3;if(Math.abs(c.r-c.g)<.04&&Math.abs(c.g-c.b)<.04&&l>.1&&l<.45)c.multiplyScalar(.32);else if(l>.85)c.multiplyScalar(.9);}}});}});
+   glb.visible=false;root.add(glb);S.glbState='ok';say('');applyLook();}catch(e){fail();}};
+ const sc=document.createElement('script');sc.src='titanic_glb.js';sc.async=true;sc.onerror=fail;
+ sc.onload=()=>{try{const s=atob(window.TITANIC_GLB_B64||'');window.TITANIC_GLB_B64=null;const n=s.length,u=new Uint8Array(n);for(let q=0;q<n;q++)u[q]=s.charCodeAt(q);const L=new T.GLTFLoader();L.setMeshoptDecoder(MeshoptDecoder);L.parse(u.buffer,'',onG,fail);}catch(e){fail();}};
+ setTimeout(()=>say('carregando o modelo detalhado…'),6500);document.head.appendChild(sc);}
+const GLB_FIT={len:269.1,dx:0,dy:0,dz:0,flip:false};
 /* ================= LAÇO ================= */
 function resize(){const w=window.innerWidth,h=window.innerHeight;R.setSize(w,h,false);cam.aspect=w/h;const bh=$('#bottom').offsetHeight;sheet.style.bottom=(w>=900?bh+12:bh)+'px';
  if(S.tab&&sheet.classList.contains('show')&&!S.fp){const r=sheet.getBoundingClientRect();if(r.width<w*.7)cam.setViewOffset(w,h,r.width/2,0,w,h);else cam.setViewOffset(w,h,0,Math.min(r.height,h*.5)/2,w,h);}else cam.clearViewOffset();
  cam.updateProjectionMatrix();}
 window.addEventListener('resize',resize);
 let last=performance.now();
-function loop(now){requestAnimationFrame(loop);const rdt=Math.min(.3,(now-last)/1000),dt=Math.min(.05,rdt);last=now;animate(dt,now/1000);camUpdate(rdt);labelsUpdate();if(S.tab==='sink'&&sk.t>=SPL&&(sk.t<161.2||sk.t>=161.5))sinkRender();else R.render(scene,cam);}
-resize();C.r=rFor(225);applyLook();camUpdate(0);
+let fpsN=0,fpsS=0;
+function loop(now){requestAnimationFrame(loop);const rdt=Math.min(.3,(now-last)/1000),dt=Math.min(.05,rdt);last=now;if(glb&&glb.visible&&S.glbOn&&!S.glbKeep){fpsN++;fpsS+=rdt;if(fpsN>=45){if(fpsS/fpsN>.11){S.glbOn=false;applyLook();const hn=$('#hint');hn.textContent='modelo detalhado desligado para manter a fluidez · botão 3D religa';hn.style.opacity=1;setTimeout(()=>hn.style.opacity=0,7000);}fpsN=0;fpsS=0;}}animate(dt,now/1000);camUpdate(rdt);labelsUpdate();if(S.tab==='sink'&&sk.t>=SPL&&(sk.t<161.2||sk.t>=161.5))sinkRender();else R.render(scene,cam);}
+resize();C.r=rFor(225);applyLook();camUpdate(0);loadGLB();
 $('#load').style.display='none';setTimeout(()=>{$('#hint').style.opacity=0;},6000);
-window.__ship={SPL:SPL,sk:sk,sinkApply:sinkApply,SETS:SETS,travel:travel,S:S,sim:sim,tel:tel,fl:fl,setMode:setMode,goto:goto,openTab:openTab,visit:visit,walk:walk,gavea:gavea,startFP:startFP,sendOrder:sendOrder,C:C,F:F,keys:keys,hb:hb,CB:CB,BHTOP:BHTOP,BH:BH,WL:WL};
+window.__ship={GLB_FIT:GLB_FIT,glbInfo:()=>({st:S.glbState,has:!!glb}),seaMat:seaMat,SPL:SPL,sk:sk,sinkApply:sinkApply,SETS:SETS,travel:travel,S:S,sim:sim,tel:tel,fl:fl,setMode:setMode,goto:goto,openTab:openTab,visit:visit,walk:walk,gavea:gavea,startFP:startFP,sendOrder:sendOrder,C:C,F:F,keys:keys,hb:hb,CB:CB,BHTOP:BHTOP,BH:BH,WL:WL};
 requestAnimationFrame(loop);
 })();
 </script>
