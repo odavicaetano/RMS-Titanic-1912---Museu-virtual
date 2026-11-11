@@ -2,7 +2,7 @@
 
 ## Modelo 3D do navio
 
-“RMS Titanic 1912”, de Renan_1912 — https://sketchfab.com/3d-models/rms-titanic-1912-fe1019b8f4bf46eea28cdb7a866f05e0 — licença CC BY 4.0 (http://creativecommons.org/licenses/by/4.0/). Alterações feitas para o museu: compressão; divisão em partes articuladas (casco, superestrutura, chaminés, mastros, cordame, botes, hélices, leme, timão e alavancas dos telégrafos); casco escurecido; luz noturna nas janelas; retirada de 18 molduras triangulares das laterais do convés A.
+“RMS Titanic 1912”, de Renan_1912 — https://sketchfab.com/3d-models/rms-titanic-1912-fe1019b8f4bf46eea28cdb7a866f05e0 — licença CC BY 4.0 (http://creativecommons.org/licenses/by/4.0/). Alterações feitas para o museu: compressão; divisão em partes articuladas (casco, superestrutura, chaminés, mastros, cordame, botes, hélices, leme, timão e alavancas dos telégrafos); casco escurecido e com chapeamento desenhado por shader; luz noturna nas janelas; retirada de 18 molduras triangulares das laterais do convés A.
 
 ## Imagens históricas (Wikimedia Commons)
 

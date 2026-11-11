@@ -81,10 +81,10 @@ function rail(x0,x1,z,y,arr){for(let k=1;k<=3;k++)arr.push(x0,y+k*.36,z,x1,y+k*.
 let FX=[47,12,-22,-56],NEST=V(87.25,38.55,0),rudder;const funnelTops=[],props=[],GLX={};
 function loadShip(cb){const ld=$('#load');let done=false;const fin=g=>{if(done)return;done=true;cb(g);};
  if(!T.GLTFLoader||typeof MeshoptDecoder==='undefined'){fin(null);return;}
- ld.innerHTML='CARREGANDO O NAVIO…<br><span style="opacity:.6;font-size:10px">modelo 3D · cerca de 14 MB</span>';
+ $('#loadT').innerHTML='CARREGANDO O NAVIO…<br><span style="opacity:.6;font-size:10px">modelo 3D · cerca de 14 MB</span>';
  const cib=window.createImageBitmap;try{window.createImageBitmap=undefined;}catch(e){}const rst=()=>{try{window.createImageBitmap=cib;}catch(e){}};
  const sc=document.createElement('script');sc.src='assets/models/titanic_glb.js';sc.async=true;sc.onerror=()=>{rst();fin(null);};
- sc.onload=()=>{try{ld.innerHTML='MONTANDO O NAVIO…';const s=atob(window.TITANIC_GLB_B64||'');window.TITANIC_GLB_B64=null;const n=s.length,u=new Uint8Array(n);for(let q=0;q<n;q++)u[q]=s.charCodeAt(q);const Ld=new T.GLTFLoader();Ld.setMeshoptDecoder(MeshoptDecoder);
+ sc.onload=()=>{try{$('#loadT').innerHTML='MONTANDO O NAVIO…';const s=atob(window.TITANIC_GLB_B64||'');window.TITANIC_GLB_B64=null;const n=s.length,u=new Uint8Array(n);for(let q=0;q<n;q++)u[q]=s.charCodeAt(q);const Ld=new T.GLTFLoader();Ld.setMeshoptDecoder(MeshoptDecoder);
    Ld.parse(u.buffer,'',g=>{rst();setTimeout(()=>fin(g.scene),30);},()=>{rst();fin(null);});}catch(e){rst();fin(null);}};
  setTimeout(()=>fin(null),150000);document.head.appendChild(sc);}
 function shipFromGLB(o){HTB=true;const w=new T.Group();w.add(o);o.updateMatrixWorld(true);const b=new T.Box3().setFromObject(o),sz=b.getSize(new T.Vector3()),s=269.1/sz.x,c=b.getCenter(new T.Vector3());
