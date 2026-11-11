@@ -1,0 +1,4 @@
+Pasta das imagens históricas exibidas nas fichas.
+As sete imagens não vieram neste pacote. Para baixá-las, execute tools/baixar-imagens.ps1 (Windows) ou tools/baixar-imagens.sh (macOS/Linux).
+Sem os arquivos aqui, o museu busca cada imagem diretamente no Wikimedia Commons quando há internet.
+Nomes esperados e créditos: ver CREDITOS.md.
