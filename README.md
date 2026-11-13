@@ -12,8 +12,11 @@ Museu interativo em uma única página (`index.html`).
 ```
 index.html                      página do museu (gerada a partir de src/)
 assets/models/titanic_glb.js    modelo 3D do navio (GLB comprimido, em base64)
+assets/models/foguista.js       malha dos foguistas (do arquivo Pessoa.obj)
 assets/models/LICENCA-modelo.txt
-assets/images/historical/       imagens históricas das fichas (ver LEIA-ME.txt)
+assets/audio/ship/              apito, sino e o hino tocado pelo botão do violino
+assets/images/historical/       imagens históricas das fichas, por tema (ver CREDITOS.md)
+ingresso/index.html             gerador de ingressos (página própria, aberta num painel do museu)
 src/                            módulos-fonte e build.sh (concatena em index.html)
 tools/                          scripts para baixar as imagens históricas
 CREDITOS.md                     autoria, licenças e fontes
