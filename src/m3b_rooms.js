@@ -29,7 +29,7 @@ function colm(g,x,z,h,c){lathe([[.2,0],[.2,.3],[.13,.4],[.13,h-.35],[.2,h-.15],[
 function bench(g,x,z,w,ry){const a=G();a.position.set(x,0,z);a.rotation.y=ry||0;const m=km(0x9a6a3a);pc(a,bx(w,.06,.45),m,0,.45,0);pc(a,bx(w,.45,.05),m,0,.75,-.2);pc(a,bx(w*.9,.42,.3),km(0x3a2414),0,.21,0);g.add(a);}
 function bed(g,x,z,ry,c){const a=G();a.position.set(x,0,z);a.rotation.y=ry||0;pc(a,bx(2,.3,1.1),km(0x6e2f1c),0,.25,0);pc(a,bx(1.95,.25,1.05),km(c||0xf2efe6),0,.52,0);pc(a,bx(.08,1,1.1),km(0x6e2f1c),-1,.6,0);g.add(a);}
 /* portas de passagem: registram-se em set.doors e levam a outro ambiente */
-const DLBL={escadaria:'Grande Escadaria',lounge:'Lounge',leitura:'Sala de leitura',fumar:'Salão de fumar',cafe:'Café Parisien',restaurante:'Restaurante',ginasio:'Ginásio',piscina:'Piscina',turco:'Banhos turcos',squash:'Squash',biblioteca:'Biblioteca 2ª',geral3:'Sala geral 3ª',fumar3:'Fumar 3ª',capitao:'Comandante',corredor:'Corredor B',cabines:'Camarotes',jantar:'Salão de jantar',ponte:'Ponte',radio:'Rádio Marconi',lift:'Elevador'};
+const DLBL={escadaria:'Grande Escadaria',lounge:'Lounge',leitura:'Sala de leitura',fumar:'Salão de fumar',cafe:'Café Parisien',restaurante:'Restaurante',ginasio:'Ginásio',piscina:'Piscina',turco:'Banhos turcos',squash:'Squash',biblioteca:'Biblioteca 2ª',geral3:'Sala geral 3ª',fumar3:'Fumar 3ª',capitao:'Comandante',cartas:'Sala de cartas',navega:'Sala de navegação',leme:'Casa do leme',corredor:'Corredor B',cabines:'Camarotes',jantar:'Salão de jantar',ponte:'Ponte',radio:'Rádio Marconi',lift:'Elevador'};
 function addDoor(g,s,x,y,z,nx,nz,target){const ry=Math.atan2(nx,nz),d=new T.Mesh(new T.PlaneGeometry(1,2.1),new T.MeshStandardMaterial({map:doorT,emissive:0x332a18,emissiveIntensity:.5}));d.position.set(x+nx*.04,y+1.05,z+nz*.04);d.rotation.y=ry;d.userData.door=target;g.add(d);
  const lt=ctex(256,48,(c,w,h)=>{c.fillStyle='#1d2a3a';c.fillRect(0,0,w,h);c.strokeStyle='#caa25a';c.lineWidth=3;c.strokeRect(2,2,w-4,h-4);c.fillStyle='#f1e6c8';c.font='600 24px Arial';c.textAlign='center';c.fillText('→ '+DLBL[target],w/2,33);}),sg=new T.Mesh(new T.PlaneGeometry(1.3,.25),new T.MeshStandardMaterial({map:lt,emissive:0xffffff,emissiveMap:lt,emissiveIntensity:.5}));sg.position.set(x+nx*.05,y+2.32,z+nz*.05);sg.rotation.y=ry;sg.userData.door=target;g.add(sg);
  (s.doors=s.doors||[]).push({p:[x,y,z],n:[nx,nz],t:target});}
@@ -68,7 +68,19 @@ mkRoom('geral3','Sala geral da 3ª classe (convés C, popa)',11,2.6,9,pineT,redF
  [[-1.5,0],[1.5,0]].forEach(p=>stab(g,p[0],p[1],1.4,.7,0x9a6a3a));piano(g,-w/2+.5,2.5,PI/2);for(let x=-4;x<=4;x+=2)pc(g,bx(.9,.6,.02),km(0xd9c9a0),x,1.7,-d/2+.03);[[-3,0],[3,0]].forEach(p=>cyl(.08,.08,h,km(0xdcdcd6),p[0],h/2,p[1],g,null,8));lamp(-2.5,h-.3,0,g,.7,14);lamp(2.5,h-.3,0,g,.7,14);},[['E',-2,'fumar3'],['E',2,'jantar'],['W',0,'cabines']],'Titanic third class general room');
 mkRoom('fumar3','Sala de fumar da 3ª classe (convés C, popa)',9,2.6,8,oakT,redFlT,(g,w,d,h)=>{[-2.5,0,2.5].forEach(x=>{bench(g,x,-d/2+.35,2.2,0);bench(g,x,d/2-.35,2.2,PI);});[[-2,-1.2],[2,-1.2],[-2,1.2],[2,1.2]].forEach(p=>{stab(g,p[0],p[1],.9,.9,0x7a5a3a);[[.8,0,-PI/2],[-.8,0,PI/2]].forEach(q=>chair(g,p[0]+q[0],p[1]+q[1],q[2],0x7a5a3a));cyl(.1,.07,.12,mBrass,p[0]+.9,.06,p[1]+.9,g,null,10);});lamp(0,h-.3,0,g,.8,14);},[['E',0,'geral3']],'Titanic third class smoking room');
 mkRoom('capitao','Aposentos do comandante (convés dos Botes)',8,2.6,4.2,whiteT,carpetB,(g,w,d,h)=>{pc(g,bx(.1,2.6,2.6),mT(whiteT,2,2),.6,1.3,-.8);stab(g,-1.6,-1.3,1.5,.8,MAHc);chair(g,-1.6,-.5,PI,GRN);pc(g,bx(.3,.2,.2),mBrass,-2.1,.9,-1.4);sofa(g,-2.6,1.4,PI,GRN,2);rtab(g,-.8,1.1,.35,MAHc);shelf(g,-w/2+.2,-.3,PI/2,1.4);
- bed(g,2.6,-1.4,PI,0xf2efe6);pc(g,bx(1.1,1.9,.5),mT(mahT,1,1),3.3,.95,1.7);pc(g,bx(.8,.85,.45),km(MAHc),1.4,.42,1.7);cyl(.16,.12,.1,km(0xffffff),1.4,.92,1.7,g);win(g,-2,1.6,-d/2+.03,0,.9,.9);win(g,2.6,1.6,-d/2+.03,0,.7,.7);lamp(-2,h-.3,0,g,.7,10);lamp(2.6,h-.3,0,g,.5,8);},[['W',1,'ponte']],'Titanic captain Smith cabin');
+ bed(g,2.6,-1.4,PI,0xf2efe6);pc(g,bx(1.1,1.9,.5),mT(mahT,1,1),3.3,.95,1.7);pc(g,bx(.8,.85,.45),km(MAHc),1.4,.42,1.7);cyl(.16,.12,.1,km(0xffffff),1.4,.92,1.7,g);win(g,-2,1.6,-d/2+.03,0,.9,.9);win(g,2.6,1.6,-d/2+.03,0,.7,.7);lamp(-2,h-.3,0,g,.7,10);lamp(2.6,h-.3,0,g,.5,8);},[['W',1,'navega']],'Titanic captain Smith cabin');
+/* salas entre a ponte e a casa do leme (interiores aproximados: não há fotografias conhecidas destes ambientes no Titanic) */
+mkRoom('cartas','Sala de cartas (convés dos Botes, bombordo)',3.8,2.5,3.4,whiteT,carpetB,(g,w,d,h)=>{const zt=-d/2+.55;
+ pc(g,bx(1.9,.06,.95),km(MAHc),-.3,.86,zt);pc(g,bx(1.8,.8,.85),km(0x5a3a1e),-.3,.41,zt);for(let i=0;i<3;i++)pc(g,bx(1.7,.02,.02),mBrass,-.3,.2+i*.22,zt+.435);
+ pc(g,bx(1.25,.012,.72),km(0xe9dfc2),-.45,.896,zt);pc(g,bx(.5,.016,.05),km(0x3a2414),-.2,.91,zt+.1,.5);
+ pc(g,bx(.22,.14,.22),km(0x4a2a14),.42,.96,zt-.12);cyl(.075,.075,.012,mBrass,.42,1.036,zt-.12,g,null,16);
+ [.45,.95].forEach(z=>{cyl(.17,.17,.03,mBrass,-w/2+.03,1.78,z,g,'x',20);cyl(.145,.145,.034,km(0xf4f0e2),-w/2+.035,1.78,z,g,'x',20);pc(g,bx(.012,.1,.012),km(0x111111),-w/2+.06,1.82,z);});
+ shelf(g,.85,d/2-.2,PI,1.3);win(g,-.3,1.68,-d/2+.03,0,.8,.7);lamp(0,h-.25,.2,g,.7,8);},[['E',.8,'ponte'],['S',-.9,'leme'],['W',-.8,'radio']],'Titanic chart room');
+mkRoom('navega','Sala de navegação (convés dos Botes, boreste)',3.8,2.5,3.4,whiteT,carpetB,(g,w,d,h)=>{const zt=d/2-.6;
+ pc(g,bx(1.6,.06,.9),km(MAHc),-.2,.76,zt);pc(g,bx(.9,.72,.4),km(0x3a2414),-.2,.37,zt);pc(g,bx(1.1,.012,.65),km(0xe9dfc2),-.2,.796,zt);
+ chair(g,-.55,zt-.8,0,GRN);chair(g,.25,zt-.8,0,GRN);
+ cyl(.11,.11,.04,mBrass,-w/2+.04,1.7,.7,g,'x',18);cyl(.09,.09,.045,km(0xf4f0e2),-w/2+.045,1.7,.7,g,'x',18);
+ shelf(g,w/2-.2,.75,-PI/2,1.2);win(g,-.2,1.68,d/2-.03,PI,.8,.7);lamp(0,h-.25,-.2,g,.7,8);},[['E',-.8,'ponte'],['N',-.9,'leme'],['W',-.8,'capitao']],'Titanic navigating room');
 mkRoom('corredor','Corredor da 1ª classe (convés B)',26,2.5,1.9,whiteT,carpetP,(g,w,d,h)=>{const dm=new T.MeshStandardMaterial({map:doorT});for(let x=-11;x<=11;x+=2.75){[[-1,0],[1,PI]].forEach(q=>{if(Math.abs(x)<.1&&q[0]<0)return;const p=new T.Mesh(new T.PlaneGeometry(.85,2),dm);p.position.set(x,1,q[0]*(d/2-.03));p.rotation.y=q[1];g.add(p);});}
  [-1,1].forEach(s=>pc(g,bx(w,.05,.05),km(0x6e2f1c),0,.95,s*(d/2-.06)));for(let x=-10;x<=10;x+=5)lamp(x,h-.2,0,g,.5,8);},[['E',0,'escadaria'],['W',0,'restaurante'],['N',0,'cabines'],['S',5.5,'cafe']],'Titanic first class corridor');
 /* portas nos cenários já existentes + banco de elevadores em movimento na Grande Escadaria */
@@ -78,11 +90,26 @@ mkRoom('corredor','Corredor da 1ª classe (convés B)',26,2.5,1.9,whiteT,carpetP
    [-.85,.85].forEach(o=>pc(g,bx(.12,6.2,.12),km(0x6a4420),6.55,3.1,z+o));const c=G();c.position.set(7.3,0,z);pc(c,bx(1.3,.08,1.5),km(0x6e2f1c),0,.04,0);pc(c,bx(1.3,.08,1.5),km(0x6e2f1c),0,2.3,0);pc(c,bx(.06,2.3,1.5),mT(mahT,1,1),.62,1.17,0);sph(.08,glow(0xffe2a0),0,2.15,0,c);g.add(c);cars.push({o:c,ph:i*2.1});});
   pc(g,bx(1.4,6.2,7.4),km(0x1a1512),7.32,3.1,0).material.side=T.BackSide;g.userData.cars=cars;(s.doors=s.doors||[]).push({p:[6.2,0,0],n:[-1,0],t:'lift'});(s.doors).push({p:[6.2,3.2,0],n:[-1,0],t:'lift'});});
  if(!GL)wrap('ponte',(g,s)=>{addDoor(g,s,-5.84,0,2.6,1,0,'capitao');addDoor(g,s,-5.95,0,-8,1,0,'radio');addDoor(g,s,-5.95,0,8,1,0,'escadaria');});
- wrap('radio',(g,s)=>{addDoor(g,s,-3,0,1.2,1,0,'ponte');});
+ wrap('radio',(g,s)=>{addDoor(g,s,-3,0,1.2,1,0,'cartas');});
  wrap('cabines',(g,s)=>{addDoor(g,s,2.5,0,1,-1,0,'corredor');addDoor(g,s,1.5,0,7.6,-1,0,'biblioteca');addDoor(g,s,1.4,0,13,-1,0,'geral3');});
  wrap('jantar',(g,s)=>{addDoor(g,s,7,0,2.5,-1,0,'lift');addDoor(g,s,6,0,13,-1,0,'biblioteca');addDoor(g,s,6,0,24,-1,0,'geral3');});}
-if(GL){SETS.ponte={n:'Ponte de comando',ship:true};WALK.ponte={spawn:[73.3,29.62,0,-PI/2],surf:[[72.45,76.45,-11.8,11.8,29.62]],doors:[]};
- {const g=G();addDoor(g,WALK.ponte,72.12,29.62,-2.3,1,0,'capitao');addDoor(g,WALK.ponte,72.12,29.62,2.3,1,0,'radio');add('portasPonte',g,{layer:'ext',clip:false});}}
+/* porta de passagem na ponte real: usa a porta que o modelo do navio já tem (área de clique invisível) e acrescenta a placa com o destino.
+   k='L' marca as portas de dentro da casa do leme */
+function addPortal(g,s,x,y,z,nx,nz,target,label,k){const ry=Math.atan2(nx,nz);
+ const d=new T.Mesh(new T.PlaneGeometry(.8,2.05),new T.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));d.position.set(x+nx*.06,y+.97,z+nz*.06);d.rotation.y=ry;d.userData.door=target;if(k)d.userData.dfrom='leme';g.add(d);
+ const lt=ctex(256,48,(c,W,h)=>{c.fillStyle='#1d2a3a';c.fillRect(0,0,W,h);c.strokeStyle='#caa25a';c.lineWidth=3;c.strokeRect(2,2,W-4,h-4);c.fillStyle='#f1e6c8';c.font='600 '+(label.length>15?20:23)+'px Arial';c.textAlign='center';c.fillText('→ '+label,W/2,32);}),sg=new T.Mesh(new T.PlaneGeometry(1.0,.19),new T.MeshStandardMaterial({map:lt,emissive:0xffffff,emissiveMap:lt,emissiveIntensity:.5}));sg.position.set(x+nx*.06,y+2.22,z+nz*.06);sg.rotation.y=ry;sg.userData.door=target;if(k)sg.userData.dfrom='leme';g.add(sg);
+ (s.doors=s.doors||[]).push({p:[x,y,z],n:[nx,nz],t:target,k:k||''});}
+if(GL){SETS.ponte={n:'Ponte de comando',ship:true};
+ /* pisos caminháveis: ponte de navegação e asas; os dois recantos ao lado da casa do leme; a casa do leme, atrás do timão principal */
+ WALK.ponte={spawn:[73.3,29.62,0,-PI/2],surf:[[72.45,76.45,-11.8,11.8,29.62],[69.45,72.5,-6.75,-3.75,29.62],[69.45,72.5,3.75,6.75,29.62],[68.5,70.45,-2.9,2.9,29.62]],doors:[]};
+ {const g=G(),W=WALK.ponte,y=29.62;
+  /* portas do próprio modelo. Na frente da casa dos oficiais, dos dois lados da casa do leme: a bombordo a sala de cartas, a boreste a sala de navegação.
+     Dentro da casa do leme, as portas de veneziana dos cantos de ré dão para as mesmas duas salas — é por elas que se passa da ponte ao timão principal. */
+  addPortal(g,W,69.02,y,-6.1,1,0,'cartas','Sala de cartas');addPortal(g,W,69.02,y,6.1,1,0,'navega','Sala de navegação');
+  addPortal(g,W,68.82,y,-3.26,0,1,'cartas','Sala de cartas','L');addPortal(g,W,68.82,y,3.28,0,-1,'navega','Sala de navegação','L');
+  add('portasPonte',g,{layer:'ext',clip:false});
+  /* estrado de teca do timoneiro, atrás do timão principal */
+  {const e=G(),tk=M(0x8a5a2e,{roughness:.7});for(let i=0;i<7;i++)box(.085,.035,.9,tk,70.02+i*.11,29.6,.02,e);box(.76,.03,.06,tk,70.35,29.575,-.36,e);box(.76,.03,.06,tk,70.35,29.575,.4,e);add('estrado',e,{layer:'ext',clip:false});}}}
 SETS.escadaria.ph='Titanic grand staircase';SETS.ponte.ph='Titanic bridge wheelhouse';SETS.radio.ph='Titanic Marconi wireless room';SETS.cabines.ph='Titanic stateroom';SETS.jantar.ph='Titanic dining saloon';
 Object.keys(SETS).forEach((k,i)=>{SETS[k].O=V((i%6)*160-400,-600-Math.floor(i/6)*200,0);});
 /* destinos do elevador (os elevadores da 1ª classe serviam dos conveses A ao E) */

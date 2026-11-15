@@ -138,7 +138,26 @@ let rotor;const dynos=[];
  /* piso, plataforma, repetidor do telégrafo, quadro de manômetros */
  const r=G();const fl=new T.Mesh(new T.BoxGeometry(55,.1,25),M(0xffffff,{map:plateT}));fl.position.set(-60.5,1.75,0);fl.userData.clipMe=true;r.add(fl);box(20,.08,3,M(0x30353a,{transparent:true,opacity:.6}),EX,7.6,0,r);
  const ra=[];rail(-53,-34,-1.5,7.64,ra);rail(-53,-34,1.5,7.64,ra);lines(ra,0xaab2b8,r);add('salaMaq',r,{ex:V(0,-33,0),layer:'maq',clip:false});
- const t=G();[-1.2,1.2].forEach(z=>{lathe([[.3,0],[.14,.15],[.1,1.1],[.2,1.2],[0,1.2]],mBrass,-36,1.8,z,t,12);const d=cyl(.42,.42,.2,M(0xffffff,{map:dialTex()}),-36,3.25,z,t,'x',24);const hd=G();hd.position.set(-36,3.25,z);box(.05,.6,.05,mDark,-.15,.3,0,hd);t.add(hd);t.userData['h'+(z>0?1:0)]=hd;});
+ /* telégrafos da casa de máquinas: mesma geometria e materiais do telégrafo da ponte, adaptados a receptor —
+    um ponteiro repete a ordem vinda da ponte (e a campainha toca); a alavanca é a resposta do maquinista */
+ const telSrc=(()=>{if(!GL||!GLX.telH||!GLX.telH[0])return null;const sup=items.find(i=>i.id==='superestrutura');if(!sup)return null;root.updateMatrixWorld(true);
+  const inv=new T.Matrix4().copy(root.matrixWorld).invert(),B=new T.Box3(V(76.03,29.53,2.14),V(76.6,30.93,2.64)),O=V(76.311,29.55,2.3855),out=[],v=new T.Vector3();
+  sup.o.traverse(m=>{if(!m.isMesh||!m.geometry||!m.geometry.attributes.position)return;const ge=m.geometry,p=ge.attributes.position;if(!ge.boundingBox)ge.computeBoundingBox();const Mx=new T.Matrix4().multiplyMatrices(inv,m.matrixWorld);if(!ge.boundingBox.clone().applyMatrix4(Mx).intersectsBox(B))return;
+   const dp=!p.normalized?1:(p.array instanceof Int16Array?32767:p.array instanceof Uint16Array?65535:p.array instanceof Int8Array?127:255),ix=ge.index?ge.index.array:null,n=Math.floor((ix?ix.length:p.count)/3),P=new Float32Array(p.count*3),ok=new Uint8Array(p.count);
+   for(let i=0;i<p.count;i++){v.set(p.getX(i)/dp,p.getY(i)/dp,p.getZ(i)/dp).applyMatrix4(Mx);ok[i]=B.containsPoint(v)?1:0;P[i*3]=v.x-O.x;P[i*3+1]=v.y-O.y;P[i*3+2]=v.z-O.z;}
+   const take=[];for(let k=0;k<n;k++){const a=ix?ix[k*3]:k*3,b=ix?ix[k*3+1]:k*3+1,c=ix?ix[k*3+2]:k*3+2;if(ok[a]&&ok[b]&&ok[c])take.push(a,b,c);}if(!take.length)return;
+   const mp=new Map(),ni=take.map(q=>{let w=mp.get(q);if(w===undefined){w=mp.size;mp.set(q,w);}return w;}),g=new T.BufferGeometry(),np=new Float32Array(mp.size*3);mp.forEach((w,q)=>{np[w*3]=P[q*3];np[w*3+1]=P[q*3+1];np[w*3+2]=P[q*3+2];});g.setAttribute('position',new T.BufferAttribute(np,3));
+   const uv=ge.attributes.uv;if(uv){const base=uv.isInterleavedBufferAttribute?uv.data.array:uv.array,ua=new base.constructor(mp.size*2);mp.forEach((w,q)=>{ua[w*2]=uv.getX(q);ua[w*2+1]=uv.getY(q);});g.setAttribute('uv',new T.BufferAttribute(ua,2,uv.normalized));}
+   g.setIndex(ni);g.computeVertexNormals();out.push([g,m.userData.real||m.material]);});
+  return out.length>3?out:null;})();
+ const t=G(),tHs=[],tNs=[];
+ [-1.2,1.2].forEach(z=>{const u=G();u.position.set(-36,1.8,z);t.add(u);
+  if(telSrc){u.rotation.y=PI/2;u.scale.setScalar(1.3);telSrc.forEach(q=>u.add(new T.Mesh(q[0],q[1])));
+   const hs=GLX.telH[0],ud=[];hs.traverse(o=>{ud.push([o,o.userData]);o.userData={};});const h=hs.clone(true);ud.forEach(q=>{q[0].userData=q[1];});h.position.set(0,1.07,0);h.rotation.set(0,0,0);u.add(h);tHs.push(h);
+   [-1,1].forEach(sd=>{const nd=G();nd.position.set(0,1.075,sd*.172);box(.013,.15,.004,mDark,0,.08,0,nd);box(.022,.04,.004,M(0xb3261a),0,.17,0,nd);cyl(.016,.016,.007,mBrass,0,0,0,nd,'z',10);u.add(nd);tNs.push(nd);});
+   const gg=sph(.065,mBrass,-.16,.7,0,u);gg.scale.set(.45,1,1);cyl(.012,.012,.1,mBrass,-.11,.7,0,u,'x',8);}
+  else{lathe([[.3,0],[.14,.15],[.1,1.1],[.2,1.2],[0,1.2]],mBrass,0,0,0,u,12);const dm=M(0xffffff,{map:dialTex()}),d=new T.Mesh(new T.CylinderGeometry(.42,.42,.2,24),[mBrass,dm,dm]);d.rotation.z=PI/2;d.position.y=1.45;u.add(d);const hd=G();hd.position.set(0,1.45,0);box(.05,.6,.05,mDark,-.15,.3,0,hd);u.add(hd);tHs.push(hd);}});
+ t.userData.hs=tHs;t.userData.ns=tNs;t.userData.k=telSrc?.36:.5;
  const gb=new T.Mesh(new T.BoxGeometry(.15,2,4),mBrass);gb.position.set(-33.5,5,0);t.add(gb);for(let i=0;i<6;i++)cyl(.28,.28,.08,M(0xf3efe2),-33.6,4.5+(i/3|0)*.9,-1.2+(i%3)*1.2,t,'x',16);
  add('telegrafoM',t,{ex:V(0,-28,0),layer:'maq',clip:false});
  /* sala dos dínamos: 4 grupos de 400 kW */

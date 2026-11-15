@@ -57,3 +57,14 @@ three.js r128 (licença MIT), GLTFLoader e meshopt_decoder, carregados por CDN. 
 - *The Shipbuilder* (1911), transcrito na Encyclopedia Titanica: apitos acionados eletricamente; temporizador Willett-Bruce que soava de 8 a 10 s a cada minuto em cerração.
 - Science Museum Group: caixa temporizadora Chadburns/Willett-Bruce (1954), usada como referência visual de época posterior.
 Forma, inscrições e posição exata das chaves no modelo são interpretações; não reproduzem uma peça documentada.
+
+## Ponte de comando, casa do leme e sino da gávea
+- *The Shipbuilder* (1911), descrição do convés dos botes (GG Archives): casa do leme a ré da ponte, com o timão e a bússola de governo; sala de cartas logo atrás; aposentos do comandante e sala de navegação a boreste; demais oficiais a bombordo.
+- Art Braunschweiger, “On Titanic's Bridge” (Encyclopedia Titanica): ponte de navegação com timão auxiliar ligado por eixo sob o teto ao telemotor da casa do leme, onde ficava o timão principal.
+- Titanic Connections, “Titanic Tours – The Bridge”: nove janelas na ponte, cinco telégrafos, telemotor Brown Brothers na casa do leme.
+- RMS Titanic Inc., “Titanic Artifacts”: sino da gávea, recuperado em 1987.
+- Titanic Pages, “Lookouts and Crow's Nest”: gávea acessada por escada interna do mastro, com sino e telefone; Fleet deu três toques.
+- Paul Lee (paullee.com) e imagens do naufrágio: gancho do sino acima da porta da gávea no mastro de proa.
+- Sino do Mauretania (Smartify/Merseyside Maritime Museum): sino de gávea preso a suporte em forma de turco, usado como referência de suporte.
+- Telégrafos da casa de máquinas: depoimento de Frederick Scott (Inquérito Britânico, 5523–5541) e “The Engineers Lost Aboard Titanic”.
+Interiores da sala de cartas e da sala de navegação, portas da casa do leme, suporte e badalo do sino são reconstruções aproximadas.

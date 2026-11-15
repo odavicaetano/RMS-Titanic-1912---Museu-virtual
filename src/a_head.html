@@ -316,6 +316,8 @@ figure.hist{margin:12px 0 0;border:1px solid var(--line2);background:rgba(0,0,0,
 /* gávea: botão dia/noite (2D), sol em tom claro e quente, lua em azul-noite; troca suave */
 .btn.dn{position:relative;gap:7px;background:#f6e3b8;border-color:#e9c77e;color:#5a3c0c;transition:background .6s ease,color .6s ease,border-color .6s ease}
 .btn.dn.nite{background:#13213f;border-color:#3d5a92;color:#e6edff}
+/* rótulo que alterna sem mudar a largura do botão: os dois textos ocupam a mesma célula */
+.sw{display:inline-grid;justify-items:center;align-items:center}.sw>span{grid-area:1/1;white-space:nowrap}.sw>span:last-child,.sw.b>span:first-child{visibility:hidden}.sw.b>span:last-child{visibility:visible}
 .dnI{position:relative;width:15px;height:15px;display:inline-block;flex:none}.dnI .ic{position:absolute;left:0;top:0;width:15px;height:15px;margin:0;transition:opacity .5s ease,transform .6s ease}
 .btn.dn .ic:first-child{opacity:1;transform:rotate(0) scale(1);stroke:#c98a12}.btn.dn .ic:last-child{opacity:0;transform:rotate(-60deg) scale(.6)}
 .btn.dn.nite .ic:first-child{opacity:0;transform:rotate(90deg) scale(.6)}.btn.dn.nite .ic:last-child{opacity:1;transform:rotate(0) scale(1);fill:#f3d57a;stroke:#f3d57a}
