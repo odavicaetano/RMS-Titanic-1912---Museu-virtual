@@ -4,6 +4,14 @@
 
 “RMS Titanic 1912”, de Renan_1912 — https://sketchfab.com/3d-models/rms-titanic-1912-fe1019b8f4bf46eea28cdb7a866f05e0 — licença CC BY 4.0 (http://creativecommons.org/licenses/by/4.0/). Alterações feitas para o museu: compressão; divisão em partes articuladas (casco, superestrutura, chaminés, mastros, cordame, botes, hélices, leme, timão e alavancas dos telégrafos); casco escurecido e com chapeamento desenhado por shader; bandeiras subdivididas para ondular; luz noturna nas janelas; retirada de 18 molduras triangulares das laterais do convés A; faixa central do convés separada como peça própria na vista explodida; suportes das hélices deixados fixos no casco (só as hélices de bronze giram).
 
+## Iceberg
+
+Malha do arquivo “iceberg.glb”, fornecido pelo autor do museu (origem e licença não verificadas). Simplificada e convertida para `assets/models/iceberg.js`; as cores do gelo (branco acima da água, azulado na parte submersa) são calculadas pelo museu, sem textura de terceiros. A linha d'água segue a marcação enviada pelo autor.
+
+## Oceano
+
+O arquivo “mar.blend” (Blender 2.79), fornecido pelo autor do museu, serviu de referência técnica: o mar do museu reproduz no shader os parâmetros do modificador Ocean desse arquivo (vento ~10 m/s, espectro de ondas com escolha de direções, faixa de espuma nas cristas) e a mistura de reflexos do seu material. Nenhuma geometria ou textura do arquivo foi copiada para o pacote.
+
 ## Foguistas
 
 Malha humana do arquivo “Pessoa.obj”, fornecido pelo autor do museu (origem e licença não verificadas). Convertida para `assets/models/foguista.js`, com cores por região, um esqueleto simples (quadril, tronco, ombros e cotovelos) e animação procedural de pá; a pá e o carvão são geometria própria do museu.
