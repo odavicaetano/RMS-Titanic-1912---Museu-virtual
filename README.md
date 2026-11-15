@@ -25,3 +25,6 @@ CREDITOS.md                     autoria, licenças e fontes
 
 ## Editar
 Altere os arquivos em `src/` e rode `sh build.sh` dentro de `src/` (gera `src/index.html`; copie para a raiz).
+
+## Hospedagem
+O iceberg e os foguistas vão embutidos no `index.html`; os arquivos em `assets/models/` com esses nomes ficam só como fonte. Publique sempre a pasta inteira (o modelo do navio, os sons e as imagens continuam em `assets/`).
