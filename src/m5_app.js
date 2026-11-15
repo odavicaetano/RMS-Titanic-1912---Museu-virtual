@@ -97,7 +97,7 @@ function applyLook(){const bp=S.bp,conv=S.mode==='conveses';S.closed=GL&&!bp&&!S
  {const on=S.fp&&!S.gavea&&!(S.tab&&sheet.classList.contains('show'));if(!on&&window.__joyEnd)window.__joyEnd();$('#dpad').classList.toggle('show',on);}
  const w=$('#where');if(inS){w.innerHTML=SETS[S.visit].n+'<small>Reconstrução visual · '+(S.fp?'arraste para olhar, setas para andar; atravesse uma porta para mudar de ambiente':'use o botão de caminhar ou toque numa porta para passar')+'</small>';w.classList.add('show');}
  else if(S.gavea){w.innerHTML='Gávea do mastro de proa<small>Arraste para olhar em volta</small>';w.classList.add('show');}
- else if(S.walk){w.innerHTML=(S.walk==='ponte'?'Ponte de comando':S.walk==='maquinas'?'Casa de máquinas':'Salas de caldeiras')+'<small>'+(S.walk==='ponte'?'Arraste para olhar · setas para andar<br>Toque: timão, telégrafo ou corda do apito':'Arraste para olhar, setas para andar')+'</small>';w.classList.add('show');}else w.classList.remove('show');
+ else if(S.walk){w.innerHTML=(S.walk==='ponte'?'Ponte de comando':S.walk==='maquinas'?'Casa de máquinas':'Salas de caldeiras')+'<small>'+(S.walk==='ponte'?'Arraste para olhar · setas para andar<br>Toque: timão, telégrafo ou a alavanca do apito':'Arraste para olhar, setas para andar')+'</small>';w.classList.add('show');}else w.classList.remove('show');
  if(S.fp){cam.near=.1;cam.updateProjectionMatrix();}if(S.tab==='sink'&&sk.bow)sinkApply();}
 
 /* ================= CÂMERA ================= */
@@ -173,14 +173,14 @@ window.addEventListener('keyup',e=>{const k={ArrowUp:'w',ArrowDown:'s',ArrowLeft
 /* ================= ENTRADA ================= */
 const ptr=new Map();let moved=0,downT=0,pd=0,pcx=0,pcy=0;
 function pan(dx,dy){const k=C.r*.0016,right=V(Math.cos(C.th),0,-Math.sin(C.th));C.t.addScaledVector(right,-dx*k);C.t.y+=dy*k;}
-cv.addEventListener('pointerdown',e=>{window.__usr=performance.now();try{cv.setPointerCapture(e.pointerId);}catch(_){}ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});if(ptr.size===1){moved=0;downT=performance.now();}tween=null;$('#hint').style.opacity=0;
+cv.addEventListener('pointerdown',e=>{window.__usr=performance.now();try{cv.setPointerCapture(e.pointerId);}catch(_){}if(!S.visit&&GLX.wb&&ptr.size===0){const r=cv.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ndc,cam);const hs=ray.intersectObjects(meshes,false).filter(q=>q.object.visible&&q.object.userData.pid==='apito'&&!q.object.userData.wbAuto);const hh=ray.intersectObjects(meshes,false).find(q=>q.object.visible&&!q.object.userData.noPick&&q.object.material&&(q.object.material.opacity>.05||q.object.userData.pid==='apito'));if(hs.length&&hh&&hh.object===hs[0].object){WB.pid=e.pointerId;wbDown();}}ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});if(ptr.size===1){moved=0;downT=performance.now();}tween=null;$('#hint').style.opacity=0;
  if(ptr.size===2){const a=[...ptr.values()];pd=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);pcx=(a[0].x+a[1].x)/2;pcy=(a[0].y+a[1].y)/2;}});
-cv.addEventListener('pointermove',e=>{const p=ptr.get(e.pointerId);if(!p)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;moved+=Math.abs(dx)+Math.abs(dy);
+cv.addEventListener('pointermove',e=>{const p=ptr.get(e.pointerId);if(!p||WB.pid===e.pointerId)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;moved+=Math.abs(dx)+Math.abs(dy);
  if(S.fp){if(ptr.size===1){F.yaw+=dx*.005;F.pitch=Math.max(-1.2,Math.min(1.2,F.pitch+dy*.004));}return;}
  if(ptr.size===1){if((e.buttons&2)||e.shiftKey)pan(dx,dy);else{C.th-=dx*.006;C.ph=Math.max(.08,Math.min(1.95,C.ph-dy*.005));}}
  else if(ptr.size===2){const a=[...ptr.values()],d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),cx=(a[0].x+a[1].x)/2,cy=(a[0].y+a[1].y)/2;if(pd>0)zoomAt(pd/d,cx,cy);pan(cx-pcx,cy-pcy);pd=d;pcx=cx;pcy=cy;}});
-function pUp(e){if(!ptr.has(e.pointerId))return;const one=ptr.size===1;ptr.delete(e.pointerId);if(one&&moved<9&&performance.now()-downT<600)pick(e.clientX,e.clientY);}
-cv.addEventListener('pointerup',pUp);cv.addEventListener('pointercancel',e=>ptr.delete(e.pointerId));
+function pUp(e){if(WB.pid===e.pointerId){WB.pid=null;wbUp();ptr.delete(e.pointerId);S.sel=['apito'];if(window.innerWidth>=900&&S.tab!=='ficha')openTab('ficha');return;}if(!ptr.has(e.pointerId))return;const one=ptr.size===1;ptr.delete(e.pointerId);if(one&&moved<9&&performance.now()-downT<600)pick(e.clientX,e.clientY);}
+cv.addEventListener('pointerup',pUp);cv.addEventListener('pointercancel',e=>{if(WB.pid===e.pointerId){WB.pid=null;wbUp();}ptr.delete(e.pointerId);});
 /* zoom: aproxima em direção ao ponto sob o cursor (o centro da órbita migra para o detalhe); passo proporcional à distância */
 const zr=new T.Raycaster(),zn=new T.Vector2();
 function zoomAt(k,x,y){if(S.fp)return;tween=null;const r0=C.r,r1=Math.max(.35,Math.min(2500,r0*k));if(k<1&&x!==undefined){const rc=cv.getBoundingClientRect();zn.set((x-rc.left)/rc.width*2-1,-(y-rc.top)/rc.height*2+1);zr.setFromCamera(zn,cam);
@@ -195,7 +195,7 @@ function pick(x,y){histNav();const r=cv.getBoundingClientRect();ndc.set((x-r.lef
  const hs=ray.intersectObjects(meshes,false),conv=S.mode==='conveses';
  for(let i=0;i<hs.length;i++){const h=hs[i],m=h.object,it=m.userData.it;if(m.userData.noPick||!m.visible||(!it.o.visible&&!it.hg))continue;if((S.ghost||conv)&&it.shell&&!S.bp&&!(conv&&it.deck===S.deck))continue;if(conv&&it.layer!=='zone'&&it.layer!=='maq')continue;
   if(it.clip&&S.cut&&clip.distanceToPoint(h.point)<0)continue;if(m.userData.door){travel(m.userData.door,S.walk);return;}let id=m.userData.pid;const lp=root.worldToLocal(h.point.clone());
-  if(id==='apito'){blowWhistle();S.sel=['apito'];if(window.innerWidth>=900)openTab('ficha');return;}if(id==='sino'){ringBell(1);S.sel=['sino'];if(window.innerWidth>=900)openTab('ficha');return;}if(S.gavea)continue;
+  if(id==='apito'){if(m.userData.wbAuto)wbAuto();else blowWhistle();S.sel=['apito'];if(window.innerWidth>=900)openTab('ficha');return;}if(id==='sino'){ringBell(1);S.sel=['sino'];if(window.innerWidth>=900)openTab('ficha');return;}if(S.gavea)continue;
   if(S.walk==='ponte'&&id==='timao'){nav.rud=Math.max(-35,Math.min(35,nav.rud+(lp.z>0?5:-5)));rudUI();flash('Leme: '+(nav.rud===0?'a meio':Math.abs(nav.rud)+'° a '+(nav.rud>0?'boreste':'bombordo')));return;}
   if(S.walk==='ponte'&&id==='telegrafoP'){ac();sendOrder(Math.max(0,Math.min(8,tel.ord+(lp.x>(lp.x<76.14?75.979:76.31)?1:-1))));flash('Telégrafo: '+ORDERS[tel.ord]+' — '+ORD_PT[tel.ord]);return;}
   if(GL&&(id==='casco'||id==='superestrutura')){const x=lp.x,y=lp.y,az=Math.abs(lp.z);if(S.walk==='ponte'){id=(x>73.6&&x<76.8&&y<31.45)?(az<1.25?(x>75.75?'bussola':'timao'):'telegrafoP'):'ponte';}else if(x>66.5&&x<77.3&&y>29.3&&y<33.2)id='ponte';else if(y>29.6&&y<33.4&&az>10.2&&((x>36&&x<66)||(x>-72&&x<-28)))id='bote';else if(x>95)id='proa';else if(x<-104)id='popa';}
@@ -278,8 +278,15 @@ function ancStep(dt){const L=GLX.anc;if(!L)return;if(ANC.dir!==0){const Hd=L[0].
  const cy=L[0].a.position.y-L[0].len;if(ANC.dir>0&&cy<WL&&!ANC.spl){ANC.spl=1;ancSnd('splash');ANC.sT=performance.now();}if(cy>WL+.5)ANC.spl=0;
  if(ANC.sT&&S.tab!=='sink'){const k=1-(performance.now()-ANC.sT)/3000;const U=seaMat.uniforms;if(k>0)U.uC2.value.set(L[1].A1.x,L[1].A1.z,.7*k);else{U.uC2.value.set(0,0,0);ANC.sT=0;}}}
 function bell3(){ac();[0,1050,2100].forEach(d=>setTimeout(()=>{fx.bell=1;if(!sndPlay('bell',.26,6))bellSynth();},d));}
+function sndFade(k,ft){const o=SND[k];if(!o||!AC)return;o.q.length=0;const t=AC.currentTime;(o.v||[]).forEach(x=>{if(x.done)return;try{x.g.gain.cancelScheduledValues(t);x.g.gain.setValueAtTime(x.g.gain.value,t);x.g.gain.linearRampToValueAtTime(0,t+ft);x.n.stop(t+ft+.05);}catch(e){}x.done=true;});}
 function hornOnce(){ac();press('#bHorn');const d=sndPlay('horn',.4,3);if(d>0){fx.wh=Math.min(d,8);return true;}if(d<0){fx.wh=3.8;return true;}return false;}
 function press(q){const b=$(q);if(!b)return;b.classList.remove('hit');void b.offsetWidth;b.classList.add('hit');clearTimeout(b._ht);b._ht=setTimeout(()=>b.classList.remove('hit'),520);}
+/* chaves Willett-Bruce da ponte: segurar a alavanca mantém o apito (a gravação é repetida enquanto estiver segura); a chave automática toca 8–10 s a cada minuto */
+const WB={hold:false,t0:0,ac:0,pid:null};
+function wbDown(){ac();WB.hold=true;WB.t0=performance.now();if(!hornOnce())whStart();}
+function wbUp(){if(!WB.hold)return;WB.hold=false;if(wh)whStop();const hd=(performance.now()-WB.t0)/1000;setTimeout(()=>{if(WB.hold)return;sndFade('horn',.4);fx.wh=Math.min(fx.wh,.4);},Math.max(0,700-hd*1000));}
+function wbBlast(){if(!hornOnce())blowWhistle(8);setTimeout(()=>{if(S.wbAuto)hornOnce();},3500);}
+function wbAuto(){S.wbAuto=!S.wbAuto;WB.ac=0;if(S.wbAuto)wbBlast();flash(S.wbAuto?'Temporizador do apito ligado: um sinal de 8 a 10 s a cada minuto, como em cerração':'Temporizador do apito desligado');}
 function holdWh(el){if(!el)return;el.addEventListener('pointerdown',e=>{e.preventDefault();if(hornOnce()){el.dataset.f='1';return;}el.dataset.f='';whStart();});['pointerup','pointerleave','pointercancel'].forEach(v=>el.addEventListener(v,()=>{if(!el.dataset.f)whStop();}));el.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter')blowWhistle();});}
 window.__out=()=>out();
 /* ambientação: mar, água no casco e máquinas — sintetizados (ruído filtrado), sem arquivos de áudio */
@@ -453,7 +460,7 @@ function floodUI(){$$('.cgrid button').forEach(b=>b.classList.toggle('on',fl.on.
 const nf=(v,d)=>v.toFixed(d).replace('.',',');
 
 /* ---- reconstituição do naufrágio (cinemática, por quadros-chave) ---- */
-function sinkInit(){ANC.u=0;ANC.dir=0;ANC.sT=0;if(GLX.anc)ancStep(0);skCh=-1;{const a=ac();if(a)crBuf(a,4.6);}leave();S.mode='navio';S.bp=false;S.cut=false;S.exT=0;S.ghost=false;S.labels=false;S.sel=[];sk.np=S.night;sk.nv={kn:sim.kn,rpm:sim.rpm,trpm:sim.trpm,burn:sim.burn,ord:tel.ord,eng:tel.eng,ack:tel.ack,stage:tel.stage};S.night=true;sk.t=-2;sk.play=false;tel.ord=tel.eng=tel.ack=4;tel.stage=3;$$('#modes button').forEach(b=>b.classList.toggle('on',b.dataset.m==='navio'));fly({t:V(25,10,0),th:.42,ph:1.36,r:rFor(380)});}
+function sinkInit(){S.wbAuto=false;ANC.u=0;ANC.dir=0;ANC.sT=0;if(GLX.anc)ancStep(0);skCh=-1;{const a=ac();if(a)crBuf(a,4.6);}leave();S.mode='navio';S.bp=false;S.cut=false;S.exT=0;S.ghost=false;S.labels=false;S.sel=[];sk.np=S.night;sk.nv={kn:sim.kn,rpm:sim.rpm,trpm:sim.trpm,burn:sim.burn,ord:tel.ord,eng:tel.eng,ack:tel.ack,stage:tel.stage};S.night=true;sk.t=-2;sk.play=false;tel.ord=tel.eng=tel.ack=4;tel.stage=3;$$('#modes button').forEach(b=>b.classList.toggle('on',b.dataset.m==='navio'));fly({t:V(25,10,0),th:.42,ph:1.36,r:rFor(380)});}
 /* peças usadas na reconstituição: luzes, botes, chaminés, metades do casco */
 const XS=GL?-24:-39,SPL=157.8,emMats=[];meshes.forEach(m=>{(Array.isArray(m.userData.real)?m.userData.real:[m.userData.real]).forEach(mm=>{if(mm.emissiveMap&&emMats.indexOf(mm)<0)emMats.push(mm);});});winMats.forEach(m=>emMats.push(m));
 const boatIt=items.find(i=>i.id==='bote'),boatG=boatIt?boatIt.o:null,boatIM=(boatG&&!GL)?boatG.children[0]:null,boatM0=[];if(boatIM){const m=new T.Matrix4();for(let i=0;i<16;i++){boatIM.getMatrixAt(i,m);boatM0.push(m.clone());}}
@@ -757,9 +764,9 @@ function animate(dt,time){const run=S.run;
  if(GLX.wheel)GLX.wheel.rotation.x+=(nav.rud/35*PI*1.5-GLX.wheel.rotation.x)*Math.min(1,dt*2.2);
  if(GLX.telH){const ta=-(tel.ord-4)*.36;GLX.telH.forEach(g=>{g.rotation.z+=(ta-g.rotation.z)*Math.min(1,dt*5);});}
  if(fx.bell>0&&GLX.bell){fx.bell=Math.max(0,fx.bell-dt*.5);GLX.bell.rotation.z=.5*fx.bell*Math.sin(time*13);}
- if(GLX.cord){const on=fx.wh>0;if(on)fx.wh=Math.max(0,fx.wh-dt);{const C=GLX.cordR;if(C){const h=Math.min(dt,.033),tgt=on?.24:0;C.v+=((tgt-C.p)*140-C.v*15)*h;C.p+=C.v*h;
-  if(C.on&&!on){C.vx+=.9;C.vz-=.35;}if(!C.on&&on){C.vx-=.25;}C.on=on;C.vx+=(-C.ax*10-C.vx*1.3)*h;C.ax+=C.vx*h;C.vz+=(-C.az*10-C.vz*1.3)*h;C.az+=C.vz*h;
-  const L=C.L0+C.p+(on?.003*Math.sin(time*47):0);C.rope.scale.y=L;C.hd.position.y=-L;C.sw.rotation.set(C.ax*.12,0,C.az*.12);}}GLX.puff.forEach((sp,i)=>{const u=sp.userData;if(u.l<1)u.l+=dt/u.d;if(u.l>=1){if(on&&fx.wh>.25&&Math.random()<dt*22){u.l=0;u.d=1+Math.random()*.9;sp.position.set((u.f?FX[1]:FX[0])+1.45,45.3,(Math.random()-.5)*.25);u.v.set(2.2+Math.random()*3.2,9+Math.random()*5.5,(Math.random()-.5)*2.6);sp.material.rotation=Math.random()*6.283;}else{sp.visible=false;return;}}const q=u.l;sp.visible=!S.bp;u.v.x-=dt*(3+sim.kn*.5);u.v.y*=Math.exp(-dt*1.7);u.v.z*=Math.exp(-dt*.7);sp.position.addScaledVector(u.v,dt);const s=.45+6.8*Math.pow(q,.72);sp.scale.set(s*.82,s,1);sp.material.opacity=.9*Math.min(1,q*12)*Math.pow(1-q,1.5);});}
+ if(GLX.wb){const on=fx.wh>0;if(on)fx.wh=Math.max(0,fx.wh-dt);if(GLX.wb){const h=Math.min(dt,.033);GLX.wb.forEach(W=>{const tg=W.auto?(S.wbAuto?-2.15:-.7):((on||WB.hold)?-2.15:-.7);W.v+=((tg-W.a)*160-W.v*17)*h;W.a+=W.v*h;W.lv.rotation.z=W.a;});
+  if(WB.hold&&performance.now()-WB.t0>3300){WB.t0=performance.now();if(!hornOnce()&&!wh)whStart();}
+  if(S.wbAuto&&S.tab!=='sink'){WB.ac+=dt;if(WB.ac>=60){WB.ac=0;wbBlast();}}}GLX.puff.forEach((sp,i)=>{const u=sp.userData;if(u.l<1)u.l+=dt/u.d;if(u.l>=1){if(on&&fx.wh>.25&&Math.random()<dt*22){u.l=0;u.d=1+Math.random()*.9;sp.position.set((u.f?FX[1]:FX[0])+1.45,45.3,(Math.random()-.5)*.25);u.v.set(2.2+Math.random()*3.2,9+Math.random()*5.5,(Math.random()-.5)*2.6);sp.material.rotation=Math.random()*6.283;}else{sp.visible=false;return;}}const q=u.l;sp.visible=!S.bp;u.v.x-=dt*(3+sim.kn*.5);u.v.y*=Math.exp(-dt*1.7);u.v.z*=Math.exp(-dt*.7);sp.position.addScaledVector(u.v,dt);const s=.45+6.8*Math.pow(q,.72);sp.scale.set(s*.82,s,1);sp.material.opacity=.9*Math.min(1,q*12)*Math.pow(1-q,1.5);});}
  if(run){teleStep(dt);const tg=ORD_RPM[tel.ack];sim.rpm+=(tg-sim.rpm)*Math.min(1,dt*(tg*sim.rpm<0?.15:.25));const tt=tel.ack>=7?165*Math.max(0,sim.rpm)/75:0;sim.trpm+=(tt-sim.trpm)*Math.min(1,dt*.25);
   const kt=sim.rpm>=0?sim.rpm/75*(18.5+3.5*Math.min(1,sim.trpm/165)):sim.rpm/60*6,ra=(kt*sim.kn<0&&Math.abs(sim.kn)>.2)?.022:Math.abs(kt)<Math.abs(sim.kn)?.03:kt<0?.016:.026;sim.kn+=(kt-sim.kn)*Math.min(1,dt*ra);if(ANC.u>.3)sim.kn*=Math.exp(-dt*.55*Math.min(1,(ANC.u-.3)*2.5));sim.burn+=((.18+.82*Math.abs(tg)/75)-sim.burn)*Math.min(1,dt*.3);
   sim.ang+=sim.rpm/60*2*PI*dt;sim.tang+=sim.trpm/60*2*PI*dt;sim.sph+=dt*(.12+.2*sim.burn);}

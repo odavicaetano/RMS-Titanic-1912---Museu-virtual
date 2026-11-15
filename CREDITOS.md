@@ -51,3 +51,9 @@ Música — `assets/audio/ship/nearer-my-god-to-thee.mp3`: “Nearer, My God, to
 ## Bibliotecas
 
 three.js r128 (licença MIT), GLTFLoader e meshopt_decoder, carregados por CDN. Fontes Barlow, Barlow Condensed e IBM Plex Mono (Google Fonts, licença OFL).
+
+## Chaves Willett-Bruce dos apitos (reconstrução aproximada)
+- Samuel Halpern, “The Instruments and Equipment of Titanic's Navigating Bridge”: duas chaves Willett-Bruce na antepara de vante da ponte de navegação e controles nas cabines das asas.
+- *The Shipbuilder* (1911), transcrito na Encyclopedia Titanica: apitos acionados eletricamente; temporizador Willett-Bruce que soava de 8 a 10 s a cada minuto em cerração.
+- Science Museum Group: caixa temporizadora Chadburns/Willett-Bruce (1954), usada como referência visual de época posterior.
+Forma, inscrições e posição exata das chaves no modelo são interpretações; não reproduzem uma peça documentada.

@@ -139,17 +139,21 @@ function shipFromGLB(o){HTB=true;const w=new T.Group();w.add(o);o.updateMatrixWo
  GLX.telH=[[76.311,2.3855],[76.310,-2.6945],[76.309,-1.5675],[75.979,3.7085],[75.979,-3.696]].map((q,k)=>{const g=G();g.position.set(q[0],30.62,q[1]);add('telegrafoP',g,{ex:V(0,34.5,0),shell:true,layer:'super'});put(g,'telH'+k);return g;});
  /* detalhes interativos presos ao navio: sino da gávea, corda do apito, luzes */
  {const g=G();g.position.set(97.3,39.75,.42);lathe([[.0,0],[.05,-.02],[.09,-.1],[.11,-.24],[.17,-.36],[.19,-.38],[.0,-.38]],mBrass,0,0,0,g,14);sph(.035,mDark,0,-.36,0,g);cyl(.02,.02,.5,mDark,.25,0,0,g,'x');add('sino',g,{layer:'ext',clip:false});GLX.bell=g;}
- {const g=G();g.position.set(75.45,32.08,.85);
-  /* fibras: faixas diagonais claras e escuras (torção de três pernas), com leve variação de tom */
-  const rT=ctex(32,128,(c,w,h)=>{c.fillStyle='#cbbd98';c.fillRect(0,0,w,h);for(let y=-w;y<h+w;y+=6){c.strokeStyle='rgba(92,72,40,.55)';c.lineWidth=1.6;c.beginPath();c.moveTo(0,y);c.lineTo(w,y+w*.9);c.stroke();c.strokeStyle='rgba(255,248,225,.35)';c.lineWidth=1;c.beginPath();c.moveTo(0,y+2.4);c.lineTo(w,y+2.4+w*.9);c.stroke();}for(let i=0;i<260;i++){c.fillStyle='rgba('+(120+Math.random()*80|0)+','+(100+Math.random()*60|0)+',60,.18)';c.fillRect(Math.random()*w,Math.random()*h,1,2);}});
-  rT.wrapS=rT.wrapT=T.RepeatWrapping;rT.repeat.set(1,9);const mR=new T.MeshStandardMaterial({map:rT,roughness:.92,metalness:0});
-  const tg=new T.CylinderGeometry(.016,.016,1,10,24,true),tp=tg.attributes.position;for(let i=0;i<tp.count;i++){const y=tp.getY(i),a=Math.atan2(tp.getZ(i),tp.getX(i)),k=1+.12*Math.cos(3*a+y*70);tp.setX(i,tp.getX(i)*k);tp.setZ(i,tp.getZ(i)*k);}tg.translate(0,-.5,0);tg.computeVertexNormals();
-  const mB=M(0x9a7a3c,{metalness:.7,roughness:.35}),mW=M(0x5a3420,{roughness:.6});
-  box(.09,.025,.09,mB,0,.0125,0,g);const eye=new T.Mesh(new T.TorusGeometry(.028,.008,8,16),mB);eye.position.y=-.03;g.add(eye);
-  const sw=G();sw.position.y=-.055;g.add(sw);const rope=new T.Mesh(tg,mR);rope.scale.y=.56;sw.add(rope);
-  const hd=G();hd.position.y=-.56;sw.add(hd);lathe([[0,.02],[.022,.01],[.026,-.03],[.034,-.06],[.03,-.11],[.018,-.13],[0,-.135]],mW,0,0,0,hd,12);const kn=new T.Mesh(new T.SphereGeometry(.024,10,8),mR);kn.position.y=.012;kn.scale.set(1,.8,1);hd.add(kn);
-  sph(.16,new T.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}),0,-.06,0,hd);
-  add('apito',g,{layer:'ext',clip:false});GLX.cord=g;GLX.cordR={sw:sw,rope:rope,hd:hd,L0:.56,p:0,v:0,ax:0,vx:0,az:0,vz:0,on:false};}
+ /* controle dos apitos (sistema elétrico Willett-Bruce): duas chaves de alavanca na antepara de vante da ponte. Reconstrução aproximada
+   a partir de fotos de chaves Willett-Bruce posteriores e das descrições do Olympic: caixa redonda de latão, alavanca com punho preto, posições marcadas */
+ {const g=G();add('apito',g,{layer:'ext',clip:false});GLX.wb=[];
+  const mBr=M(0xb39a5e,{metalness:.75,roughness:.32}),mBd=M(0x8a7442,{metalness:.7,roughness:.4}),mBk=M(0x111214,{roughness:.35,metalness:.1}),mGl=M(0x6f6f6f,{metalness:.6,roughness:.45});
+  const face=(auto)=>ctex(256,256,(c,w,h)=>{const r=c.createRadialGradient(w*.4,h*.35,10,w/2,h/2,w*.55);r.addColorStop(0,'#e8d8a2');r.addColorStop(.6,'#c8b177');r.addColorStop(1,'#9c834a');c.fillStyle=r;c.fillRect(0,0,w,h);
+   for(let k=0;k<900;k++){c.fillStyle='rgba(90,70,30,'+(Math.random()*.08).toFixed(3)+')';c.fillRect(Math.random()*w,Math.random()*h,2,1);}
+   c.fillStyle='#2a1e0c';c.textAlign='center';c.font='bold 16px Georgia,serif';c.fillText('WILLETT-BRUCE',118,198);c.font='bold 12px Georgia,serif';c.fillText(auto?'AUTOMATIC':'WHISTLE',118,216);c.fillText(auto?'WHISTLE TIMER':'CONTROL',118,231);
+   c.font='bold 20px Georgia,serif';c.textBaseline='middle';c.fillText('OFF',128+Math.sin(.62)*92,128-Math.cos(.62)*92);c.fillText(auto?'AUTO':'ON',128+Math.sin(2.15)*90,128-Math.cos(2.15)*90);c.textBaseline='alphabetic';
+   [[.5,.1],[.1,.5],[.9,.5]].forEach(q=>{c.fillStyle='#7d6936';c.beginPath();c.arc(q[0]*w,q[1]*h,6,0,7);c.fill();c.strokeStyle='#3d3015';c.lineWidth=2;c.beginPath();c.moveTo(q[0]*w-5,q[1]*h);c.lineTo(q[0]*w+5,q[1]*h);c.stroke();});});
+  [[-.94,false],[.94,true]].forEach(q=>{const u=G();u.position.set(76.8,30.15,q[0]);u.rotation.y=-PI/2;u.scale.setScalar(.78);g.add(u);
+   cyl(.175,.175,.02,mBd,0,0,.01,u,'z',32);cyl(.156,.16,.1,mBr,0,0,.07,u,'z',32);const f=new T.Mesh(new T.CircleGeometry(.152,40),new T.MeshStandardMaterial({map:face(q[1]),metalness:.55,roughness:.38}));f.position.z=.1205;u.add(f);
+   cyl(.022,.026,.08,mGl,0,-.19,.07,u,null,10);cyl(.018,.018,.58,mGl,0,-.47,.05,u,null,8);cyl(.03,.03,.03,mGl,0,-.755,.05,u,null,10);
+   const lv=G();lv.position.z=.13;u.add(lv);cyl(.032,.032,.025,mBd,0,0,.005,lv,'z',18);box(.034,.165,.012,mBr,0,.085,.016,lv);cyl(.012,.012,.05,mBr,0,.165,.04,lv,'z',8);const kb=sph(.03,mBk,0,.165,.072,lv);kb.scale.set(1,1,1.1);
+   const hit=sph(.2,new T.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}),0,.03,.08,u);hit.userData.wbAuto=q[1];
+   lv.rotation.z=-.7;GLX.wb.push({lv:lv,auto:q[1],a:-.7,v:0});});}
  {const g=G(),lm2=c=>new T.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:.25});add('luzes',g,{layer:'super',clip:false});GLX.nav=[];GLX.navS=[];GLX.navL=[];[[0xfff0c8,96.6,44.6,0,.7],[0xfff0c8,-132.9,24.1,0,.6],[0x35ff78,72.5,29.8,15.1,.42],[0xff3a2a,72.5,29.8,-15.1,.42]].forEach((q,i)=>{const sp=new T.Sprite(new T.SpriteMaterial({map:dotT,color:q[0],transparent:true,opacity:0,blending:T.AdditiveBlending,depthWrite:false}));sp.position.set(q[1],q[2],q[3]);sp.scale.setScalar(q[4]);sp.visible=false;root.add(sp);GLX.navS.push(sp);if(i>1){const l=new T.PointLight(q[0],0,7,2);l.position.set(q[1],q[2]+.3,q[3]+(q[3]>0?.9:-.9));root.add(l);GLX.navL.push(l);}});}
  GLX.deckL=[[62,37,0],[24,37,0],[-12,37,0],[-48,37,0],[-98,30,0],[108,30,0]].map(p=>{const l=new T.PointLight(0xffd9a0,0,60,1.4);l.position.set(p[0],p[1],p[2]);root.add(l);return l;});
  GLX.puff=[];{const sm=new T.SpriteMaterial({map:dotT,color:0xffffff,transparent:true,opacity:0,depthWrite:false});for(let i=0;i<10;i++){const sp=new T.Sprite(sm.clone());sp.visible=false;sp.userData={l:1,f:i%2};root.add(sp);GLX.puff.push(sp);}}
