@@ -1,0 +1,1 @@
+As imagens desta pasta são baixadas por tools/baixar-imagens.ps1 (Windows) ou tools/baixar-imagens.sh. Sem elas, o museu busca cada imagem no Wikimedia Commons quando há internet.
