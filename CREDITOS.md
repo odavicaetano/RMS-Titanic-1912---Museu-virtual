@@ -68,3 +68,10 @@ Forma, inscrições e posição exata das chaves no modelo são interpretações
 - Sino do Mauretania (Smartify/Merseyside Maritime Museum): sino de gávea preso a suporte em forma de turco, usado como referência de suporte.
 - Telégrafos da casa de máquinas: depoimento de Frederick Scott (Inquérito Britânico, 5523–5541) e “The Engineers Lost Aboard Titanic”.
 Interiores da sala de cartas e da sala de navegação, portas da casa do leme, suporte e badalo do sino são reconstruções aproximadas.
+
+## Casa do leme, telefones, portas estanques e salas do comando
+- Art Braunschweiger, “On Titanic's Bridge” (Encyclopedia Titanica): telefones em circuitos dedicados entre a casa do leme e castelo de proa, gávea, casa das máquinas alternativas e ponte de atracação; porta de cada lado da casa do leme para a ponte e as asas; porta de ré a bombordo para a sala de cartas e o corredor dos oficiais; porta de ré a boreste para a sala de navegação, e dela para os aposentos do comandante.
+- Inquérito britânico, relatório (equipamento elétrico): telefones alto-falantes de padrão naval; portas estanques liberadas por eletroímãs.
+- *The Shipbuilder* (1911), citado no fórum da Encyclopedia Titanica: a chave das portas estanques ficava no “bridge shelter or chart room”.
+- Depoimentos de Frederick Fleet (inquéritos americano, 5239–5247, e britânico, 17278–17286): três toques no sino, telefonema à ponte, “What do you see?” — “Iceberg right ahead” — “Thank you”.
+Interiores da sala de cartas e da sala de navegação, telefones, chave das portas estanques e porta da gávea: reconstruções aproximadas.

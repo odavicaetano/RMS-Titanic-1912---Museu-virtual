@@ -151,7 +151,14 @@ function shipFromGLB(o){HTB=true;const w=new T.Group();w.add(o);o.updateMatrixWo
   lathe([[0,-.035],[.07,-.035],[.103,-.055],[.118,-.1],[.123,-.17],[.133,-.24],[.152,-.3],[.18,-.335],[.19,-.352],[.186,-.362],[.17,-.358]],mB,0,0,0,bd,40);
   const bead=new T.Mesh(new T.TorusGeometry(.124,.006,6,40),mB);bead.rotation.x=PI/2;bead.position.y=-.17;bd.add(bead);
   const cl=G();cl.position.y=-.075;bd.add(cl);cyl(.008,.008,.24,mI,0,-.12,0,cl,null,8);sph(.036,mI,0,-.26,0,cl);
-  cyl(.007,.007,.78,mR,0,-.67,0,cl,null,6);sph(.018,mR,0,-1.065,0,cl);
+  /* cabo de puxar: corda de cânhamo trançada, em segmentos que o passo do sino move como uma corda de verdade */
+  {const rT=ctex(64,256,(c,w,h)=>{c.fillStyle='#cdbb94';c.fillRect(0,0,w,h);for(let y=-w;y<h+w;y+=11){c.strokeStyle='rgba(96,74,40,.55)';c.lineWidth=3;c.beginPath();c.moveTo(0,y);c.lineTo(w,y+w*.55);c.stroke();c.strokeStyle='rgba(255,246,220,.35)';c.lineWidth=1.2;c.beginPath();c.moveTo(0,y+4);c.lineTo(w,y+4+w*.55);c.stroke();}for(let i=0;i<300;i++){c.fillStyle='rgba(70,50,25,'+(Math.random()*.25).toFixed(2)+')';c.fillRect(Math.random()*w,Math.random()*h,1,2+Math.random()*4);}},1,3);
+   const mRp=new T.MeshStandardMaterial({map:rT,roughness:.95,metalness:0}),N=11,seg=.078,P=[],O=[],Ms=[];
+   for(let i=0;i<N;i++){P.push(new T.Vector3(0,-.375-i*seg,0));O.push(P[i].clone());}
+   for(let i=0;i<N-1;i++){const m=new T.Mesh(new T.CylinderGeometry(.0075,.0075,1,7,1,true),mRp);m.position.set(0,-.375-(i+.5)*seg,0);m.scale.y=seg;bd.add(m);Ms.push(m);}
+   const kn=new T.Mesh(new T.SphereGeometry(.02,10,8),mRp);kn.scale.set(1,1.35,1);kn.position.copy(P[N-1]);bd.add(kn);
+   const tk=new T.Mesh(new T.TorusGeometry(.011,.005,6,12),mRp);tk.rotation.x=PI/2;tk.position.y=-.3;cl.add(tk);
+   GLX.bellRope={on:true,P:P,O:O,M:Ms,knot:kn,seg:seg};}
   add('sino',g,{layer:'ext',clip:false});GLX.bell=g;GLX.bellBody=bd;GLX.bellCl=cl;}
  /* controle dos apitos (sistema elétrico Willett-Bruce): duas chaves de alavanca na antepara de vante da ponte. Reconstrução aproximada
    a partir de fotos de chaves Willett-Bruce posteriores e das descrições do Olympic: caixa redonda de latão, alavanca com punho preto, posições marcadas */

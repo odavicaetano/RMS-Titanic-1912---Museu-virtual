@@ -18,7 +18,12 @@ function room(w,h,d,wt,ft,g,ox,oz,ceil){ox=ox||0;oz=oz||0;const f=new T.Mesh(new
  wall(d,h,mT(wt,d/1.2,h/1.6),ox+w/2,h/2,oz,-PI/2,g);wall(d,h,mT(wt,d/1.2,h/1.6),ox-w/2,h/2,oz,PI/2,g);wall(w,h,mT(wt,w/1.2,h/1.6),ox,h/2,oz+d/2,PI,g);wall(w,h,mT(wt,w/1.2,h/1.6),ox,h/2,oz-d/2,0,g);
  if(ceil){const c=new T.Mesh(new T.PlaneGeometry(w,d),M(0xf2eee2));c.rotation.x=PI/2;c.position.set(ox,h,oz);g.add(c);}}
 const glow=(c,i)=>new T.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:i||1});
-function lamp(x,y,z,g,i,d){sph(.09,glow(0xffe2a0),x,y,z,g);const l=new T.PointLight(0xffdca0,i||.7,d||14,1.5);l.position.set(x,y,z);g.add(l);}
+/* luminária pendente presa ao forro (haste de latão e cúpula de vidro fosco), no lugar da esfera de luz flutuante;
+   a luz continua no mesmo ponto. As cúpulas somem quando a câmera olha de cima de uma sala sem forro */
+const LAMPS=[];let _lampG=null,_lampS=null;
+function lamp(x,y,z,g,i,d){if(!_lampG){_lampG=new T.LatheGeometry([[.025,.06],[.07,.04],[.13,-.03],[.15,-.08],[.12,-.1],[0,-.105]].map(q=>new T.Vector2(q[0],q[1])),20);_lampS=new T.MeshStandardMaterial({color:0xfff5e2,emissive:0xffe2b0,emissiveIntensity:.8,roughness:.45});}
+ const f=G();f.position.set(x,y,z);g.add(f);cyl(.007,.007,.52,mBrass,0,.32,0,f,null,6);cyl(.055,.055,.014,mBrass,0,.58,0,f,null,14);cyl(.03,.035,.035,mBrass,0,.07,0,f,null,12);f.add(new T.Mesh(_lampG,_lampS));
+ const l=new T.PointLight(0xffdca0,i||.7,d||14,1.5);l.position.set(x,y-.12,z);g.add(l);LAMPS.push(f);}
 const baluGeo=new T.LatheGeometry([[.03,0],[.05,.05],[.025,.15],[.06,.42],[.025,.7],[.05,.84],[.03,.9]].map(q=>new T.Vector2(q[0],q[1])),8);
 function balustrade(segs,g,mRail){const tr=[];segs.forEach(s=>{const a=V(s[0],s[1],s[2]),b=V(s[3],s[4],s[5]),len=a.distanceTo(b),n=Math.max(2,Math.round(len/.28));for(let i=0;i<=n;i++)tr.push(a.clone().lerp(b,i/n));
   const r=rod(a.clone().setY(a.y+.95),b.clone().setY(b.y+.95),.07,.07,mRail,g,8);part(r,'balaustrada');[a,b].forEach(p=>lathe([[.11,0],[.09,.1],[.07,1],[.12,1.06],[.1,1.16],[0,1.2]],mRail,p.x,p.y,p.z,g,10));});

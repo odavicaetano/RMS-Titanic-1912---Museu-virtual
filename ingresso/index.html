@@ -297,7 +297,29 @@ function currentName(){
   if(st.mode === "free"){ const n = st.free.trim(); return n ? st.title + " " + n : ""; }
   return st.person ? st.person.name : "";
 }
-const NAME_DY = 4.5;   // abaixa nome e número (pt) para ficarem rente à linha do campo
+/* posição vertical dos dados variáveis: medida na própria arte do ingresso de cada classe.
+   Cada campo procura, numa faixa da imagem base, a sua linha de escrita (o traço sob "on the", "NAME" e "TICKET No.");
+   porto e destino não têm traço e usam a linha de base do texto impresso da mesma fileira ("for").
+   O texto fica sempre GAP pontos acima dessa referência, qualquer que seja o valor escrito. */
+const GAP = 1.6;   // pt entre a linha e a base do texto
+const LREF = {};
+function lineRefs(cls){
+  if(LREF[cls]) return LREF[cls];
+  const c = baseCanvas[cls], k = W / c.width, d = c.getContext("2d", {willReadFrequently:true}).getImageData(0,0,c.width,c.height).data, w = c.width;
+  const dens = (x0,x1,y) => { let n=0; for(let x=x0;x<x1;x++){ const i=(y*w+x)*4; if(d[i+3]>100 && d[i]*.3+d[i+1]*.59+d[i+2]*.11<150) n++; } return n/(x1-x0); };
+  const X = v => Math.round(px(v)/k), Y = v => Math.round(py(v)/k);
+  // traço mais escuro numa faixa vertical (linha de escrita)
+  const rule = (x0,x1,yPt,fb) => { const y0=Y(yPt)-8, y1=Y(yPt)+22; let best=-1, bv=.05; for(let y=y0;y<=y1;y++){ const v=dens(X(x0),X(x1),y); if(v>bv){bv=v;best=y;} } return best<0 ? fb : best*k; };
+  // base de um rótulo impresso: última linha com tinta antes de um vão
+  const base = (x0,x1,yPt,fb) => { const y0=Y(yPt)-25, y1=Y(yPt)+12; let best=null, cur=null; for(let y=y0;y<=y1+1;y++){ const on = y<=y1 && dens(X(x0),X(x1),y)>.18; if(on){ if(!cur) cur={a:y,b:y}; else cur.b=y; } else if(cur){ if(!best || cur.b-cur.a > best.b-best.a) best=cur; cur=null; } } return best ? (best.b+1)*k : fb; };
+  const r = {
+    day:  rule(360, 405, 239.92, py(239.92 - 4)),
+    name: rule(300, 400, 206.885, py(206.885 - 4.5)),
+    no:   rule(600, 700, 206.885, py(206.885 - 4.5)),
+    row:  base(555.5, 566, 248.424, py(250.5))
+  };
+  return LREF[cls] = r;
+}
 function drawTicket(){
   const cv = $("ticket"), ctx = cv.getContext("2d");
   ctx.clearRect(0,0,W,H);
@@ -305,22 +327,24 @@ function drawTicket(){
   ctx.drawImage(baseCanvas[st.cls], 0, 0, W, H);
 
   ctx.fillStyle = "#000"; ctx.textBaseline = "alphabetic"; ctx.textAlign = "left";
+  const L = lineRefs(st.cls), g = GAP*S;
   // dia, porto, destino (Helvetica-Bold 18 pt nos PDFs)
   ctx.font = `700 ${18*S}px ${SANS}`;
-  ctx.fillText(st.day, px(286.3), py(239.92));
-  ctx.fillText(st.port, px(388.347), py(251.259));
-  ctx.fillText("NEW YORK", px(575.434), py(248.424));
+  ctx.fillText(st.day, px(286.3), L.day - g);
+  ctx.fillText(st.port, px(388.347), L.row);
+  ctx.fillText("NEW YORK", px(575.434), L.row);
 
   // nome (DejaVu Serif 10 pt, até duas linhas) e número do bilhete
   const name = currentName();
   if(name){
     const r = fitText(ctx, name, SERIF, 10, 5.5, 226, 2);
     ctx.font = `${r.size*S}px ${SERIF}`;
-    if(r.lines.length === 2){ ctx.fillText(r.lines[0], px(243.78), py(219.385 - NAME_DY)); ctx.fillText(r.lines[1], px(243.78), py(206.885 - NAME_DY)); }
-    else ctx.fillText(r.lines[0], px(243.78), py(206.885 - NAME_DY));
+    const lead = r.size*1.25*S;
+    if(r.lines.length === 2){ ctx.fillText(r.lines[0], px(243.78), L.name - g - lead); ctx.fillText(r.lines[1], px(243.78), L.name - g); }
+    else ctx.fillText(r.lines[0], px(243.78), L.name - g);
   }
   const no = st.no.trim();
-  if(no){ const r = fitText(ctx, no, SERIF, 10, 5.5, 160, 1); ctx.font = `${r.size*S}px ${SERIF}`; ctx.fillText(r.lines[0], px(558.426), py(206.885 - NAME_DY)); }
+  if(no){ const r = fitText(ctx, no, SERIF, 10, 5.5, 160, 1); ctx.font = `${r.size*S}px ${SERIF}`; ctx.fillText(r.lines[0], px(558.426), L.no - g); }
 }
 let queued = false;
 function render(){ if(queued) return; queued = true; requestAnimationFrame(() => { queued = false; if(baseCanvas[st.cls]) drawTicket(); }); }
