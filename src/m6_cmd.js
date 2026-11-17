@@ -4,7 +4,8 @@
 const CMD={doors:[],ring:0,ringT:0,call:false,ringN:null,hook:null,gong:null,ham:null,wtd:{a:0,tg:0,closed:false,lv:null,lit:-1,t0:0},lights:[],tip:null,tipT:''};
 const _cmv=new T.Vector3();
 /* itens criados depois do registro inicial: entram na lista de seleção (toque/clique) */
-function regItem(it){if(!it)return it;it.o.traverse(o=>{if(!o.isMesh||meshes.indexOf(o)>=0)return;o.userData.real=o.material;o.userData.it=it;let p=o,id=null;while(p){if(p.userData.part){id=p.userData.part;break;}p=p.parent;}o.userData.pid=id;(byPart[id]=byPart[id]||[]).push(o);meshes.push(o);});return it;}
+function regItem(it){if(!it)return it;if(!it.clip){root.updateMatrixWorld(true);const c=new T.Box3().setFromObject(it.o).applyMatrix4(new T.Matrix4().copy(root.matrixWorld).invert()).getCenter(new T.Vector3());it.half=c.x<XS?'S':'B';}
+ it.o.traverse(o=>{if(!o.isMesh||meshes.indexOf(o)>=0)return;if(it.clip){const cl=m=>{const c=m.clone();c.clippingPlanes=CLIP;return c;};o.material=Array.isArray(o.material)?o.material.map(cl):cl(o.material);}o.userData.real=o.material;o.userData.it=it;let p=o,id=null;while(p){if(p.userData.part){id=p.userData.part;break;}p=p.parent;}o.userData.pid=id;(byPart[id]=byPart[id]||[]).push(o);meshes.push(o);});return it;}
 /* texturas de acabamento */
 function grainT(base,dark,light){return ctex(256,256,(c,w,h)=>{c.fillStyle=base;c.fillRect(0,0,w,h);for(let i=0;i<70;i++){const y=Math.random()*h,a=Math.random()*.16;c.strokeStyle=(Math.random()<.5?dark:light);c.globalAlpha=a;c.lineWidth=1+Math.random()*2.5;c.beginPath();c.moveTo(0,y);for(let x=0;x<=w;x+=16)c.lineTo(x,y+Math.sin(x*.03+i)*3+Math.sin(x*.11+i*2)*1.2);c.stroke();}c.globalAlpha=1;});}
 const cmdMah=grainT('#5e2615','#2a0e05','#8a4426'),cmdTeak=grainT('#8a5a2e','#4a2c12','#b98a55');
@@ -52,10 +53,10 @@ function ceilLamp(x,yc,z,g,i,d){const f=G();f.position.set(x,yc,z);g.add(f);cyl(
         A chave preta é separada da malha e gira sobre o eixo do disco de latão; o quadro acende uma lâmpada por porta fechada ---- */
  {const pv=V(68.19,30.963,2.112),hg=G();hg.position.copy(toSup(pv));sup.o.add(hg);hg.updateMatrixWorld(true);
   const LB=new T.Box3(V(68.11,30.915,2.065),V(68.335,31.005,2.265));let nl=0;
-  supAll.forEach(m=>{if(!rbox(m).intersectsBox(LB))return;const o=takeComps(m,c=>LB.containsBox(c.b),hg);if(o){nl++;if(o.isMesh){o.material=new T.MeshStandardMaterial({color:0x121212,roughness:.32,metalness:.35});o.userData.real=o.material;}}});
+  supAll.forEach(m=>{if(!rbox(m).intersectsBox(LB))return;const o=takeComps(m,c=>LB.containsBox(c.b),hg);if(o){nl++;if(o.isMesh){o.material=new T.MeshStandardMaterial({color:0x121212,roughness:.32,metalness:.35,clippingPlanes:CLIP});o.userData.real=o.material;}}});
   if(nl){CMD.wtd.lv=hg;CMD.wtd.a=0;CMD.wtd.tg=0;CMD.wtd.axis='x';}
   /* disco e cubo de latão polido */
-  const DB=new T.Box3(V(68.11,30.86,2.0),V(68.27,31.07,2.215)),brass=new T.MeshStandardMaterial({color:0xe0b25a,metalness:.8,roughness:.26,emissive:0x2a1c08});
+  const DB=new T.Box3(V(68.11,30.86,2.0),V(68.27,31.07,2.215)),brass=new T.MeshStandardMaterial({color:0xe0b25a,metalness:.8,roughness:.26,emissive:0x2a1c08,clippingPlanes:CLIP});
   supAll.forEach(m=>{if(!m.isMesh||!rbox(m).intersectsBox(DB)||!/Metal_Aluminum_Anodized_1[02]/.test(m.material.name||''))return;const o=takeComps(m,c=>DB.containsBox(c.b),sup.o);if(o){o.material=brass;o.userData.real=brass;}});
   /* quadro indicador: arte nova (inspirada no filme), com doze lâmpadas que acendem conforme as portas fecham */
   const pm=supAll.find(m=>m.name==='M_super_57');
@@ -69,7 +70,7 @@ function ceilLamp(x,yc,z,g,i,d){const f=G();f.position.set(x,yc,z);g.add(f);cyl(
     for(let k=0;k<N;k++){c.fillStyle='#0d0d0d';c.beginPath();c.arc(LX(k),160,25,0,7);c.fill();c.strokeStyle='#8a7a5a';c.lineWidth=3;c.stroke();}
     c.fillStyle='#4a3a28';[[14,14],[W-14,14],[14,H-14],[W-14,H-14]].forEach(q=>{c.beginPath();c.arc(q[0],q[1],6,0,7);c.fill();});};
    drawBase();const tB=new T.CanvasTexture(base),tG=new T.CanvasTexture(glow);tB.flipY=tG.flipY=false;tB.encoding=T.sRGBEncoding;
-   tB.flipY=tG.flipY=true;const pmat=new T.MeshStandardMaterial({map:tB,emissive:0xffffff,emissiveMap:tG,emissiveIntensity:1.8,roughness:.55});const pl=new T.Mesh(new T.PlaneGeometry(1.1,.585),pmat);pl.position.copy(toSup(V(68.186,31.49,2.19)));pl.rotation.y=PI/2;sup.o.add(pl);
+   tB.flipY=tG.flipY=true;const pmat=new T.MeshStandardMaterial({map:tB,emissive:0xffffff,emissiveMap:tG,emissiveIntensity:1.8,roughness:.55,clippingPlanes:CLIP});const pl=new T.Mesh(new T.PlaneGeometry(1.1,.585),pmat);pl.position.copy(toSup(V(68.186,31.49,2.19)));pl.rotation.y=PI/2;sup.o.add(pl);
    const lt=supAll.find(m=>m.name==='M_super_56');if(lt)drop(lt);
    CMD.wtdLamps=n=>{const c=glow.getContext('2d');c.fillStyle='#000';c.fillRect(0,0,W,H);const b=base.getContext('2d');drawBase();for(let k=0;k<N;k++){const on=k<n,x=LX(k);if(on){const g=c.createRadialGradient(x,160,2,x,160,30);g.addColorStop(0,'#fff6d8');g.addColorStop(.6,'#ffd27a');g.addColorStop(1,'rgba(255,190,90,0)');c.fillStyle=g;c.beginPath();c.arc(x,160,30,0,7);c.fill();b.fillStyle='#ffe9a8';b.beginPath();b.arc(x,160,22,0,7);b.fill();b.fillStyle='#fffbe8';b.beginPath();b.arc(x-5,155,8,0,7);b.fill();}}tB.needsUpdate=true;tG.needsUpdate=true;};
    CMD.wtdLamps(0);}}
