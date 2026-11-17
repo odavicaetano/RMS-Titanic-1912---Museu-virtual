@@ -321,6 +321,12 @@ figure.hist{margin:12px 0 0;border:1px solid var(--line2);background:rgba(0,0,0,
 .dnI{position:relative;width:15px;height:15px;display:inline-block;flex:none}.dnI .ic{position:absolute;left:0;top:0;width:15px;height:15px;margin:0;transition:opacity .5s ease,transform .6s ease}
 .btn.dn .ic:first-child{opacity:1;transform:rotate(0) scale(1);stroke:#c98a12}.btn.dn .ic:last-child{opacity:0;transform:rotate(-60deg) scale(.6)}
 .btn.dn.nite .ic:first-child{opacity:0;transform:rotate(90deg) scale(.6)}.btn.dn.nite .ic:last-child{opacity:1;transform:rotate(0) scale(1);fill:#f3d57a;stroke:#f3d57a}
+.ic .eyO{transform-box:view-box;transform-origin:12px 12px;transition:transform .34s cubic-bezier(.4,0,.2,1),opacity .26s ease .06s}
+.ic .eyP{transform-box:view-box;transform-origin:12px 12px;transition:transform .3s ease}
+.ic .eyC{opacity:0;transform-box:view-box;transform-origin:12px 12px;transform:translateY(-1.5px);transition:opacity .22s ease,transform .3s ease}
+.shut .ic .eyO{transform:scaleY(.08);opacity:0}.shut .ic .eyP{transform:scale(.3)}
+.shut .ic .eyC{opacity:1;transform:none;transition:opacity .24s ease .16s,transform .3s ease .1s}
+@media (prefers-reduced-motion:reduce){.ic .eyO,.ic .eyP,.ic .eyC{transition:none}}
 </style>
 </head>
 <body>
