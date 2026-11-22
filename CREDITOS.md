@@ -86,3 +86,11 @@ Interiores da sala de cartas e da sala de navegação, telefones, chave das port
 - Portas do convés dos Botes para a Grande Escadaria e o ginásio: posições aproximadas.
 - Relógio “Honour and Glory Crowning Time”: figuras da Honra (com livro) e da Glória (com coroa de louros) em baixo-relevo simplificado, com pilastras e arco; composição aproximada, não reproduz o entalhe original. O mostrador marca a hora local do visitante.
 - Asa de boreste da ponte: lâmpada de sinais Morse e foguetes de socorro, a partir dos depoimentos do 4º oficial Joseph Boxhall nos inquéritos de 1912 (tentativa de chamar com a lâmpada um navio visto ao longe; cerca de oito foguetes). Forma, suporte, soquete e caixa: reconstrução aproximada.
+- Interiores públicos e cabines (módulo `src/m3d_interiores.js`): detalhes acrescentados aos cenários existentes, todos reconstrução aproximada, com localização pelo Inquérito britânico (sala de recepção e salão de jantar da 1ª classe no convés D; biblioteca da 2ª classe no convés C, entre as escadas da 2ª classe; salas geral e de fumar da 3ª classe no convés C, sob o tombadilho):
+  - salão de jantar: forro com nervuras em gesso de estilo jacobino, piso de ladrilhos de linóleo (padrão e cores supostos), louça com borda dourada e copos na 1ª classe, louça simples na 2ª e pratos e canecas na 3ª;
+  - sala de recepção da 1ª classe: ambiente novo, ao pé da Grande Escadaria e ligado ao salão de jantar e aos elevadores; cor e desenho do tapete, móveis e disposição não documentados;
+  - lounge: lustre de bronze e uma estatueta de Ártemis (Diana de Versalhes) sobre a lareira, forma simplificada;
+  - sala de leitura: tinteiros, mata-borrões e papel de carta nas escrivaninhas; Café Parisien: trepadeiras na treliça;
+  - cabines: coletes salva-vidas de cortiça guardados em cada cabine, vigias, cortinas nos beliches da 2ª classe, tapete e campainha do camareiro na 1ª;
+  - biblioteca da 2ª classe: cortinas de seda nas janelas (cor suposta); sala geral da 3ª classe: piano de armário, relógio e quadro de avisos;
+  - casa de máquinas: mostradores dos manômetros da plataforma de manobra com escala em libras; a leitura de cerca de 215 lb/pol² corresponde à pressão de trabalho das caldeiras, as demais são ilustrativas.
