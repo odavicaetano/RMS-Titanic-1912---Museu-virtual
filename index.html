@@ -1153,6 +1153,36 @@ escadaria:{n:'Grande Escadaria (1ª classe)',c:[-1,3.4,0],r:26,spawn:[5.4,0,1.2,
  box(2,1.6,9,tread,-4.5,.8,0,g);[-1,1].forEach(s=>{const st=box(4.9,.5,.1,oakS,-1.25,2.2,s*2.72,g);st.rotation.z=.34;const s2=box(4.9,.5,.1,oakS,-1.25,2.2,s*4.5,g);s2.rotation.z=.34;});
  [[-6.75,0,2.5,18],[6.25,0,3.5,18],[-.5,6.8,10,4.4],[-.5,-6.8,10,4.4],[2.75,3.6,3.5,2],[2.75,-3.6,3.5,2]].forEach(r=>box(r[2],.25,r[3],oakS,r[0],3.075,r[1],g));
  const pn=part(new T.Mesh(new T.PlaneGeometry(2.6,4.2),new T.MeshStandardMaterial({map:clockPanelT(),roughness:.55})),'relogio');pn.position.set(-5.47,3.75,0);pn.rotation.y=PI/2;g.add(pn);{const cf=new T.Mesh(new T.CircleGeometry(.52,40),new T.MeshStandardMaterial({map:clockFace(),roughness:.35,emissive:0x2a2418,emissiveMap:CLK.tex,emissiveIntensity:.5}));cf.position.set(-5.44,4.07,0);cf.rotation.y=PI/2;part(cf,'relogio');g.add(cf);}wall(9,6.3,mT(oakH,6,2),-5.49,3.15,0,PI/2,g);
+ /* “Honour and Glory Crowning Time”: entalhe em relevo, em carvalho, em volta do relógio. À esquerda a Honra, com um livro;
+    à direita a Glória, erguendo uma coroa de louros para o mostrador. Figuras simplificadas em baixo-relevo (silhuetas extrudadas),
+    pilastras caneluradas e arco moldurado; reconstrução aproximada, não cópia da peça original. */
+ {const cg=G();cg.position.set(-5.465,0,0);cg.rotation.y=PI/2;const ok=new T.MeshStandardMaterial({map:woodGrainT('#8e5a2c'),roughness:.48,metalness:.05});ok.map.repeat.set(3,3);
+  const okD=new T.MeshStandardMaterial({map:ok.map,color:0xb08a66,roughness:.5});
+  const ex=(sh,d,bev)=>new T.ExtrudeGeometry(sh,{depth:d,bevelEnabled:true,bevelThickness:bev,bevelSize:bev,bevelSegments:2,curveSegments:10});
+  /* figura sentada, voltada para a direita (x+), base em (0,0), cerca de 1 m de altura */
+  const fig=glory=>{const s=new T.Shape();s.moveTo(-.26,0);s.lineTo(.44,0);s.quadraticCurveTo(.47,.2,.36,.36);s.lineTo(.3,.46);
+   if(glory){s.lineTo(.26,.62);s.quadraticCurveTo(.33,.8,.42,1.02);s.lineTo(.47,1.06);s.lineTo(.44,1.1);s.quadraticCurveTo(.3,.92,.24,.8);}
+   else{s.lineTo(.46,.57);s.lineTo(.58,.6);s.lineTo(.55,.74);s.lineTo(.4,.69);s.lineTo(.27,.7);}
+   s.lineTo(.23,.8);s.absarc(.18,.9,.085,-.9,PI*1.05,false);s.lineTo(.07,.8);s.quadraticCurveTo(-.02,.66,-.05,.46);s.quadraticCurveTo(-.2,.22,-.26,0);
+   const m=new T.Mesh(ex(s,.05,.018),ok);const hd=new T.Mesh(new T.SphereGeometry(.088,14,10),ok);hd.scale.z=.8;hd.position.set(.18,.9,.07);m.add(hd);const hr=new T.Mesh(new T.SphereGeometry(.06,10,8),okD);hr.position.set(.12,.94,.1);m.add(hr);return m;};
+  /* dobras do panejamento: sulcos rasos sobre a figura */
+  const folds=(o,sx)=>{for(let i=0;i<4;i++){const f=new T.Mesh(new T.BoxGeometry(.018,.34-i*.05,.02),okD);f.position.set(sx*(-.12+i*.11),.2+i*.02,.075);f.rotation.z=sx*(.25-i*.08);o.add(f);}};
+  const rec=new T.Mesh(new T.PlaneGeometry(2.5,1.25),new T.MeshStandardMaterial({map:ok.map,color:0x5a3a22,roughness:.7}));rec.position.set(0,3.95,.004);cg.add(rec);
+  const hon=G();hon.position.set(-1.18,3.32,0);hon.add(fig(false));folds(hon,1);cg.add(hon);
+  const glo=G();glo.position.set(1.18,3.32,0);glo.scale.x=-1;glo.add(fig(true));folds(glo,1);cg.add(glo);
+  /* livro aberto da Honra e coroa de louros da Glória (bronze dourado) */
+  const gilt=M(0xc9a24a,{metalness:.8,roughness:.3});const bk=new T.Mesh(new T.BoxGeometry(.2,.13,.03),M(0xe9dcc0,{roughness:.6}));bk.position.set(-1.18+.5,3.32+.66,.09);bk.rotation.z=-.25;cg.add(bk);
+  const wr=new T.Mesh(new T.TorusGeometry(.11,.022,6,18),M(0x6f7a3a,{roughness:.6}));wr.position.set(1.18-.45,3.32+1.12,.09);cg.add(wr);
+  for(let i=0;i<14;i++){const a=i/14*PI*2,l=new T.Mesh(new T.SphereGeometry(.028,5,4),M(0x5d6a2c,{roughness:.6}));l.scale.set(1.6,.7,.6);l.position.set(wr.position.x+Math.cos(a)*.11,wr.position.y+Math.sin(a)*.11,.11);l.rotation.z=a+PI/2;cg.add(l);}
+  /* moldura de bronze do mostrador */
+  const bz=new T.Mesh(new T.TorusGeometry(.535,.035,10,48),gilt);bz.position.set(0,4.07,.04);cg.add(bz);
+  /* pilastras caneluradas com capitéis e arco moldurado */
+  [-1.36,1.36].forEach(x=>{const p=new T.Mesh(new T.BoxGeometry(.2,2.5,.07),ok);p.position.set(x,2.9,.035);cg.add(p);for(let i=-1;i<=1;i++){const f=new T.Mesh(new T.BoxGeometry(.025,2.2,.02),okD);f.position.set(x+i*.055,2.9,.075);cg.add(f);}
+   const cp=new T.Mesh(new T.BoxGeometry(.28,.12,.12),ok);cp.position.set(x,4.2,.06);cg.add(cp);const cb=new T.Mesh(new T.BoxGeometry(.26,.1,.1),ok);cb.position.set(x,1.7,.05);cg.add(cb);});
+  const ar=new T.Mesh(new T.TorusGeometry(1.36,.06,8,40,PI),ok);ar.position.set(0,4.26,.05);cg.add(ar);const ar2=new T.Mesh(new T.TorusGeometry(1.24,.025,6,40,PI),okD);ar2.position.set(0,4.26,.07);cg.add(ar2);
+  const ks=new T.Mesh(new T.BoxGeometry(.16,.24,.1),ok);ks.position.set(0,5.6,.07);cg.add(ks);
+  cg.traverse(o=>{if(o.isMesh)part(o,'relogio');});g.add(cg);}
+
  balustrade([[1,0,2.5,-3.5,1.6,2.5],[1,0,-2.5,-3.5,1.6,-2.5],[-3.5,1.6,2.72,1,3.2,2.72],[-3.5,1.6,-2.72,1,3.2,-2.72],[-5.5,3.2,4.6,1,3.2,4.6],[-5.5,3.2,-4.6,1,3.2,-4.6],[4.5,3.2,-2.6,4.5,3.2,2.6],[1,3.2,2.6,4.5,3.2,2.6],[1,3.2,-2.6,4.5,3.2,-2.6]],g,oakS);
  const q=part(G(),'querubim');lathe([[.26,0],[.22,.12],[.15,.2],[.13,1.0],[.2,1.12],[.22,1.2],[.18,1.26]],M(0x6a4a2a,{metalness:.2,roughness:.5}),1.25,0,0,q,14);g.add(q);
  querubimLoad(o=>{if(!o){const bd=sph(.085,M(0x8a6a3a,{metalness:.6,roughness:.4}),1.25,1.55,0,q);bd.scale.set(1,1.7,1);return;}const c=o.clone(true);c.traverse(m=>{if(m.isMesh){const mm=m.material;mm.metalness=.6;mm.roughness=.4;mm.color=new T.Color(0x8a6238);mm.emissive=new T.Color(0x1c1209);m.frustumCulled=false;}});const k=new T.Group();k.add(c);k.rotation.y=PI/2;const bb=new T.Box3().setFromObject(c),sc=1.5/(bb.max.y-bb.min.y);c.scale.setScalar(sc);bb.setFromObject(c);c.position.set(-(bb.min.x+bb.max.x)/2,-bb.min.y,-(bb.min.z+bb.max.z)/2);k.position.set(1.25,1.26,0);q.add(k);
