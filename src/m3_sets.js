@@ -24,10 +24,26 @@ const LAMPS=[];let _lampG=null,_lampS=null;
 function lamp(x,y,z,g,i,d){if(!_lampG){_lampG=new T.LatheGeometry([[.025,.06],[.07,.04],[.13,-.03],[.15,-.08],[.12,-.1],[0,-.105]].map(q=>new T.Vector2(q[0],q[1])),20);_lampS=new T.MeshStandardMaterial({color:0xfff5e2,emissive:0xffe2b0,emissiveIntensity:.8,roughness:.45});}
  const f=G();f.position.set(x,y,z);g.add(f);cyl(.007,.007,.52,mBrass,0,.32,0,f,null,6);cyl(.055,.055,.014,mBrass,0,.58,0,f,null,14);cyl(.03,.035,.035,mBrass,0,.07,0,f,null,12);f.add(new T.Mesh(_lampG,_lampS));
  const l=new T.PointLight(0xffdca0,i||.7,d||14,1.5);l.position.set(x,y-.12,z);g.add(l);LAMPS.push(f);}
-const baluGeo=new T.LatheGeometry([[.03,0],[.05,.05],[.025,.15],[.06,.42],[.025,.7],[.05,.84],[.03,.9]].map(q=>new T.Vector2(q[0],q[1])),8);
-function balustrade(segs,g,mRail){const tr=[];segs.forEach(s=>{const a=V(s[0],s[1],s[2]),b=V(s[3],s[4],s[5]),len=a.distanceTo(b),n=Math.max(2,Math.round(len/.28));for(let i=0;i<=n;i++)tr.push(a.clone().lerp(b,i/n));
+function balustrade(segs,g,mRail){segs.forEach(s=>{const a=V(s[0],s[1],s[2]),b=V(s[3],s[4],s[5]);
   const r=rod(a.clone().setY(a.y+.95),b.clone().setY(b.y+.95),.07,.07,mRail,g,8);part(r,'balaustrada');[a,b].forEach(p=>lathe([[.11,0],[.09,.1],[.07,1],[.12,1.06],[.1,1.16],[0,1.2]],mRail,p.x,p.y,p.z,g,10));});
- const im=new T.InstancedMesh(baluGeo,M(0x2a2118,{metalness:.6,roughness:.4}),tr.length),m4=new T.Matrix4();tr.forEach((p,i)=>{m4.makeTranslation(p.x,p.y,p.z);im.setMatrixAt(i,m4);});part(im,'balaustrada');g.add(im);}
+ /* painéis de ferro forjado (volutas em C, estilo Luís XIV, com rosetas douradas) entre o corrimão de carvalho e o piso, como na Grande Escadaria;
+    desenho aproximado a partir de fotografias do Olympic */
+ const pos=[],uv=[],ix=[];segs.forEach(q=>{const a=V(q[0],q[1],q[2]),b=V(q[3],q[4],q[5]),u=a.distanceTo(b)/.55,k=pos.length/3;
+  pos.push(a.x,a.y+.06,a.z, b.x,b.y+.06,b.z, b.x,b.y+.9,b.z, a.x,a.y+.9,a.z);uv.push(0,0,u,0,u,1,0,1);ix.push(k,k+1,k+2,k,k+2,k+3);});
+ const gg=new T.BufferGeometry();gg.setAttribute('position',new T.Float32BufferAttribute(pos,3));gg.setAttribute('uv',new T.Float32BufferAttribute(uv,2));gg.setIndex(ix);gg.computeVertexNormals();
+ const gm=new T.Mesh(gg,grilleMat());part(gm,'balaustrada');g.add(gm);}
+let _grM=null;function grilleMat(){if(_grM)return _grM;const t=ctex(256,384,(c,w,h)=>{c.clearRect(0,0,w,h);const iron='#1f1b17',gold='#c9a24a';c.lineCap='round';
+ c.strokeStyle=iron;c.lineWidth=14;c.strokeRect(7,7,w-14,h-14);c.lineWidth=9;
+ const S=(x,y,r,a0,a1,cw)=>{c.beginPath();c.arc(x,y,r,a0,a1,cw);c.stroke();};
+ /* volutas em C espelhadas, em cima e embaixo, e eixo central */
+ [[1,1],[-1,1],[1,-1],[-1,-1]].forEach(([sx,sy])=>{c.save();c.translate(w/2,h/2);c.scale(sx,sy);c.strokeStyle=iron;c.lineWidth=9;
+  c.beginPath();c.moveTo(0,-20);c.bezierCurveTo(10,-80,90,-60,95,-120);c.stroke();S(70,-132,26,0,PI*1.6,false);S(70,-132,10,0,PI*2,false);
+  c.beginPath();c.moveTo(18,0);c.bezierCurveTo(60,10,105,-10,104,-50);c.stroke();S(86,-52,18,PI*.1,PI*1.5,true);c.restore();});
+ c.beginPath();c.moveTo(w/2,14);c.lineTo(w/2,h-14);c.stroke();
+ /* medalhão oval e rosetas douradas */
+ c.lineWidth=8;c.beginPath();c.ellipse(w/2,h/2,34,46,0,0,PI*2);c.stroke();c.fillStyle=gold;c.beginPath();c.ellipse(w/2,h/2,18,26,0,0,PI*2);c.fill();
+ [[w/2,40],[w/2,h-40],[40,h/2],[w-40,h/2]].forEach(p=>{c.beginPath();c.arc(p[0],p[1],9,0,PI*2);c.fill();});});
+ t.wrapS=T.RepeatWrapping;t.anisotropy=4;_grM=new T.MeshStandardMaterial({map:t,alphaTest:.45,transparent:false,side:DS,metalness:.55,roughness:.45});return _grM;}
 function chairs(list,g,col){const s=new T.InstancedMesh(new T.BoxGeometry(.45,.08,.45),M(col),list.length),b=new T.InstancedMesh(new T.BoxGeometry(.45,.5,.06),M(col),list.length),l=new T.InstancedMesh(new T.BoxGeometry(.4,.45,.4),M(0x3a2414),list.length),m4=new T.Matrix4();
  list.forEach((p,i)=>{m4.makeTranslation(p[0],.47,p[1]);s.setMatrixAt(i,m4);m4.makeTranslation(p[0],.76,p[1]+(p[2]||0)*.22);b.setMatrixAt(i,m4);m4.makeTranslation(p[0],.22,p[1]);l.setMatrixAt(i,m4);});g.add(s,b,l);}
 function teleg(x,z,g,key){const t=part(G(),'telegrafoP');lathe([[.26,0],[.12,.12],[.09,.95],[.17,1.05],[0,1.05]],mBrass,x,0,z,t,12);const dm=M(0xffffff,{map:dialTex()});cyl(.3,.3,.2,dm,x,1.3,z,t,'z',24);const h=G();h.position.set(x,1.3,z);box(.04,.5,.04,mBrass,0,.25,.13,h);sph(.05,M(0x3a2414),0,.52,.13,h);box(.04,.5,.04,mBrass,0,.25,-.13,h);t.add(h);g.add(t);(g.userData.handles=g.userData.handles||[]).push(h);}
@@ -144,20 +160,66 @@ ponte:{n:'Ponte de comando',c:[0,1.2,0],r:24,spawn:[-.4,0,5.5,-PI/2],build(g){
  const ck=part(cyl(.2,.2,.06,M(0xf3efe2),-5.82,1.9,0,g,'x',18),'relogioN');box(.5,1.6,1.6,M(0x5a2a18),-5.6,.8,3,g);
  [-13.2,13.2].forEach(z=>{box(2.4,1.25,.1,mWhite,3.7,.62,z+(z>0?.75:-.75),g);});lamp(-3.6,2.3,0,g,.7,12);lamp(1,2.3,0,g,.6,12);},
  surf:[[-5.8,4.6,-13.8,13.8,0]]},
-radio:{n:'Sala de rádio Marconi',c:[1.4,1.1,0],r:13,spawn:[-1.6,0,1,PI/2-.2],build(g){
- room(6,2.5,5,whiteT,linoT,g,0,0,true);room(3.2,2.5,5,whiteT,linoT,g,4.6,0,true);
- box(3,.06,.85,M(0x6e2f1c),0,.8,-2,g);box(2.9,.78,.8,M(0x5a2a18),0,.4,-2,g);
- const k=part(G(),'chaveMorse');box(.24,.03,.12,M(0x2a1c10),-.3,.85,-1.85,k);box(.2,.015,.03,mBrass,-.3,.9,-1.85,k);cyl(.03,.03,.04,M(0x111111),-.38,.93,-1.85,k);g.add(k);g.userData.key=k.children[1];
- const rc=part(G(),'receptor');box(.6,.26,.3,M(0x6e2f1c),.6,.96,-2.1,rc);[-.14,.14].forEach(o=>cyl(.1,.1,.04,mBrass,.6+o,1.1,-2.1,rc));box(.55,.4,.3,M(0x4a2c12),1.25,1.03,-2.1,rc);for(let i=0;i<3;i++)cyl(.04,.04,.05,mBrass,1.08+i*.17,1.05,-1.93,rc,'z');g.add(rc);
- const hp=part(G(),'fones');const hb2=new T.Mesh(new T.TorusGeometry(.1,.012,6,14,PI),mDark);hb2.position.set(-.9,.95,-1.9);hp.add(hb2);[-.1,.1].forEach(o=>cyl(.05,.05,.03,mDark,-.9+o,.92,-1.9,hp,'x'));g.add(hp);
- box(.3,.02,.22,M(0xf6f1e0),-.75,.84,-1.75,g);box(.3,.02,.22,M(0xf6f1e0),.1,.84,-1.7,g);cyl(.16,.16,.05,M(0xf3efe2),0,1.9,-2.46,g,'z',18);
- box(.45,.5,.45,M(0x3a2414),-.2,.25,-1.2,g);box(.45,.5,.06,M(0x3a2414),-.2,.7,-.98,g);box(1.9,.5,.8,M(0x5a2a18),-1.9,.25,2,g);box(1.9,.14,.8,M(0xe8e4d8),-1.9,.57,2,g);
- const t=part(G(),'transmissor');const disc=G();disc.position.set(4.6,1,-1.6);cyl(.34,.34,.05,mBrass,0,0,0,disc,'z',20);for(let i=0;i<8;i++)box(.05,.05,.1,mBright,.3*Math.cos(i*PI/4),.3*Math.sin(i*PI/4),0,disc);t.add(disc);g.userData.disc=disc;
- box(.9,.7,.6,M(0x2c4a3a),4.6,.36,-1.6,t);box(.9,.9,.5,M(0x4a2c12),5.6,.45,-1.9,t);const sp=sph(.07,glow(0x9fd8ff,0),4.6,1.38,-1.6,t);g.userData.spark=sp;const sl=new T.PointLight(0x9fd8ff,0,8);sl.position.set(4.6,1.4,-1.5);t.add(sl);g.userData.sparkL=sl;
- const jars=[];for(let i=0;i<12;i++)jars.push([3.5+(i%6)*.26,1.2+(i/6|0)*.3]);const ji=new T.InstancedMesh(new T.CylinderGeometry(.1,.1,.5,10),new T.MeshStandardMaterial({color:0x9fc3d6,transparent:true,opacity:.55}),12),m4=new T.Matrix4();jars.forEach((p,i)=>{m4.makeTranslation(p[0],.3,p[1]);ji.setMatrixAt(i,m4);});t.add(ji);
- box(.08,1.3,1.6,M(0xd9d4c4),6.14,1.4,.6,t);for(let i=0;i<4;i++)cyl(.12,.12,.05,mBrass,6.08,1.1+(i>>1)*.5,.25+(i%2)*.7,t,'x',14);g.add(t);
- lamp(0,2.2,0,g,.8,10);lamp(4.6,2.2,0,g,.5,8);},
- surf:[[-2.8,2.8,-1.4,2.3,0],[2.8,6,-1,2.3,0]]},
+radio:{n:'Estação Marconi — sala de operação, sala silenciosa e camarote',c:[0,1.1,0],r:10,spawn:[-.3,0,.9,0],build(g){
+ /* Reconstrução aproximada da estação no convés dos Botes (na linha de centro, a ré da chaminé de vante, dentro da casa dos oficiais).
+    Três compartimentos lado a lado: camarote dos operadores (oeste, x<-1.8), sala de operação (centro) e sala silenciosa do
+    transmissor (leste, x>1.8), forrada para abafar o estalo da centelha. Medidas e disposição plausíveis, não tiradas de planta. */
+ const H=2.4,D=3,wd=M(0x6e2f1c,{roughness:.6}),wdD=M(0x4a2c12,{roughness:.6}),cond=M(0x8e8e86,{metalness:.5,roughness:.45}),ebo=M(0x1b1712,{roughness:.35}),marb=M(0xd9d4c4,{roughness:.3});
+ const pw=mT(whiteT,1.2,1.4);
+ const quilt=new T.MeshStandardMaterial({map:ctex(128,128,(c,w,h)=>{c.fillStyle='#6f6a5c';c.fillRect(0,0,w,h);c.strokeStyle='#57524a';c.lineWidth=3;for(let i=0;i<=4;i++){c.beginPath();c.moveTo(i*w/4,0);c.lineTo(i*w/4,h);c.stroke();c.beginPath();c.moveTo(0,i*h/4);c.lineTo(w,i*h/4);c.stroke();}c.fillStyle='#3e3a33';for(let i=0;i<4;i++)for(let j=0;j<4;j++){c.beginPath();c.arc((i+.5)*w/4,(j+.5)*h/4,3,0,7);c.fill();}}),roughness:.95});
+ const qm=(w,h)=>{const m=quilt.clone();m.map=quilt.map.clone();m.map.wrapS=m.map.wrapT=T.RepeatWrapping;m.map.repeat.set(w/.6,h/.6);m.map.needsUpdate=true;return m;};
+ const fl=(w,ox)=>{const f=new T.Mesh(new T.PlaneGeometry(w,D),mT(linoT,w,D));f.rotation.x=-PI/2;f.position.set(ox,0,0);g.add(f);const c=new T.Mesh(new T.PlaneGeometry(w,D),M(0xf2eee2));c.rotation.x=PI/2;c.position.set(ox,H,0);g.add(c);};
+ fl(2.4,-3);fl(3.6,0);fl(2.6,3.1);
+ /* paredes externas (planos voltados para dentro) */
+ wall(2.4,H,pw,-3,H/2,-D/2,0,g);wall(2.4,H,pw,-3,H/2,D/2,PI,g);wall(D,H,pw,-4.2,H/2,0,PI/2,g);
+ wall(3.6,H,pw,0,H/2,-D/2,0,g);wall(3.6,H,pw,0,H/2,D/2,PI,g);
+ wall(2.6,H,qm(2.6,H),3.1,H/2,-D/2,0,g);wall(2.6,H,qm(2.6,H),3.1,H/2,D/2,PI,g);wall(D,H,qm(D,H),4.4,H/2,0,-PI/2,g);
+ /* divisórias com vão de porta (z de .55 a 1.25), batentes e porta aberta encostada */
+ [-1.8,1.8].forEach(x=>{const seg=(z0,z1,y0,y1)=>box(.08,y1-y0,z1-z0,pw,x,(y0+y1)/2,(z0+z1)/2,g);seg(-D/2,.55,0,H);seg(1.25,D/2,0,H);seg(.55,1.25,2.02,H);
+  [.55,1.25].forEach(z=>box(.12,2.05,.05,wd,x,1.02,z,g));box(.12,.06,.76,wd,x,2.05,.9,g);box(.68,2,.04,wdD,x+(x<0?-.36:.36),1,.53,g);});
+ /* lado silencioso da divisória leste: forro acolchoado */
+ [[-D/2,.55],[1.25,D/2]].forEach(([z0,z1])=>wall(z1-z0,H,qm(z1-z0,H),1.845,H/2,(z0+z1)/2,PI/2,g));
+ /* rodapés e eletrodutos na sala de operação */
+ box(3.6,.12,.02,wd,0,.06,-D/2+.01,g);box(3.6,.12,.02,wd,0,.06,D/2-.01,g);
+ [2.15,2.25].forEach(y=>box(3.5,.025,.025,cond,0,y,-D/2+.03,g));box(.025,1.3,.025,cond,1.6,1.55,-D/2+.03,g);box(.025,1.3,.025,cond,1.68,1.55,-D/2+.03,g);
+ /* ---- sala de operação: mesa de mogno ao longo da antepara ---- */
+ box(2.5,.05,.75,wd,-.25,.8,-1.12,g);box(2.4,.75,.68,wdD,-.25,.39,-1.14,g);
+ const k=part(G(),'chaveMorse');box(.24,.03,.12,M(0x2a1c10),-.5,.85,-.95,k);box(.2,.015,.03,mBrass,-.5,.9,-.95,k);cyl(.03,.03,.04,ebo,-.58,.93,-.95,k);g.add(k);g.userData.key=k.children[1];
+ const rc=part(G(),'receptor');box(.6,.26,.3,M(0x6e2f1c),.3,.96,-1.3,rc);[-.14,.14].forEach(o=>cyl(.1,.1,.04,mBrass,.3+o,1.1,-1.3,rc));box(.55,.4,.3,M(0x4a2c12),.85,1.03,-1.3,rc);for(let i=0;i<3;i++)cyl(.04,.04,.05,mBrass,.68+i*.17,1.05,-1.13,rc,'z');
+ /* fiação até a parede e comutador de antena (transmitir / receber) em placa de mármore */
+ box(.02,.02,.32,cond,.85,1.24,-1.42,rc);const sw=G();sw.position.set(.3,1.55,-D/2+.05);box(.42,.5,.03,marb,0,0,0,sw);[-.12,.12].forEach(x=>{box(.03,.2,.03,mBrass,x,.05,.04,sw);cyl(.025,.025,.06,ebo,x,.17,.06,sw,'z');});box(.3,.03,.03,mBrass,0,-.12,.06,sw);rc.add(sw);g.add(rc);
+ const hp=part(G(),'fones');const hb2=new T.Mesh(new T.TorusGeometry(.1,.012,6,14,PI),mDark);hb2.position.set(-1.05,.91,-1.0);hp.add(hb2);[-.1,.1].forEach(o=>cyl(.05,.05,.03,mDark,-1.05+o,.86,-1.0,hp,'x'));g.add(hp);
+ /* formulários, espeto de mensagens, lápis e livro de registro */
+ const form=new T.MeshStandardMaterial({map:ctex(128,96,(c,w,h)=>{c.fillStyle='#f4efdc';c.fillRect(0,0,w,h);c.fillStyle='#8a3a2a';c.font='bold 11px Georgia';c.fillText('MARCONI',8,16);c.fillStyle='#444';for(let y=28;y<h-6;y+=9)c.fillRect(8,y,w-16,1);})});
+ [[-.1,-.85],[.05,-.82]].forEach(p=>{const f=new T.Mesh(new T.PlaneGeometry(.21,.16),form);f.rotation.x=-PI/2;f.rotation.z=p[0]*.8;f.position.set(p[0],.828,p[1]);g.add(f);});
+ cyl(.004,.004,.14,mBright,-.85,.89,-1.3,g);cyl(.05,.05,.01,mDark,-.85,.83,-1.3,g);for(let i=0;i<5;i++)box(.13,.003,.1,M(0xf1ebd6),-.85,.84+i*.006,-1.3,g);
+ cyl(.004,.004,.15,M(0xc9a23a),.15,.83,-.86,g,'x');box(.26,.04,.34,M(0x2f3f2a),-1.2,.845,-1.25,g);
+ /* transmissor de emergência (bobina de indução alimentada por baterias), na ponta da mesa, com as baterias embaixo */
+ box(.35,.3,.25,wd,1.25,.95,-1.2,g);cyl(.06,.06,.3,M(0x222222),1.25,1.16,-1.2,g,'x');[-.1,.1].forEach(o=>cyl(.015,.015,.06,mBrass,1.25+o,1.14,-1.1,g));
+ box(.5,.3,.35,M(0x2b2b2b),1.3,.15,-1.1,g);for(let i=0;i<3;i++)cyl(.03,.03,.04,M(0x444444),1.15+i*.15,.32,-1.1,g);
+ /* relógio de parede */
+ cyl(.17,.17,.05,wd,-.25,1.9,-D/2+.04,g,'z',20);const cf=new T.Mesh(new T.CircleGeometry(.14,24),new T.MeshStandardMaterial({map:ctex(128,128,(c,w,h)=>{c.fillStyle='#f3efe2';c.fillRect(0,0,w,h);c.strokeStyle='#222';c.lineWidth=3;for(let i=0;i<12;i++){const a=i/12*PI*2;c.beginPath();c.moveTo(64+Math.sin(a)*50,64-Math.cos(a)*50);c.lineTo(64+Math.sin(a)*58,64-Math.cos(a)*58);c.stroke();}c.beginPath();c.moveTo(64,64);c.lineTo(94,52);c.moveTo(64,64);c.lineTo(56,20);c.stroke();})}));cf.position.set(-.25,1.9,-D/2+.07);g.add(cf);
+ /* cadeiras giratórias de madeira */
+ [[-.5,-.35],[.35,-.3]].forEach(p=>{cyl(.21,.21,.05,wd,p[0],.47,p[1],g,null,16);cyl(.03,.03,.42,mIron,p[0],.23,p[1],g);cyl(.2,.24,.03,mIron,p[0],.02,p[1],g,null,12);box(.38,.3,.04,wd,p[0],.68,p[1]+.2,g);});
+ /* quadro de avisos na parede sul */
+ box(.6,.45,.02,M(0x3d2a17),1.1,1.5,D/2-.02,g);[[.95,1.55],[1.2,1.45]].forEach(p=>{const f=new T.Mesh(new T.PlaneGeometry(.18,.13),form);f.position.set(p[0],p[1],D/2-.035);f.rotation.y=PI;g.add(f);});
+ lamp(-.25,H-.05,-.4,g,.7,8);
+ /* ---- sala silenciosa: motor-gerador, transformador, condensadores, centelhador rotativo, bobina de sintonia e quadro ---- */
+ const t=part(G(),'transmissor');const disc=G();disc.position.set(3.6,1,-1.0);cyl(.34,.34,.05,mBrass,0,0,0,disc,'z',20);for(let i=0;i<8;i++)box(.05,.05,.1,mBright,.3*Math.cos(i*PI/4),.3*Math.sin(i*PI/4),0,disc);t.add(disc);g.userData.disc=disc;
+ box(.9,.7,.6,M(0x2c4a3a),3.6,.36,-1.0,t);const sp=sph(.07,glow(0x9fd8ff,0),3.6,1.38,-1.0,t);g.userData.spark=sp;const sl=new T.PointLight(0x9fd8ff,0,6);sl.position.set(3.6,1.4,-.9);t.add(sl);g.userData.sparkL=sl;
+ box(1.1,.12,.45,mIron,2.45,.06,-1.1,t);cyl(.2,.2,.45,M(0x3a4a3e,{metalness:.4,roughness:.5}),2.25,.33,-1.1,t,'x',18);cyl(.18,.18,.4,M(0x3a4a3e,{metalness:.4,roughness:.5}),2.72,.31,-1.1,t,'x',18);cyl(.05,.05,.12,mBright,2.49,.32,-1.1,t,'x');
+ box(.5,.6,.4,M(0x2a2a2a,{metalness:.3}),4.05,.3,-1.15,t);[3.95,4.15].forEach(x=>cyl(.04,.04,.12,M(0xe8e0c8),x,.66,-1.15,t));
+ box(1.3,.04,.6,wd,2.95,1.0,-1.2,t);const ji=new T.InstancedMesh(new T.CylinderGeometry(.08,.08,.42,10),new T.MeshStandardMaterial({color:0x9fc3d6,transparent:true,opacity:.55}),12),m4=new T.Matrix4();for(let i=0;i<12;i++){m4.makeTranslation(2.45+(i%6)*.2,1.23,-1.3+(i/6|0)*.26);ji.setMatrixAt(i,m4);}t.add(ji);
+ for(let i=0;i<10;i++){const r=new T.Mesh(new T.TorusGeometry(.16,.008,4,20),mBrass);r.rotation.x=PI/2;r.position.set(4.05,1.25+i*.05,-1.15);t.add(r);}cyl(.012,.012,H-1.75,cond,4.05,(H+1.75)/2,-1.15,t);cyl(.05,.05,.08,M(0xe8e0c8),4.05,H-.05,-1.15,t);
+ box(.08,1.3,1.4,marb,4.36,1.4,.5,t);for(let i=0;i<4;i++)cyl(.1,.1,.05,mBrass,4.3,1.75,.1+i*.27,t,'x',14);for(let i=0;i<3;i++){box(.04,.18,.04,mBrass,4.3,1.25,.2+i*.3,t);cyl(.02,.02,.08,ebo,4.27,1.36,.2+i*.3,t,'x');}g.add(t);
+ lamp(3.1,H-.05,0,g,.5,7);
+ /* ---- camarote dos operadores: beliche, lavatório com espelho, armário, cadeira e uniformes no cabide ---- */
+ [.35,1.3].forEach(y=>{box(1.9,.16,.75,M(0xf2efe6),-3.1,y+.12,-1.07,g);box(1.95,.1,.8,wd,-3.1,y,-1.07,g);box(1.95,.18,.03,wd,-3.1,y+.12,-.68,g);});[-4.08,-2.12].forEach(x=>box(.06,1.6,.8,wd,x,.8,-1.07,g));
+ [.5,1.45].forEach(y=>box(.45,.1,.3,M(0xffffff),-3.85,y+.25,-1.15,g));box(.5,.85,.45,wd,-3.95,.42,.9,g);box(.52,.03,.47,marb,-3.95,.86,.9,g);cyl(.13,.1,.08,M(0xffffff),-3.95,.92,.9,g);box(.03,.45,.35,M(0xbcd0d8,{metalness:.9,roughness:.1}),-4.17,1.4,.9,g);
+ box(.55,1.9,.5,mT(mahT,1,1),-2.4,.95,1.2,g);box(.4,.45,.4,wd,-3.1,.22,.6,g);box(.4,.4,.04,wd,-3.1,.62,.78,g);
+ [-3.5,-3.25].forEach(x=>cyl(.012,.012,.08,mBrass,x,1.8,D/2-.05,g,'z'));box(.38,.6,.08,M(0x1e2433),-3.38,1.45,D/2-.1,g);
+ lamp(-3,H-.05,.2,g,.45,6);},
+ surf:[[-1.55,1.55,-.62,1.25,0],[2.05,4.1,-.55,1.25,0],[-3.95,-2.05,-.55,.6,0],[-3.4,-2.05,.6,.95,0],[-2.1,-1.5,.55,1.25,0],[1.5,2.1,.55,1.25,0]]},
 cabines:{n:'Cabines das três classes',c:[0,1,6],r:24,spawn:[1.6,0,0,PI/2],build(g){
  /* 1ª classe (convés B/C) */
  room(5,2.6,4.2,whiteT,carpetT,g,0,0);part(g.children[g.children.length-1],'cab1');

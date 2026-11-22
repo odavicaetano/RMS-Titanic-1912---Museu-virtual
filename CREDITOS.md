@@ -75,3 +75,12 @@ Interiores da sala de cartas e da sala de navegação, portas da casa do leme, s
 - *The Shipbuilder* (1911), citado no fórum da Encyclopedia Titanica: a chave das portas estanques ficava no “bridge shelter or chart room”.
 - Depoimentos de Frederick Fleet (inquéritos americano, 5239–5247, e britânico, 17278–17286): três toques no sino, telefonema à ponte, “What do you see?” — “Iceberg right ahead” — “Thank you”.
 Interiores da sala de cartas e da sala de navegação, telefones, chave das portas estanques e porta da gávea: reconstruções aproximadas.
+
+## Conveses caminháveis, estação Marconi, Grande Escadaria e áreas da tripulação (revisão de 2026)
+- Fonte consultada: Inquérito britânico de 1912, relatório, seção de acomodações (titanicinquiry.org, “botRepAccomo”). Dela vêm: estação de telegrafia e alojamento dos operadores na linha de centro do convés dos Botes, a ré da chaminé de vante; entrada e escadas da 1ª classe a ré da casa dos oficiais; duas escadas de ferro da tripulação na ré do convés dos Botes para o convés A; maquinário de âncoras e amarração no castelo de proa; refeitórios de marinheiros e foguistas sob o castelo (convés C); alojamento de foguistas à vante no convés D, com as escadas em espiral para o túnel até as caldeiras; corredor de serviço (“working passage”) a bombordo no convés E, com acesso aos refeitórios da 3ª classe por uma escada larga a meia-nau.
+- As páginas da Encyclopedia Titanica sobre a instalação Marconi e a Grande Escadaria recusaram o acesso automatizado durante a revisão e não foram lidas.
+- Caminhada nos conveses: pisos, degraus e obstáculos medidos no próprio modelo de Renan_1912; nada foi acrescentado ao casco. As marcas azuis de “acesso do museu” não são escadas históricas.
+- Estação Marconi: divisão em sala de operação, sala silenciosa acolchoada e camarote dos operadores; disposição dos aparelhos, medidas, móveis e iluminação são reconstrução aproximada, sem planta de referência.
+- Grande Escadaria: painéis de ferro forjado com volutas e rosetas douradas, desenhados a partir do estilo conhecido por fotografias do Olympic; o desenho exato dos painéis do Titanic não foi reproduzido.
+- Scotland Road, refeitório e alojamento dos foguistas: reunidos lado a lado para a visita; no navio ficavam em conveses diferentes. Medidas, móveis e acabamentos aproximados.
+- Portas do convés dos Botes para a Grande Escadaria e o ginásio: posições aproximadas.

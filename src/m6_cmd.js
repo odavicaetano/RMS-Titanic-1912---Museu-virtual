@@ -116,7 +116,10 @@ function ceilLamp(x,yc,z,g,i,d){const f=G();f.position.set(x,yc,z);g.add(f);cyl(
  [-1,1].forEach(s=>{const R=(x0,x1,a,b)=>W.surf.push([x0,x1,s>0?a:-b,s>0?b:-a,y]);
   R(72.45,76.1,4.5,6.2);R(72.45,75.4,6.2,7.4);R(72.4,74.75,7.4,8.4);R(72.1,74.15,8.4,9.4);R(71.95,73.55,9.4,14.35);
   R(69.45,72.6,3.75,6.75);R(69.45,70.3,3.0,3.85);R(68.3,68.85,3.0,3.7);R(64.65,68.75,3.65,6.6);});
- W.doors=[{p:[64.42,y,-5.3],n:[1,0],t:'radio'},{p:[64.42,y,5.3],n:[1,0],t:'capitao'}];
+ W.doors=[{p:[64.42,y,-5.3],n:[1,0],t:'radio'},{p:[64.42,y,5.3],n:[1,0],t:'capitao'},
+  /* convés dos Botes: entradas laterais da casa da Grande Escadaria (a ré dos aposentos dos oficiais) e porta do ginásio, a boreste; posições aproximadas */
+  {p:[40,28.98,8.75],n:[0,1],t:'escadaria'},{p:[40,28.98,-8.75],n:[0,-1],t:'escadaria'},{p:[33.5,28.98,8.75],n:[0,1],t:'ginasio'}];
+ [[40,8.75,'Grande Escadaria — entrada do convés dos Botes'],[40,-8.75,'Grande Escadaria — entrada do convés dos Botes'],[33.5,8.75,'Ginásio']].forEach(q=>CMD.doors.push({room:true,c:V(q[0],28.98,q[1]),lab:q[2]}));
  CMD.doors.push({room:true,c:V(64.45,Y0,-5.3),lab:'Corredor dos oficiais e sala Marconi'},{room:true,c:V(64.45,Y0,5.3),lab:'Aposentos do comandante'});
 
  /* ---- dica discreta perto de portas (substitui as placas grandes) ---- */

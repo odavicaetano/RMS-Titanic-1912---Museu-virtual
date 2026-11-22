@@ -1046,10 +1046,26 @@ const LAMPS=[];let _lampG=null,_lampS=null;
 function lamp(x,y,z,g,i,d){if(!_lampG){_lampG=new T.LatheGeometry([[.025,.06],[.07,.04],[.13,-.03],[.15,-.08],[.12,-.1],[0,-.105]].map(q=>new T.Vector2(q[0],q[1])),20);_lampS=new T.MeshStandardMaterial({color:0xfff5e2,emissive:0xffe2b0,emissiveIntensity:.8,roughness:.45});}
  const f=G();f.position.set(x,y,z);g.add(f);cyl(.007,.007,.52,mBrass,0,.32,0,f,null,6);cyl(.055,.055,.014,mBrass,0,.58,0,f,null,14);cyl(.03,.035,.035,mBrass,0,.07,0,f,null,12);f.add(new T.Mesh(_lampG,_lampS));
  const l=new T.PointLight(0xffdca0,i||.7,d||14,1.5);l.position.set(x,y-.12,z);g.add(l);LAMPS.push(f);}
-const baluGeo=new T.LatheGeometry([[.03,0],[.05,.05],[.025,.15],[.06,.42],[.025,.7],[.05,.84],[.03,.9]].map(q=>new T.Vector2(q[0],q[1])),8);
-function balustrade(segs,g,mRail){const tr=[];segs.forEach(s=>{const a=V(s[0],s[1],s[2]),b=V(s[3],s[4],s[5]),len=a.distanceTo(b),n=Math.max(2,Math.round(len/.28));for(let i=0;i<=n;i++)tr.push(a.clone().lerp(b,i/n));
+function balustrade(segs,g,mRail){segs.forEach(s=>{const a=V(s[0],s[1],s[2]),b=V(s[3],s[4],s[5]);
   const r=rod(a.clone().setY(a.y+.95),b.clone().setY(b.y+.95),.07,.07,mRail,g,8);part(r,'balaustrada');[a,b].forEach(p=>lathe([[.11,0],[.09,.1],[.07,1],[.12,1.06],[.1,1.16],[0,1.2]],mRail,p.x,p.y,p.z,g,10));});
- const im=new T.InstancedMesh(baluGeo,M(0x2a2118,{metalness:.6,roughness:.4}),tr.length),m4=new T.Matrix4();tr.forEach((p,i)=>{m4.makeTranslation(p.x,p.y,p.z);im.setMatrixAt(i,m4);});part(im,'balaustrada');g.add(im);}
+ /* painéis de ferro forjado (volutas em C, estilo Luís XIV, com rosetas douradas) entre o corrimão de carvalho e o piso, como na Grande Escadaria;
+    desenho aproximado a partir de fotografias do Olympic */
+ const pos=[],uv=[],ix=[];segs.forEach(q=>{const a=V(q[0],q[1],q[2]),b=V(q[3],q[4],q[5]),u=a.distanceTo(b)/.55,k=pos.length/3;
+  pos.push(a.x,a.y+.06,a.z, b.x,b.y+.06,b.z, b.x,b.y+.9,b.z, a.x,a.y+.9,a.z);uv.push(0,0,u,0,u,1,0,1);ix.push(k,k+1,k+2,k,k+2,k+3);});
+ const gg=new T.BufferGeometry();gg.setAttribute('position',new T.Float32BufferAttribute(pos,3));gg.setAttribute('uv',new T.Float32BufferAttribute(uv,2));gg.setIndex(ix);gg.computeVertexNormals();
+ const gm=new T.Mesh(gg,grilleMat());part(gm,'balaustrada');g.add(gm);}
+let _grM=null;function grilleMat(){if(_grM)return _grM;const t=ctex(256,384,(c,w,h)=>{c.clearRect(0,0,w,h);const iron='#1f1b17',gold='#c9a24a';c.lineCap='round';
+ c.strokeStyle=iron;c.lineWidth=14;c.strokeRect(7,7,w-14,h-14);c.lineWidth=9;
+ const S=(x,y,r,a0,a1,cw)=>{c.beginPath();c.arc(x,y,r,a0,a1,cw);c.stroke();};
+ /* volutas em C espelhadas, em cima e embaixo, e eixo central */
+ [[1,1],[-1,1],[1,-1],[-1,-1]].forEach(([sx,sy])=>{c.save();c.translate(w/2,h/2);c.scale(sx,sy);c.strokeStyle=iron;c.lineWidth=9;
+  c.beginPath();c.moveTo(0,-20);c.bezierCurveTo(10,-80,90,-60,95,-120);c.stroke();S(70,-132,26,0,PI*1.6,false);S(70,-132,10,0,PI*2,false);
+  c.beginPath();c.moveTo(18,0);c.bezierCurveTo(60,10,105,-10,104,-50);c.stroke();S(86,-52,18,PI*.1,PI*1.5,true);c.restore();});
+ c.beginPath();c.moveTo(w/2,14);c.lineTo(w/2,h-14);c.stroke();
+ /* medalhão oval e rosetas douradas */
+ c.lineWidth=8;c.beginPath();c.ellipse(w/2,h/2,34,46,0,0,PI*2);c.stroke();c.fillStyle=gold;c.beginPath();c.ellipse(w/2,h/2,18,26,0,0,PI*2);c.fill();
+ [[w/2,40],[w/2,h-40],[40,h/2],[w-40,h/2]].forEach(p=>{c.beginPath();c.arc(p[0],p[1],9,0,PI*2);c.fill();});});
+ t.wrapS=T.RepeatWrapping;t.anisotropy=4;_grM=new T.MeshStandardMaterial({map:t,alphaTest:.45,transparent:false,side:DS,metalness:.55,roughness:.45});return _grM;}
 function chairs(list,g,col){const s=new T.InstancedMesh(new T.BoxGeometry(.45,.08,.45),M(col),list.length),b=new T.InstancedMesh(new T.BoxGeometry(.45,.5,.06),M(col),list.length),l=new T.InstancedMesh(new T.BoxGeometry(.4,.45,.4),M(0x3a2414),list.length),m4=new T.Matrix4();
  list.forEach((p,i)=>{m4.makeTranslation(p[0],.47,p[1]);s.setMatrixAt(i,m4);m4.makeTranslation(p[0],.76,p[1]+(p[2]||0)*.22);b.setMatrixAt(i,m4);m4.makeTranslation(p[0],.22,p[1]);l.setMatrixAt(i,m4);});g.add(s,b,l);}
 function teleg(x,z,g,key){const t=part(G(),'telegrafoP');lathe([[.26,0],[.12,.12],[.09,.95],[.17,1.05],[0,1.05]],mBrass,x,0,z,t,12);const dm=M(0xffffff,{map:dialTex()});cyl(.3,.3,.2,dm,x,1.3,z,t,'z',24);const h=G();h.position.set(x,1.3,z);box(.04,.5,.04,mBrass,0,.25,.13,h);sph(.05,M(0x3a2414),0,.52,.13,h);box(.04,.5,.04,mBrass,0,.25,-.13,h);t.add(h);g.add(t);(g.userData.handles=g.userData.handles||[]).push(h);}
@@ -1166,20 +1182,66 @@ ponte:{n:'Ponte de comando',c:[0,1.2,0],r:24,spawn:[-.4,0,5.5,-PI/2],build(g){
  const ck=part(cyl(.2,.2,.06,M(0xf3efe2),-5.82,1.9,0,g,'x',18),'relogioN');box(.5,1.6,1.6,M(0x5a2a18),-5.6,.8,3,g);
  [-13.2,13.2].forEach(z=>{box(2.4,1.25,.1,mWhite,3.7,.62,z+(z>0?.75:-.75),g);});lamp(-3.6,2.3,0,g,.7,12);lamp(1,2.3,0,g,.6,12);},
  surf:[[-5.8,4.6,-13.8,13.8,0]]},
-radio:{n:'Sala de rádio Marconi',c:[1.4,1.1,0],r:13,spawn:[-1.6,0,1,PI/2-.2],build(g){
- room(6,2.5,5,whiteT,linoT,g,0,0,true);room(3.2,2.5,5,whiteT,linoT,g,4.6,0,true);
- box(3,.06,.85,M(0x6e2f1c),0,.8,-2,g);box(2.9,.78,.8,M(0x5a2a18),0,.4,-2,g);
- const k=part(G(),'chaveMorse');box(.24,.03,.12,M(0x2a1c10),-.3,.85,-1.85,k);box(.2,.015,.03,mBrass,-.3,.9,-1.85,k);cyl(.03,.03,.04,M(0x111111),-.38,.93,-1.85,k);g.add(k);g.userData.key=k.children[1];
- const rc=part(G(),'receptor');box(.6,.26,.3,M(0x6e2f1c),.6,.96,-2.1,rc);[-.14,.14].forEach(o=>cyl(.1,.1,.04,mBrass,.6+o,1.1,-2.1,rc));box(.55,.4,.3,M(0x4a2c12),1.25,1.03,-2.1,rc);for(let i=0;i<3;i++)cyl(.04,.04,.05,mBrass,1.08+i*.17,1.05,-1.93,rc,'z');g.add(rc);
- const hp=part(G(),'fones');const hb2=new T.Mesh(new T.TorusGeometry(.1,.012,6,14,PI),mDark);hb2.position.set(-.9,.95,-1.9);hp.add(hb2);[-.1,.1].forEach(o=>cyl(.05,.05,.03,mDark,-.9+o,.92,-1.9,hp,'x'));g.add(hp);
- box(.3,.02,.22,M(0xf6f1e0),-.75,.84,-1.75,g);box(.3,.02,.22,M(0xf6f1e0),.1,.84,-1.7,g);cyl(.16,.16,.05,M(0xf3efe2),0,1.9,-2.46,g,'z',18);
- box(.45,.5,.45,M(0x3a2414),-.2,.25,-1.2,g);box(.45,.5,.06,M(0x3a2414),-.2,.7,-.98,g);box(1.9,.5,.8,M(0x5a2a18),-1.9,.25,2,g);box(1.9,.14,.8,M(0xe8e4d8),-1.9,.57,2,g);
- const t=part(G(),'transmissor');const disc=G();disc.position.set(4.6,1,-1.6);cyl(.34,.34,.05,mBrass,0,0,0,disc,'z',20);for(let i=0;i<8;i++)box(.05,.05,.1,mBright,.3*Math.cos(i*PI/4),.3*Math.sin(i*PI/4),0,disc);t.add(disc);g.userData.disc=disc;
- box(.9,.7,.6,M(0x2c4a3a),4.6,.36,-1.6,t);box(.9,.9,.5,M(0x4a2c12),5.6,.45,-1.9,t);const sp=sph(.07,glow(0x9fd8ff,0),4.6,1.38,-1.6,t);g.userData.spark=sp;const sl=new T.PointLight(0x9fd8ff,0,8);sl.position.set(4.6,1.4,-1.5);t.add(sl);g.userData.sparkL=sl;
- const jars=[];for(let i=0;i<12;i++)jars.push([3.5+(i%6)*.26,1.2+(i/6|0)*.3]);const ji=new T.InstancedMesh(new T.CylinderGeometry(.1,.1,.5,10),new T.MeshStandardMaterial({color:0x9fc3d6,transparent:true,opacity:.55}),12),m4=new T.Matrix4();jars.forEach((p,i)=>{m4.makeTranslation(p[0],.3,p[1]);ji.setMatrixAt(i,m4);});t.add(ji);
- box(.08,1.3,1.6,M(0xd9d4c4),6.14,1.4,.6,t);for(let i=0;i<4;i++)cyl(.12,.12,.05,mBrass,6.08,1.1+(i>>1)*.5,.25+(i%2)*.7,t,'x',14);g.add(t);
- lamp(0,2.2,0,g,.8,10);lamp(4.6,2.2,0,g,.5,8);},
- surf:[[-2.8,2.8,-1.4,2.3,0],[2.8,6,-1,2.3,0]]},
+radio:{n:'Estação Marconi — sala de operação, sala silenciosa e camarote',c:[0,1.1,0],r:10,spawn:[-.3,0,.9,0],build(g){
+ /* Reconstrução aproximada da estação no convés dos Botes (na linha de centro, a ré da chaminé de vante, dentro da casa dos oficiais).
+    Três compartimentos lado a lado: camarote dos operadores (oeste, x<-1.8), sala de operação (centro) e sala silenciosa do
+    transmissor (leste, x>1.8), forrada para abafar o estalo da centelha. Medidas e disposição plausíveis, não tiradas de planta. */
+ const H=2.4,D=3,wd=M(0x6e2f1c,{roughness:.6}),wdD=M(0x4a2c12,{roughness:.6}),cond=M(0x8e8e86,{metalness:.5,roughness:.45}),ebo=M(0x1b1712,{roughness:.35}),marb=M(0xd9d4c4,{roughness:.3});
+ const pw=mT(whiteT,1.2,1.4);
+ const quilt=new T.MeshStandardMaterial({map:ctex(128,128,(c,w,h)=>{c.fillStyle='#6f6a5c';c.fillRect(0,0,w,h);c.strokeStyle='#57524a';c.lineWidth=3;for(let i=0;i<=4;i++){c.beginPath();c.moveTo(i*w/4,0);c.lineTo(i*w/4,h);c.stroke();c.beginPath();c.moveTo(0,i*h/4);c.lineTo(w,i*h/4);c.stroke();}c.fillStyle='#3e3a33';for(let i=0;i<4;i++)for(let j=0;j<4;j++){c.beginPath();c.arc((i+.5)*w/4,(j+.5)*h/4,3,0,7);c.fill();}}),roughness:.95});
+ const qm=(w,h)=>{const m=quilt.clone();m.map=quilt.map.clone();m.map.wrapS=m.map.wrapT=T.RepeatWrapping;m.map.repeat.set(w/.6,h/.6);m.map.needsUpdate=true;return m;};
+ const fl=(w,ox)=>{const f=new T.Mesh(new T.PlaneGeometry(w,D),mT(linoT,w,D));f.rotation.x=-PI/2;f.position.set(ox,0,0);g.add(f);const c=new T.Mesh(new T.PlaneGeometry(w,D),M(0xf2eee2));c.rotation.x=PI/2;c.position.set(ox,H,0);g.add(c);};
+ fl(2.4,-3);fl(3.6,0);fl(2.6,3.1);
+ /* paredes externas (planos voltados para dentro) */
+ wall(2.4,H,pw,-3,H/2,-D/2,0,g);wall(2.4,H,pw,-3,H/2,D/2,PI,g);wall(D,H,pw,-4.2,H/2,0,PI/2,g);
+ wall(3.6,H,pw,0,H/2,-D/2,0,g);wall(3.6,H,pw,0,H/2,D/2,PI,g);
+ wall(2.6,H,qm(2.6,H),3.1,H/2,-D/2,0,g);wall(2.6,H,qm(2.6,H),3.1,H/2,D/2,PI,g);wall(D,H,qm(D,H),4.4,H/2,0,-PI/2,g);
+ /* divisórias com vão de porta (z de .55 a 1.25), batentes e porta aberta encostada */
+ [-1.8,1.8].forEach(x=>{const seg=(z0,z1,y0,y1)=>box(.08,y1-y0,z1-z0,pw,x,(y0+y1)/2,(z0+z1)/2,g);seg(-D/2,.55,0,H);seg(1.25,D/2,0,H);seg(.55,1.25,2.02,H);
+  [.55,1.25].forEach(z=>box(.12,2.05,.05,wd,x,1.02,z,g));box(.12,.06,.76,wd,x,2.05,.9,g);box(.68,2,.04,wdD,x+(x<0?-.36:.36),1,.53,g);});
+ /* lado silencioso da divisória leste: forro acolchoado */
+ [[-D/2,.55],[1.25,D/2]].forEach(([z0,z1])=>wall(z1-z0,H,qm(z1-z0,H),1.845,H/2,(z0+z1)/2,PI/2,g));
+ /* rodapés e eletrodutos na sala de operação */
+ box(3.6,.12,.02,wd,0,.06,-D/2+.01,g);box(3.6,.12,.02,wd,0,.06,D/2-.01,g);
+ [2.15,2.25].forEach(y=>box(3.5,.025,.025,cond,0,y,-D/2+.03,g));box(.025,1.3,.025,cond,1.6,1.55,-D/2+.03,g);box(.025,1.3,.025,cond,1.68,1.55,-D/2+.03,g);
+ /* ---- sala de operação: mesa de mogno ao longo da antepara ---- */
+ box(2.5,.05,.75,wd,-.25,.8,-1.12,g);box(2.4,.75,.68,wdD,-.25,.39,-1.14,g);
+ const k=part(G(),'chaveMorse');box(.24,.03,.12,M(0x2a1c10),-.5,.85,-.95,k);box(.2,.015,.03,mBrass,-.5,.9,-.95,k);cyl(.03,.03,.04,ebo,-.58,.93,-.95,k);g.add(k);g.userData.key=k.children[1];
+ const rc=part(G(),'receptor');box(.6,.26,.3,M(0x6e2f1c),.3,.96,-1.3,rc);[-.14,.14].forEach(o=>cyl(.1,.1,.04,mBrass,.3+o,1.1,-1.3,rc));box(.55,.4,.3,M(0x4a2c12),.85,1.03,-1.3,rc);for(let i=0;i<3;i++)cyl(.04,.04,.05,mBrass,.68+i*.17,1.05,-1.13,rc,'z');
+ /* fiação até a parede e comutador de antena (transmitir / receber) em placa de mármore */
+ box(.02,.02,.32,cond,.85,1.24,-1.42,rc);const sw=G();sw.position.set(.3,1.55,-D/2+.05);box(.42,.5,.03,marb,0,0,0,sw);[-.12,.12].forEach(x=>{box(.03,.2,.03,mBrass,x,.05,.04,sw);cyl(.025,.025,.06,ebo,x,.17,.06,sw,'z');});box(.3,.03,.03,mBrass,0,-.12,.06,sw);rc.add(sw);g.add(rc);
+ const hp=part(G(),'fones');const hb2=new T.Mesh(new T.TorusGeometry(.1,.012,6,14,PI),mDark);hb2.position.set(-1.05,.91,-1.0);hp.add(hb2);[-.1,.1].forEach(o=>cyl(.05,.05,.03,mDark,-1.05+o,.86,-1.0,hp,'x'));g.add(hp);
+ /* formulários, espeto de mensagens, lápis e livro de registro */
+ const form=new T.MeshStandardMaterial({map:ctex(128,96,(c,w,h)=>{c.fillStyle='#f4efdc';c.fillRect(0,0,w,h);c.fillStyle='#8a3a2a';c.font='bold 11px Georgia';c.fillText('MARCONI',8,16);c.fillStyle='#444';for(let y=28;y<h-6;y+=9)c.fillRect(8,y,w-16,1);})});
+ [[-.1,-.85],[.05,-.82]].forEach(p=>{const f=new T.Mesh(new T.PlaneGeometry(.21,.16),form);f.rotation.x=-PI/2;f.rotation.z=p[0]*.8;f.position.set(p[0],.828,p[1]);g.add(f);});
+ cyl(.004,.004,.14,mBright,-.85,.89,-1.3,g);cyl(.05,.05,.01,mDark,-.85,.83,-1.3,g);for(let i=0;i<5;i++)box(.13,.003,.1,M(0xf1ebd6),-.85,.84+i*.006,-1.3,g);
+ cyl(.004,.004,.15,M(0xc9a23a),.15,.83,-.86,g,'x');box(.26,.04,.34,M(0x2f3f2a),-1.2,.845,-1.25,g);
+ /* transmissor de emergência (bobina de indução alimentada por baterias), na ponta da mesa, com as baterias embaixo */
+ box(.35,.3,.25,wd,1.25,.95,-1.2,g);cyl(.06,.06,.3,M(0x222222),1.25,1.16,-1.2,g,'x');[-.1,.1].forEach(o=>cyl(.015,.015,.06,mBrass,1.25+o,1.14,-1.1,g));
+ box(.5,.3,.35,M(0x2b2b2b),1.3,.15,-1.1,g);for(let i=0;i<3;i++)cyl(.03,.03,.04,M(0x444444),1.15+i*.15,.32,-1.1,g);
+ /* relógio de parede */
+ cyl(.17,.17,.05,wd,-.25,1.9,-D/2+.04,g,'z',20);const cf=new T.Mesh(new T.CircleGeometry(.14,24),new T.MeshStandardMaterial({map:ctex(128,128,(c,w,h)=>{c.fillStyle='#f3efe2';c.fillRect(0,0,w,h);c.strokeStyle='#222';c.lineWidth=3;for(let i=0;i<12;i++){const a=i/12*PI*2;c.beginPath();c.moveTo(64+Math.sin(a)*50,64-Math.cos(a)*50);c.lineTo(64+Math.sin(a)*58,64-Math.cos(a)*58);c.stroke();}c.beginPath();c.moveTo(64,64);c.lineTo(94,52);c.moveTo(64,64);c.lineTo(56,20);c.stroke();})}));cf.position.set(-.25,1.9,-D/2+.07);g.add(cf);
+ /* cadeiras giratórias de madeira */
+ [[-.5,-.35],[.35,-.3]].forEach(p=>{cyl(.21,.21,.05,wd,p[0],.47,p[1],g,null,16);cyl(.03,.03,.42,mIron,p[0],.23,p[1],g);cyl(.2,.24,.03,mIron,p[0],.02,p[1],g,null,12);box(.38,.3,.04,wd,p[0],.68,p[1]+.2,g);});
+ /* quadro de avisos na parede sul */
+ box(.6,.45,.02,M(0x3d2a17),1.1,1.5,D/2-.02,g);[[.95,1.55],[1.2,1.45]].forEach(p=>{const f=new T.Mesh(new T.PlaneGeometry(.18,.13),form);f.position.set(p[0],p[1],D/2-.035);f.rotation.y=PI;g.add(f);});
+ lamp(-.25,H-.05,-.4,g,.7,8);
+ /* ---- sala silenciosa: motor-gerador, transformador, condensadores, centelhador rotativo, bobina de sintonia e quadro ---- */
+ const t=part(G(),'transmissor');const disc=G();disc.position.set(3.6,1,-1.0);cyl(.34,.34,.05,mBrass,0,0,0,disc,'z',20);for(let i=0;i<8;i++)box(.05,.05,.1,mBright,.3*Math.cos(i*PI/4),.3*Math.sin(i*PI/4),0,disc);t.add(disc);g.userData.disc=disc;
+ box(.9,.7,.6,M(0x2c4a3a),3.6,.36,-1.0,t);const sp=sph(.07,glow(0x9fd8ff,0),3.6,1.38,-1.0,t);g.userData.spark=sp;const sl=new T.PointLight(0x9fd8ff,0,6);sl.position.set(3.6,1.4,-.9);t.add(sl);g.userData.sparkL=sl;
+ box(1.1,.12,.45,mIron,2.45,.06,-1.1,t);cyl(.2,.2,.45,M(0x3a4a3e,{metalness:.4,roughness:.5}),2.25,.33,-1.1,t,'x',18);cyl(.18,.18,.4,M(0x3a4a3e,{metalness:.4,roughness:.5}),2.72,.31,-1.1,t,'x',18);cyl(.05,.05,.12,mBright,2.49,.32,-1.1,t,'x');
+ box(.5,.6,.4,M(0x2a2a2a,{metalness:.3}),4.05,.3,-1.15,t);[3.95,4.15].forEach(x=>cyl(.04,.04,.12,M(0xe8e0c8),x,.66,-1.15,t));
+ box(1.3,.04,.6,wd,2.95,1.0,-1.2,t);const ji=new T.InstancedMesh(new T.CylinderGeometry(.08,.08,.42,10),new T.MeshStandardMaterial({color:0x9fc3d6,transparent:true,opacity:.55}),12),m4=new T.Matrix4();for(let i=0;i<12;i++){m4.makeTranslation(2.45+(i%6)*.2,1.23,-1.3+(i/6|0)*.26);ji.setMatrixAt(i,m4);}t.add(ji);
+ for(let i=0;i<10;i++){const r=new T.Mesh(new T.TorusGeometry(.16,.008,4,20),mBrass);r.rotation.x=PI/2;r.position.set(4.05,1.25+i*.05,-1.15);t.add(r);}cyl(.012,.012,H-1.75,cond,4.05,(H+1.75)/2,-1.15,t);cyl(.05,.05,.08,M(0xe8e0c8),4.05,H-.05,-1.15,t);
+ box(.08,1.3,1.4,marb,4.36,1.4,.5,t);for(let i=0;i<4;i++)cyl(.1,.1,.05,mBrass,4.3,1.75,.1+i*.27,t,'x',14);for(let i=0;i<3;i++){box(.04,.18,.04,mBrass,4.3,1.25,.2+i*.3,t);cyl(.02,.02,.08,ebo,4.27,1.36,.2+i*.3,t,'x');}g.add(t);
+ lamp(3.1,H-.05,0,g,.5,7);
+ /* ---- camarote dos operadores: beliche, lavatório com espelho, armário, cadeira e uniformes no cabide ---- */
+ [.35,1.3].forEach(y=>{box(1.9,.16,.75,M(0xf2efe6),-3.1,y+.12,-1.07,g);box(1.95,.1,.8,wd,-3.1,y,-1.07,g);box(1.95,.18,.03,wd,-3.1,y+.12,-.68,g);});[-4.08,-2.12].forEach(x=>box(.06,1.6,.8,wd,x,.8,-1.07,g));
+ [.5,1.45].forEach(y=>box(.45,.1,.3,M(0xffffff),-3.85,y+.25,-1.15,g));box(.5,.85,.45,wd,-3.95,.42,.9,g);box(.52,.03,.47,marb,-3.95,.86,.9,g);cyl(.13,.1,.08,M(0xffffff),-3.95,.92,.9,g);box(.03,.45,.35,M(0xbcd0d8,{metalness:.9,roughness:.1}),-4.17,1.4,.9,g);
+ box(.55,1.9,.5,mT(mahT,1,1),-2.4,.95,1.2,g);box(.4,.45,.4,wd,-3.1,.22,.6,g);box(.4,.4,.04,wd,-3.1,.62,.78,g);
+ [-3.5,-3.25].forEach(x=>cyl(.012,.012,.08,mBrass,x,1.8,D/2-.05,g,'z'));box(.38,.6,.08,M(0x1e2433),-3.38,1.45,D/2-.1,g);
+ lamp(-3,H-.05,.2,g,.45,6);},
+ surf:[[-1.55,1.55,-.62,1.25,0],[2.05,4.1,-.55,1.25,0],[-3.95,-2.05,-.55,.6,0],[-3.4,-2.05,.6,.95,0],[-2.1,-1.5,.55,1.25,0],[1.5,2.1,.55,1.25,0]]},
 cabines:{n:'Cabines das três classes',c:[0,1,6],r:24,spawn:[1.6,0,0,PI/2],build(g){
  /* 1ª classe (convés B/C) */
  room(5,2.6,4.2,whiteT,carpetT,g,0,0);part(g.children[g.children.length-1],'cab1');
@@ -1248,7 +1310,7 @@ function colm(g,x,z,h,c){lathe([[.2,0],[.2,.3],[.13,.4],[.13,h-.35],[.2,h-.15],[
 function bench(g,x,z,w,ry){const a=G();a.position.set(x,0,z);a.rotation.y=ry||0;const m=km(0x9a6a3a);pc(a,bx(w,.06,.45),m,0,.45,0);pc(a,bx(w,.45,.05),m,0,.75,-.2);pc(a,bx(w*.9,.42,.3),km(0x3a2414),0,.21,0);g.add(a);}
 function bed(g,x,z,ry,c){const a=G();a.position.set(x,0,z);a.rotation.y=ry||0;pc(a,bx(2,.3,1.1),km(0x6e2f1c),0,.25,0);pc(a,bx(1.95,.25,1.05),km(c||0xf2efe6),0,.52,0);pc(a,bx(.08,1,1.1),km(0x6e2f1c),-1,.6,0);g.add(a);}
 /* portas de passagem: registram-se em set.doors e levam a outro ambiente */
-const DLBL={escadaria:'Grande Escadaria',lounge:'Lounge',leitura:'Sala de leitura',fumar:'Salão de fumar',cafe:'Café Parisien',restaurante:'Restaurante',ginasio:'Ginásio',piscina:'Piscina',turco:'Banhos turcos',squash:'Squash',biblioteca:'Biblioteca 2ª',geral3:'Sala geral 3ª',fumar3:'Fumar 3ª',capitao:'Comandante',cartas:'Sala de cartas',navega:'Sala de navegação',leme:'Casa do leme',corredor:'Corredor B',cabines:'Camarotes',jantar:'Salão de jantar',ponte:'Ponte',radio:'Rádio Marconi',lift:'Elevador'};
+const DLBL={escadaria:'Grande Escadaria',lounge:'Lounge',leitura:'Sala de leitura',fumar:'Salão de fumar',cafe:'Café Parisien',restaurante:'Restaurante',ginasio:'Ginásio',piscina:'Piscina',turco:'Banhos turcos',squash:'Squash',biblioteca:'Biblioteca 2ª',geral3:'Sala geral 3ª',fumar3:'Fumar 3ª',capitao:'Comandante',cartas:'Sala de cartas',navega:'Sala de navegação',leme:'Casa do leme',corredor:'Corredor B',cabines:'Camarotes',jantar:'Salão de jantar',ponte:'Convés dos Botes',radio:'Rádio Marconi',lift:'Elevador',tripulacao:'Scotland Road'};
 /* plaquinha de latão gravada na própria porta (em vez da placa grande iluminada) */
 function plaqueT(txt){return ctex(256,56,(c,w,h)=>{const gr=c.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#e3c983');gr.addColorStop(.5,'#c4a45c');gr.addColorStop(1,'#9c7c3c');c.fillStyle=gr;c.fillRect(0,0,w,h);c.strokeStyle='#6d5424';c.lineWidth=3;c.strokeRect(3,3,w-6,h-6);c.fillStyle='#2b1d0a';c.font='600 '+(txt.length>16?20:24)+'px Georgia,serif';c.textAlign='center';c.textBaseline='middle';c.fillText(txt,w/2,h/2+1);[[10,h/2],[w-10,h/2]].forEach(q=>{c.fillStyle='#7d6430';c.beginPath();c.arc(q[0],q[1],3.2,0,7);c.fill();});});}
 function addDoor(g,s,x,y,z,nx,nz,target){const ry=Math.atan2(nx,nz),d=new T.Mesh(new T.PlaneGeometry(.92,2.08),new T.MeshStandardMaterial({map:doorT,roughness:.6}));d.position.set(x+nx*.04,y+1.04,z+nz*.04);d.rotation.y=ry;d.userData.door=target;g.add(d);
@@ -1275,7 +1337,7 @@ mkRoom('ginasio','Ginásio (convés dos Botes, boreste)',13,2.9,5.5,pineT,linoT,
  const rw=G();rw.position.set(.5,0,-1);pc(rw,bx(2.2,.12,.5),km(0x5a3a1e),0,.2,0);pc(rw,bx(.4,.08,.4),km(0x8a5a3a),-.3,.34,0);rod(V(.6,.3,-.5),V(1.4,.6,-.9),.02,.02,km(0x9a6a3a),rw,6);rod(V(.6,.3,.5),V(1.4,.6,.9),.02,.02,km(0x9a6a3a),rw,6);g.add(rw);
  [3,4.6].forEach((x,i)=>{pc(g,bx(.5,.8,.9),ir,x,.4,-1);const sd=sph(.3,km(0x6a3a1e),x,1,-1,g);sd.scale.set(.7,.5,1.4+i*.4);});
  const bag=sph(.2,km(0x6a3a1e),5.5,1.7,1.4,g);bag.scale.y=1.4;pc(g,bx(.6,.05,.6),km(0x5a3a1e),5.5,2.1,1.4);for(let i=0;i<4;i++)cyl(.03,.03,2,km(0x9a6a3a),-5.9,1,1+i*.3,g,null,6);
- [-4,-1,2,5].forEach(x=>win(g,x,1.7,d/2-.03,PI,1.3,1.6));lamp(-3,h-.4,0,g,.7,12);lamp(3,h-.4,0,g,.7,12);},[['W',0,'escadaria']],'Titanic gymnasium');
+ [-4,-1,2,5].forEach(x=>win(g,x,1.7,d/2-.03,PI,1.3,1.6));lamp(-3,h-.4,0,g,.7,12);lamp(3,h-.4,0,g,.7,12);},[['W',0,'escadaria'],['S',-5.7,'ponte']],'Titanic gymnasium');
 mkRoom('piscina','Piscina (convés F, boreste)',14,3,7.5,wtileT,wtileT,(g,w,d,h)=>{const wm=new T.MeshStandardMaterial({color:0x3fa6b8,transparent:true,opacity:.75,roughness:.1,metalness:.2}),wp=new T.Mesh(new T.PlaneGeometry(9.1,4.2),wm);wp.rotation.x=-PI/2;wp.position.set(-1.5,.06,-.6);g.add(wp);g.userData.water=wp;
  [[-1.5,-2.75,9.4,.12],[-1.5,1.55,9.4,.12]].forEach(q=>pc(g,bx(q[2],.3,q[3]),km(0xdde3e3),q[0],.15,q[1]));[[-6.15],[3.15]].forEach(q=>pc(g,bx(.12,.3,4.4),km(0xdde3e3),q[0],.15,-.6));
  for(let x=-6;x<=5;x+=1.2)pc(g,bx(1.1,2,.9),km(0xe6e2d6),x,1,d/2-.5);rod(V(3.1,0,-2),V(3.1,1,-2),.025,.025,mBrass,g,6);rod(V(3.1,0,-1.5),V(3.1,1,-1.5),.025,.025,mBrass,g,6);
@@ -1294,6 +1356,40 @@ mkRoom('capitao','Aposentos do comandante (convés dos Botes)',8,2.6,4.2,whiteT,
  bed(g,2.6,-1.4,PI,0xf2efe6);pc(g,bx(1.1,1.9,.5),mT(mahT,1,1),3.3,.95,1.7);pc(g,bx(.8,.85,.45),km(MAHc),1.4,.42,1.7);cyl(.16,.12,.1,km(0xffffff),1.4,.92,1.7,g);win(g,-2,1.6,-d/2+.03,0,.9,.9);win(g,2.6,1.6,-d/2+.03,0,.7,.7);lamp(-2,h-.3,0,g,.7,10);lamp(2.6,h-.3,0,g,.5,8);},[['W',1,'ponte']],'Titanic captain Smith cabin');
 mkRoom('corredor','Corredor da 1ª classe (convés B)',26,2.5,1.9,whiteT,carpetP,(g,w,d,h)=>{const dm=new T.MeshStandardMaterial({map:doorT});for(let x=-11;x<=11;x+=2.75){[[-1,0],[1,PI]].forEach(q=>{if(Math.abs(x)<.1&&q[0]<0)return;const p=new T.Mesh(new T.PlaneGeometry(.85,2),dm);p.position.set(x,1,q[0]*(d/2-.03));p.rotation.y=q[1];g.add(p);});}
  [-1,1].forEach(s=>pc(g,bx(w,.05,.05),km(0x6e2f1c),0,.95,s*(d/2-.06)));for(let x=-10;x<=10;x+=5)lamp(x,h-.2,0,g,.5,8);},[['E',0,'escadaria'],['W',0,'restaurante'],['N',0,'cabines'],['S',5.5,'cafe']],'Titanic first class corridor');
+/* Áreas da tripulação: o corredor de serviço do convés E a bombordo (“working passage”, apelidado Scotland Road), um refeitório
+   e um alojamento de foguistas. No navio real o refeitório dos foguistas ficava no convés C, sob o castelo, e os alojamentos nos
+   conveses D a G, à vante; aqui estão reunidos ao longo do corredor para a visita. Disposição e medidas aproximadas. */
+SETS.tripulacao={n:'Áreas da tripulação — Scotland Road, refeitório e alojamento',ph:'Titanic Scotland Road crew',c:[0,1.2,1.5],r:20,spawn:[-10.5,0,0,-PI/2],build(g){
+ const H=2.45,paint=km(0xe9e6dc),steel=M(0x8d918e,{metalness:.5,roughness:.5}),pipeR=M(0x7a3a2a,{metalness:.3,roughness:.6}),iron=km(0x3a3d40),wd=km(0x8a5a32);
+ const fl=(w,d,ox,oz,t)=>{const f=new T.Mesh(new T.PlaneGeometry(w,d),mT(t,w/1.2,d/1.2));f.rotation.x=-PI/2;f.position.set(ox,0,oz);g.add(f);const c=new T.Mesh(new T.PlaneGeometry(w,d),km(0xf0eee6));c.rotation.x=PI/2;c.position.set(ox,H,oz);g.add(c);};
+ fl(24,2.6,0,0,redFlT);fl(6,5,-6,3.8,linoT);fl(6,5,6,3.8,pineT);
+ /* paredes de aço pintado (caixas finas); vãos de porta de .9 m */
+ const wz=(x0,x1,z,gaps)=>{let a=x0;(gaps||[]).concat([[x1+1,0]]).forEach(([c,w])=>{const b=Math.min(c-w/2,x1);if(b>a)pc(g,bx(b-a,H,.08),paint,(a+b)/2,H/2,z);if(c<=x1){pc(g,bx(w,H-2.05,.08),paint,c,(H+2.05)/2,z);[c-w/2,c+w/2].forEach(x=>pc(g,bx(.06,2.05,.14),steel,x,1.02,z));}a=c+w/2;});};
+ const wx=(z0,z1,x)=>pc(g,bx(.08,H,z1-z0),paint,x,H/2,(z0+z1)/2);
+ wz(-12,12,-1.3);wz(-12,12,1.3,[[-6,.9],[6,.9]]);wx(-1.3,1.3,-12);wx(-1.3,1.3,12);
+ wz(-9,-3,6.3);wx(1.3,6.3,-9);wx(1.3,6.3,-3);wz(3,9,6.3);wx(1.3,6.3,3);wx(1.3,6.3,9);
+ /* corredor: vaus do convés de cima, tubulações, cabos e lâmpadas em gaiola; soleiras das portas estanques */
+ for(let x=-11.5;x<=11.5;x+=.9)pc(g,bx(.12,.2,2.6),steel,x,H-.1,0);
+ [[-.85,.07,pipeR],[-.6,.05,steel],[.7,.06,steel],[.95,.04,pipeR]].forEach(([z,r,m])=>{const p=new T.Mesh(new T.CylinderGeometry(r,r,24,10),m);p.rotation.z=PI/2;p.position.set(0,H-.32,z);g.add(p);});
+ for(let x=-10;x<=10;x+=4)lamp(x,H-.25,0,g,.55,9);
+ [-9,9].forEach(x=>{pc(g,bx(.12,.12,2.6),steel,x,.06,0);[-1.25,1.25].forEach(z=>pc(g,bx(.3,2.1,.1),steel,x,1.05,z));});
+ /* placas */
+ const plq=(t1,t2,x,y,z,ry)=>{const m=new T.Mesh(new T.PlaneGeometry(1.1,.32),new T.MeshStandardMaterial({map:ctex(352,102,(c,w,h)=>{c.fillStyle='#1d2a3a';c.fillRect(0,0,w,h);c.strokeStyle='#c9a24a';c.lineWidth=3;c.strokeRect(3,3,w-6,h-6);c.fillStyle='#f2e8c8';c.textAlign='center';c.font='600 26px Georgia';c.fillText(t1,w/2,40);c.font='18px Georgia';c.fillText(t2,w/2,74);})}));m.position.set(x,y,z);m.rotation.y=ry||0;g.add(m);};
+ plq('WORKING PASSAGE','corredor de serviço · convés E',-4,1.9,-1.25,0);
+ plq('FIREMEN’S MESS','refeitório dos foguistas',-6,2.2,1.25,PI);plq('FIREMEN','alojamento dos foguistas',6,2.2,1.25,PI);
+ plq('Escada em espiral','dos foguistas para o túnel (não visitável)',-11.95,1.7,0,PI/2);
+ /* refeitório: mesas compridas com bancos fixos, bandejas e canecas esmaltadas, vigias */
+ [2.7,4.9].forEach(z=>{stab(g,-6,z,4.2,.8,0xb08a5a);bench(g,-6,z-.65,4,0);bench(g,-6,z+.65,4,PI);for(let i=0;i<6;i++){cyl(.045,.04,.09,km(0xf4f2ea),-7.8+i*.72,.84,z-.18,g,null,10);pc(g,bx(.3,.01,.22),km(0x9a9a92),-7.8+i*.72,.8,z+.12);}});
+ [-7.5,-4.5].forEach(x=>{const r=new T.Mesh(new T.TorusGeometry(.18,.03,8,20),mBrass);r.position.set(x,1.6,6.25);g.add(r);const gl=new T.Mesh(new T.CircleGeometry(.17,20),new T.MeshStandardMaterial({color:0xbfd8e8,emissive:0x6a8aa0,emissiveIntensity:.5}));gl.position.set(x,1.6,6.26);gl.rotation.y=PI;g.add(gl);});
+ pc(g,bx(1.2,1.1,.45),wd,-8.3,.55,1.6);for(let i=0;i<6;i++)cyl(.012,.012,.1,mBrass,-8.8+i*.2,1.7,1.36,g,'z');
+ lamp(-6,H-.1,3.8,g,.8,11);
+ /* alojamento: beliches de ferro de dois leitos, colchões de palha, armários individuais, botas e roupa de trabalho */
+ const bunk=(x,z,ry)=>{const a=G();a.position.set(x,0,z);a.rotation.y=ry;[[-.95,-.4],[.95,-.4],[-.95,.4],[.95,.4]].forEach(p=>cyl(.022,.022,1.75,iron,p[0],.875,p[1],a,null,6));[.4,1.35].forEach(y=>{pc(a,bx(1.9,.04,.8),iron,0,y,0);pc(a,bx(1.85,.12,.72),km(0xb8ad8e),0,y+.08,0);pc(a,bx(1.85,.03,.72),km(0x5a5d6a),.2,y+.155,0);});g.add(a);};
+ bunk(4.3,2.3,0);bunk(4.3,5.6,0);bunk(7.8,2.3,0);bunk(7.8,5.6,0);
+ for(let i=0;i<5;i++){pc(g,bx(.38,1.8,.45),km(0x6b7a6a),5.2+i*.4,.9,6.0);cyl(.02,.02,.02,mBrass,5.2+i*.4,1.2,5.77,g,'z');}
+ [[4.9,3.4],[7.2,3.5]].forEach(p=>{pc(g,bx(.12,.22,.28),km(0x1d1a17),p[0],.11,p[1]);pc(g,bx(.12,.22,.28),km(0x1d1a17),p[0]+.16,.11,p[1]);});
+ pc(g,bx(.06,.7,.5),km(0x34363a),3.05,1.55,3.8);lamp(6,H-.1,3.8,g,.6,10);},
+ surf:[[-11.6,11.6,-1.0,1.0,0],[-6.45,-5.55,.9,1.7,0],[5.55,6.45,.9,1.7,0],[-8.6,-3.4,1.6,6.0,0],[3.4,8.6,1.6,6.0,0]]};
 /* portas nos cenários já existentes + banco de elevadores em movimento na Grande Escadaria */
 {const wrap=(id,fn)=>{const b=SETS[id].build;SETS[id].build=g=>{b(g);fn(g,SETS[id]);};};
  wrap('escadaria',(g,s)=>{addDoor(g,s,-6.5,0,9,0,-1,'lounge');addDoor(g,s,-6.5,0,-9,0,1,'leitura');addDoor(g,s,5.5,0,9,0,-1,'corredor');addDoor(g,s,6.3,3.2,-9,0,1,'ginasio');addDoor(g,s,6.3,3.2,9,0,-1,'radio');addDoor(g,s,-8,3.2,6.5,1,0,'ponte');
@@ -1301,13 +1397,14 @@ mkRoom('corredor','Corredor da 1ª classe (convés B)',26,2.5,1.9,whiteT,carpetP
    [-.85,.85].forEach(o=>pc(g,bx(.12,6.2,.12),km(0x6a4420),6.55,3.1,z+o));const c=G();c.position.set(7.3,0,z);pc(c,bx(1.3,.08,1.5),km(0x6e2f1c),0,.04,0);pc(c,bx(1.3,.08,1.5),km(0x6e2f1c),0,2.3,0);pc(c,bx(.06,2.3,1.5),mT(mahT,1,1),.62,1.17,0);sph(.08,glow(0xffe2a0),0,2.15,0,c);g.add(c);cars.push({o:c,ph:i*2.1});});
   pc(g,bx(1.4,6.17,7.4),km(0x1a1512),7.32,3.105,0).material.side=T.BackSide;g.userData.cars=cars;(s.doors=s.doors||[]).push({p:[6.2,0,0],n:[-1,0],t:'lift'});(s.doors).push({p:[6.2,3.2,0],n:[-1,0],t:'lift'});});
  if(!GL)wrap('ponte',(g,s)=>{addDoor(g,s,-5.84,0,2.6,1,0,'capitao');addDoor(g,s,-5.95,0,-8,1,0,'radio');addDoor(g,s,-5.95,0,8,1,0,'escadaria');});
- wrap('radio',(g,s)=>{addDoor(g,s,-3,0,1.2,1,0,'ponte');
+ wrap('radio',(g,s)=>{addDoor(g,s,-.9,0,1.5,0,-1,'ponte');
  const pn=(w,h,fn)=>new T.MeshStandardMaterial({map:ctex(256,Math.round(256*h/w),fn),roughness:.45});
- const tun=new T.Mesh(new T.PlaneGeometry(.58,.25),pn(.58,.25,(c,w,h)=>{c.fillStyle='#141210';c.fillRect(0,0,w,h);[[.27,.55],[.73,.55]].forEach(q=>{const x=q[0]*w,y=q[1]*h;c.fillStyle='#e8dfc6';c.beginPath();c.arc(x,y,h*.36,PI,0);c.fill();c.strokeStyle='#111';for(let i=0;i<=10;i++){const a=PI+i/10*PI;c.beginPath();c.moveTo(x+Math.cos(a)*h*.36,y+Math.sin(a)*h*.36);c.lineTo(x+Math.cos(a)*h*.28,y+Math.sin(a)*h*.28);c.stroke();}});c.fillStyle='#d6c38a';c.font='600 15px Georgia';c.textAlign='center';c.fillText('MARCONI  MULTIPLE  TUNER',w/2,h*.16);}));tun.position.set(.6,.96,-1.948);g.add(tun);
- const det=new T.Mesh(new T.PlaneGeometry(.53,.38),pn(.53,.38,(c,w,h)=>{c.fillStyle='#4a2c12';c.fillRect(0,0,w,h);c.strokeStyle='#2a1808';c.lineWidth=4;c.strokeRect(6,6,w-12,h-12);c.fillStyle='#d6c38a';c.font='600 14px Georgia';c.textAlign='center';c.fillText('MAGNETIC DETECTOR',w/2,26);[.33,.67].forEach(q=>{c.fillStyle='#b88a3a';c.beginPath();c.arc(q*w,h*.6,h*.17,0,7);c.fill();c.fillStyle='#6a4a1a';c.beginPath();c.arc(q*w,h*.6,h*.07,0,7);c.fill();});}));det.position.set(1.25,1.03,-1.948);g.add(det);
- const tx=new T.Mesh(new T.PlaneGeometry(.88,.68),pn(.88,.68,(c,w,h)=>{c.fillStyle='#24392d';c.fillRect(0,0,w,h);c.strokeStyle='#c9a35a';c.lineWidth=3;c.strokeRect(8,8,w-16,h-16);c.fillStyle='#e6d6a6';c.font='600 16px Georgia';c.textAlign='center';c.fillText('MARCONI',w/2,34);c.font='12px Georgia';c.fillText('5 kW  ROTARY  DISC  DISCHARGER',w/2,54);[.25,.5,.75].forEach(q=>{c.fillStyle='#f0ead6';c.beginPath();c.arc(q*w,h*.62,22,0,7);c.fill();c.strokeStyle='#222';c.lineWidth=2;c.beginPath();c.moveTo(q*w,h*.62);c.lineTo(q*w+14,h*.62-12);c.stroke();});}));tx.position.set(4.6,.36,-1.29);g.add(tx);});
- wrap('cabines',(g,s)=>{addDoor(g,s,2.5,0,1,-1,0,'corredor');addDoor(g,s,1.5,0,7.6,-1,0,'biblioteca');addDoor(g,s,1.4,0,13,-1,0,'geral3');});
- wrap('jantar',(g,s)=>{addDoor(g,s,7,0,2.5,-1,0,'lift');addDoor(g,s,6,0,13,-1,0,'biblioteca');addDoor(g,s,6,0,24,-1,0,'geral3');});}
+ const tun=new T.Mesh(new T.PlaneGeometry(.58,.25),pn(.58,.25,(c,w,h)=>{c.fillStyle='#141210';c.fillRect(0,0,w,h);[[.27,.55],[.73,.55]].forEach(q=>{const x=q[0]*w,y=q[1]*h;c.fillStyle='#e8dfc6';c.beginPath();c.arc(x,y,h*.36,PI,0);c.fill();c.strokeStyle='#111';for(let i=0;i<=10;i++){const a=PI+i/10*PI;c.beginPath();c.moveTo(x+Math.cos(a)*h*.36,y+Math.sin(a)*h*.36);c.lineTo(x+Math.cos(a)*h*.28,y+Math.sin(a)*h*.28);c.stroke();}});c.fillStyle='#d6c38a';c.font='600 15px Georgia';c.textAlign='center';c.fillText('MARCONI  MULTIPLE  TUNER',w/2,h*.16);}));tun.position.set(.3,.96,-1.148);g.add(tun);
+ const det=new T.Mesh(new T.PlaneGeometry(.53,.38),pn(.53,.38,(c,w,h)=>{c.fillStyle='#4a2c12';c.fillRect(0,0,w,h);c.strokeStyle='#2a1808';c.lineWidth=4;c.strokeRect(6,6,w-12,h-12);c.fillStyle='#d6c38a';c.font='600 14px Georgia';c.textAlign='center';c.fillText('MAGNETIC DETECTOR',w/2,26);[.33,.67].forEach(q=>{c.fillStyle='#b88a3a';c.beginPath();c.arc(q*w,h*.6,h*.17,0,7);c.fill();c.fillStyle='#6a4a1a';c.beginPath();c.arc(q*w,h*.6,h*.07,0,7);c.fill();});}));det.position.set(.85,1.03,-1.148);g.add(det);
+ const tx=new T.Mesh(new T.PlaneGeometry(.88,.68),pn(.88,.68,(c,w,h)=>{c.fillStyle='#24392d';c.fillRect(0,0,w,h);c.strokeStyle='#c9a35a';c.lineWidth=3;c.strokeRect(8,8,w-16,h-16);c.fillStyle='#e6d6a6';c.font='600 16px Georgia';c.textAlign='center';c.fillText('MARCONI',w/2,34);c.font='12px Georgia';c.fillText('5 kW  ROTARY  DISC  DISCHARGER',w/2,54);[.25,.5,.75].forEach(q=>{c.fillStyle='#f0ead6';c.beginPath();c.arc(q*w,h*.62,22,0,7);c.fill();c.strokeStyle='#222';c.lineWidth=2;c.beginPath();c.moveTo(q*w,h*.62);c.lineTo(q*w+14,h*.62-12);c.stroke();});}));tx.position.set(3.6,.36,-.69);g.add(tx);});
+ wrap('tripulacao',(g,s)=>{addDoor(g,s,0,0,-1.3,0,1,'jantar');addDoor(g,s,12,0,0,-1,0,'cabines');});
+ wrap('cabines',(g,s)=>{addDoor(g,s,-1.4,0,12.5,1,0,'tripulacao');addDoor(g,s,2.5,0,1,-1,0,'corredor');addDoor(g,s,1.5,0,7.6,-1,0,'biblioteca');addDoor(g,s,1.4,0,13,-1,0,'geral3');});
+ wrap('jantar',(g,s)=>{addDoor(g,s,-6,0,24,1,0,'tripulacao');addDoor(g,s,7,0,2.5,-1,0,'lift');addDoor(g,s,6,0,13,-1,0,'biblioteca');addDoor(g,s,6,0,24,-1,0,'geral3');});}
 if(GL){SETS.ponte={n:'Ponte de comando',ship:true};
  /* pisos caminháveis: ponte de navegação e asas; os dois recantos ao lado da casa do leme; a casa do leme, atrás do timão principal */
  WALK.ponte={spawn:[73.3,29.62,0,-PI/2],surf:[[72.45,76.45,-11.8,11.8,29.62],[69.45,72.5,-6.75,-3.75,29.62],[69.45,72.5,3.75,6.75,29.62],[68.5,70.45,-2.9,2.9,29.62]],doors:[]};
@@ -1318,6 +1415,61 @@ SETS.escadaria.surf.solid=true;SETS.escadaria.ph='Titanic grand staircase';SETS.
 Object.keys(SETS).forEach((k,i)=>{SETS[k].O=V((i%6)*160-400,-600-Math.floor(i/6)*200,0);});
 /* destinos do elevador (os elevadores da 1ª classe serviam dos conveses A ao E) */
 const LIFT=[['A','Convés A — Grande Escadaria','escadaria'],['B','Convés B — corredor, camarotes, restaurante','corredor'],['C','Convés C — camarotes de 1ª classe','cabines'],['D','Convés D — recepção e salão de jantar','jantar'],['E','Convés E — e escada até a piscina (F)','piscina']];
+
+/* ===== MÓDULO 3c — caminhada nos conveses do navio (malha de navegação gerada do modelo) =====
+   assets/models/conves_nav.js (tools/gerar-navegacao.mjs): grade de 25 cm em coordenadas locais do navio; em cada coluna, os pisos
+   com pé-direito livre e, em cada piso, as ligações com os vizinhos (degrau até 42 cm, sem parede, balaústre ou bote no caminho).
+   Carregada só quando o visitante começa a caminhar. Os pisos retangulares da ponte (WALK.ponte.surf) continuam valendo. */
+const NAV={d:null,ld:false,cbs:[]};
+function navLoad(cb){if(NAV.d){cb&&cb();return;}if(cb)NAV.cbs.push(cb);if(NAV.ld)return;NAV.ld=true;
+ const fin=()=>{const r=window.CONVES_NAV;if(!r)return;const b=s=>{const t=atob(s),u=new Uint8Array(t.length);for(let i=0;i<t.length;i++)u[i]=t.charCodeAt(i);return u;};
+  const cnt=b(r.cnt),yb=b(r.y),off=new Uint32Array(cnt.length+1);for(let i=0;i<cnt.length;i++)off[i+1]=off[i]+cnt[i];
+  NAV.d={x0:r.x0,z0:r.z0,h:r.h,nx:r.nx,nz:r.nz,off,y:new Int16Array(yb.buffer,0,yb.length/2),e:b(r.e)};delete window.CONVES_NAV;NAV.cbs.splice(0).forEach(f=>f());};
+ if(window.CONVES_NAV){fin();return;}const s=document.createElement('script');s.src='assets/models/conves_nav.js';s.onload=fin;s.onerror=()=>{NAV.ld=false;};document.head.appendChild(s);}
+const NAV_STEP=.42;
+function navCell(x,z){const d=NAV.d,i=Math.floor((x-d.x0)/d.h),j=Math.floor((z-d.z0)/d.h);return i<0||j<0||i>=d.nx||j>=d.nz?-1:i*d.nz+j;}
+/* piso da coluna c mais próximo da altura y (dentro de tol); devolve o índice da camada ou -1 */
+function navLayer(c,y,tol){const d=NAV.d;if(c<0)return -1;let b=-1,bd=tol;for(let n=d.off[c];n<d.off[c+1];n++){const q=Math.abs(d.y[n]/100-y);if(q<=bd){bd=q;b=n;}}return b;}
+/* passo para uma coluna vizinha (di,dj ∈ {-1,0,1}, só um eixo): exige a ligação gravada */
+function navAdj(n,c,di,dj){const d=NAV.d,bit=di>0?1:di<0?2:dj>0?4:8;if(!(d.e[n]&bit))return -1;return navLayer(c+di*d.nz+dj,d.y[n]/100,NAV_STEP);}
+/* altura do piso em (x1,z1) partindo de (x0,z0,y) ou null se o caminho estiver bloqueado */
+function navMove(x0,z0,y,x1,z1){const d=NAV.d;if(!d)return null;const c0=navCell(x0,z0),n0=navLayer(c0,y,.6);if(n0<0)return null;const c1=navCell(x1,z1);if(c1<0)return null;if(c1===c0)return d.y[n0]/100;
+ const di=Math.floor((x1-d.x0)/d.h)-Math.floor((x0-d.x0)/d.h),dj=Math.floor((z1-d.z0)/d.h)-Math.floor((z0-d.z0)/d.h);if(Math.abs(di)>1||Math.abs(dj)>1)return null;
+ if(!di||!dj){const n=navAdj(n0,c0,di,dj);return n<0?null:d.y[n]/100;}
+ /* diagonal: passa por uma das duas colunas laterais */
+ for(const [a,b] of [[di,0],[0,dj]]){const m=navAdj(n0,c0,a,b);if(m<0)continue;const n=navAdj(m,c0+a*d.nz+b,b?di:0,a?dj:0);if(n>=0)return d.y[n]/100;}return null;}
+/* coluna livre em volta (3×3 com todas as ligações), para não pôr marcas encostadas em obstáculos */
+function navOpen(c,y){const d=NAV.d;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const n=navLayer(c+a*d.nz+b,y,.3);if(n<0||d.e[n]!==15)return false;}return true;}
+/* ponto de piso mais próximo de (x,y,z) num raio de r metros (para pontos de partida e acessos) */
+function navNear(x,y,z,r){const d=NAV.d;if(!d)return null;let best=null,bd=1e9;const R=Math.ceil((r||3)/d.h),ci=Math.floor((x-d.x0)/d.h),cj=Math.floor((z-d.z0)/d.h);
+ for(let i=ci-R;i<=ci+R;i++)for(let j=cj-R;j<=cj+R;j++){if(i<0||j<0||i>=d.nx||j>=d.nz)continue;const c=i*d.nz+j;for(let n=d.off[c];n<d.off[c+1];n++){if(d.e[n]!==15||!navOpen(c,d.y[n]/100))continue;const px=d.x0+(i+.5)*d.h,pz=d.z0+(j+.5)*d.h,py=d.y[n]/100;if(Math.abs(py-y)>1.2)continue;const q=Math.hypot(px-x,pz-z)+Math.abs(py-y)*3;if(q<bd){bd=q;best=[px,py,pz];}}}return best;}
+/* pontos de partida no convés (aproximados; ajustados ao piso real ao carregar) */
+const NAV_SPOTS={ponte:null,botes:[[48,29,12.4],-PI/2],proa:[[112,25.5,2.5],-PI/2],popa:[[-112,24.5,3],PI/2],passeioA:[[30,23.3,11],-PI/2]};
+/* regiões, só para o letreiro do canto (ordem importa) */
+function navZone(x,y){if(y>27.4)return x>67.8?'Ponte de comando':'Convés dos Botes';if(x>66)return 'Proa · castelo e poço de vante';if(x<-59.5&&y>20.3)return 'Popa · poço de ré e tombadilho';if(y<21)return 'Convés B · passeio de ré da 2ª classe';return 'Convés A · passeio';}
+/* Acessos do museu: ligam áreas do convés que, no navio real, se comunicavam por escadas internas não reconstruídas aqui.
+   Não são escadas históricas; aparecem como marcas circulares azuis com a legenda “acesso do museu”. */
+const NAV_LINKS=[
+ {a:[[62,29,8.3],PI/2],b:[[82,21.2,8.5],-PI/2],la:'Descer à proa',lb:'Subir ao convés dos Botes'},
+ {a:[[62,29,-8.3],PI/2],b:[[82,21.2,-8.5],-PI/2],la:'Descer à proa',lb:'Subir ao convés dos Botes'},
+ {a:[[38,29,12.2],PI/2],b:[[38,23.3,11],PI/2],la:'Descer ao passeio do convés A',lb:'Subir ao convés dos Botes'},
+ {a:[[38,29,-12.2],PI/2],b:[[38,23.3,-11],PI/2],la:'Descer ao passeio do convés A',lb:'Subir ao convés dos Botes'},
+ {a:[[-62,28.6,2],PI/2],b:[[-58.2,23,2],PI/2],la:'Descer ao convés A, à ré',lb:'Subir ao convés dos Botes'},
+ {a:[[-70,28.6,8],PI/2],b:[[-92,21.2,8],PI/2],la:'Descer à popa',lb:'Subir ao convés dos Botes'},
+ {a:[[-70,20.3,12],PI/2],b:[[-100,21.2,9],PI/2],la:'Ir ao poço de ré',lb:'Ir ao passeio do convés B'}];
+let navG=null,navLock=true;
+function navMarkers(){if(navG||!NAV.d)return;navG=G();navG.visible=false;
+ const rm=new T.MeshBasicMaterial({color:0x7fd0ff,transparent:true,opacity:.75,depthWrite:false,side:DS}),rg=new T.RingGeometry(.42,.55,40);
+ const lab=t=>{const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');x.fillStyle='rgba(10,17,32,.82)';x.fillRect(0,0,512,128);x.strokeStyle='#7fd0ff';x.lineWidth=4;x.strokeRect(2,2,508,124);x.fillStyle='#e8f4ff';x.font='600 40px Barlow, sans-serif';x.textAlign='center';x.fillText(t,256,58);x.fillStyle='#9fc3d6';x.font='28px Barlow, sans-serif';x.fillText('acesso do museu (não histórico)',256,100);
+  const s=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(c),depthTest:true,transparent:true}));s.scale.set(1.6,.4,1);return s;};
+ NAV.pts=[];NAV_LINKS.forEach((L,i)=>{['a','b'].forEach(k=>{const p=navNear(L[k][0][0],L[k][0][1],L[k][0][2],4);if(!p)return;L[k+'p']=p;const r=new T.Mesh(rg,rm);r.rotation.x=-PI/2;r.position.set(p[0],p[1]+.03,p[2]);r.userData.noPick=true;navG.add(r);
+  const s=lab(k==='a'?L.la:L.lb);s.position.set(p[0],p[1]+1.9,p[2]);navG.add(s);NAV.pts.push({p,L,k});});});
+ root.add(navG);}
+/* chegou a uma marca de acesso: atravessa com o esmaecimento já usado nas portas */
+function navLinks(){if(!NAV.pts)return;let near=false;for(const q of NAV.pts){const r=Math.hypot(F.p.x-q.p[0],F.p.z-q.p[2]);if(Math.abs(F.p.y-q.p[1])>1)continue;if(r<1.4)near=true;
+  if(r<.5&&!navLock){const o=q.k==='a'?'b':'a',to=q.L[o+'p'],yaw=q.L[o][1];if(!to)return;navLock=true;fadeDo(()=>{F.p.set(to[0],to[1],to[2]);F.yaw=yaw;F.ys=undefined;applyLook();});return;}}
+ if(!near)navLock=false;}
+function navSpawn(k){const s=NAV_SPOTS[k];if(!s||!NAV.d)return;const p=navNear(s[0][0],s[0][1],s[0][2],4);if(!p)return;F.p.set(p[0],p[1],p[2]);F.yaw=s[1];F.pitch=0;F.ys=undefined;navLock=true;}
 /* ===== MÓDULO 4 — conteúdo: fichas, ambientes por convés, categorias, rota ===== */
 // tag: D = informação histórica documentada · R = reconstrução visual plausível · S = simplificação da simulação
 // [grupo, nome, inglês, tag, âncora, distância, texto]
@@ -1375,10 +1527,10 @@ telemotor:['s','Telemotor','Telemotor','D',[.95,1,0],0,'Coluna hidráulica sob a
 telefone:['s','Telefones','Telephones','D',[-1.1,1.5,0],0,'Linhas diretas da casa do leme para a gávea, o castelo de proa, a ponte de atracação da popa e a casa de máquinas.'],
 cartas:['s','Mesa de cartas','Chart table','D',[-3.6,1,0],0,'Cartas do Atlântico Norte, compasso, réguas paralelas e cronômetros. A posição era calculada pelos astros (sextante e cronômetro) e por estima: rumo, velocidade e tempo.'],
 relogioN:['s','Relógio de bordo','Ship’s clock','D',[-5.8,1.9,0],0,'A hora de bordo era ajustada todos os dias conforme a longitude; relógios-mestres comandavam os demais.'],
-chaveMorse:['s','Chave telegráfica','Morse key','D',[-.3,.9,-1.85],0,'Manipulador com que o operador abre e fecha o circuito do transmissor, formando pontos e traços.'],
-receptor:['s','Receptor','Receiver','D',[.9,1.1,-2.1],0,'Detector magnético Marconi e sintonizador múltiplo. O sinal era ouvido como cliques e zumbidos nos fones — não havia alto-falante nem voz.'],
-fones:['s','Fones de ouvido','Headphones','D',[-.9,.95,-1.9],0,'O operador passava horas com os fones, anotando letra por letra em formulários.'],
-transmissor:['s','Transmissor de centelha','Rotary spark transmitter','D',[4.6,1.1,-1.6],0,'Aparelho de 5 kW com centelhador rotativo, instalado numa “sala silenciosa” ao lado, forrada para abafar o ruído. Alcance garantido de cerca de 400 km de dia, muito maior à noite.'],
+chaveMorse:['s','Chave telegráfica','Morse key','D',[-.5,.9,-.95],0,'Manipulador com que o operador abre e fecha o circuito do transmissor, formando pontos e traços.'],
+receptor:['s','Receptor','Receiver','D',[.55,1.1,-1.3],0,'Detector magnético Marconi e sintonizador múltiplo. O sinal era ouvido como cliques e zumbidos nos fones — não havia alto-falante nem voz.'],
+fones:['s','Fones de ouvido','Headphones','D',[-1.05,.95,-1.0],0,'O operador passava horas com os fones, anotando letra por letra em formulários.'],
+transmissor:['s','Transmissor de centelha','Rotary spark transmitter','D',[3.6,1.1,-1.0],0,'Aparelho de 5 kW com centelhador rotativo, instalado numa “sala silenciosa” ao lado, forrada para abafar o ruído. Alcance garantido de cerca de 400 km de dia, muito maior à noite.'],
 cab1:['s','Camarote de 1ª classe','First-class stateroom','R',[0,1.2,0],0,'Cama de latão, sofá, guarda-roupa, lavatório de mármore com água corrente, aquecedor elétrico e painéis decorados em estilos de época. As suítes de luxo do convés B tinham ainda sala de estar, banheiro e passeio privativos.'],
 cab2:['s','Cabine de 2ª classe','Second-class cabin','R',[0,1.2,7],0,'Dois a quatro leitos em beliches de mogno, sofá-cama, lavatório dobrável e paredes esmaltadas de branco. Equivalia à primeira classe de muitos navios menores.'],
 cab3:['s','Cabine de 3ª classe','Third-class cabin','R',[0,1.2,12.5],0,'Dois a dez leitos em beliches de ferro, com colchão, cobertor e lavatório — simples, mas com camarotes fechados, quando muitos navios ainda usavam dormitórios abertos. Homens sozinhos ficavam na proa; mulheres e famílias, na popa.'],
@@ -1442,18 +1594,18 @@ const TAGN={D:'Documentado',R:'Reconstrução visual',S:'Simplificação'};
 const CLSN={1:'1ª classe',2:'2ª classe',3:'3ª classe',t:'Tripulação e serviço'};
 // categorias do menu Explorar: [id, nome, introdução, ações [rótulo, tipo, argumento], peças]
 const CATS=[
-['ext','Visão externa','O Titanic em abril de 1912: 269 m, quatro chaminés (a quarta, de ventilação), dois mastros, três hélices.',[['Ver o navio','mode','navio'],['Proa','go','proa'],['Popa e hélices','go','helice'],['Noite / dia','night']],['casco','proa','popa','superestrutura','chamine','chamine4','mastro','antena','bote','ancora','corrente','conves_eq','leme','helice']],
+['ext','Visão externa','O Titanic em abril de 1912: 269 m, quatro chaminés (a quarta, de ventilação), dois mastros, três hélices.',[['Ver o navio','mode','navio'],['Caminhar no convés dos Botes','walk','ponte:botes'],['Caminhar na proa','walk','ponte:proa'],['Caminhar na popa','walk','ponte:popa'],['Proa','go','proa'],['Popa e hélices','go','helice'],['Noite / dia','night']],['casco','proa','popa','superestrutura','chamine','chamine4','mastro','antena','bote','ancora','corrente','conves_eq','leme','helice']],
 ['ponte','Ponte de comando','Timão, bússolas, telégrafos e sala de cartas. O telégrafo transmitia ordens; quem as executava eram os maquinistas.',[['Entrar na ponte','visit','ponte'],['Leme e telégrafo','tab','tele'],['Apito a vapor','whistle'],['Aposentos do comandante','visit','capitao'],['Operar o telégrafo','tab','tele'],['Gávea: o posto do vigia','gavea']],['ponte','timao','bussola','telegrafoP','telemotor','telefone','cartas','relogioN','gavea']],
 ['esc','Grande Escadaria','A peça central da 1ª classe: carvalho, ferro forjado, relógio entalhado e cúpula de vidro. A escadaria de ré, entre a 3ª e a 4ª chaminés, repetia o estilo com menos ornamento e um relógio simples.',[['Visitar a escadaria','visit','escadaria'],['Elevadores','tab','lift'],['Onde fica (convés dos Botes)','go','z_esc']],['cupula','relogio','querubim','balaustrada','elevador','z_esc2','z_recep']],
 ['c1','Primeira classe','324 passageiros na viagem inaugural. Camarotes e suítes nos conveses B a E e salões nos conveses A, B e D.',[['Visitar um camarote','visit','cabines:cab1'],['Salão de jantar','visit','jantar:jan1'],['Lounge','visit','lounge'],['Sala de leitura','visit','leitura'],['Salão de fumar','visit','fumar'],['Restaurante','visit','restaurante'],['Café Parisien','visit','cafe'],['Ginásio','visit','ginasio'],['Piscina','visit','piscina'],['Banhos turcos','visit','turco'],['Squash','visit','squash'],['Corredor','visit','corredor'],['Comparar as três classes','tab','comp']],['cab1','jan1','z_suite','z_lounge','z_leitura','z_fumar','z_palm','z_rest','z_cafe','z_gin','z_pisc','z_turco','z_squash','elevador']],
 ['c2','Segunda classe','284 passageiros. Conforto comparável à primeira classe de navios menores, com salão de jantar, biblioteca, sala de fumar e um elevador.',[['Visitar uma cabine','visit','cabines:cab2'],['Salão de jantar','visit','jantar:jan2'],['Biblioteca','visit','biblioteca'],['Comparar as três classes','tab','comp']],['cab2','z_jan2','z_bib2','z_fum2','z_cabE2','z_cabF2','z_ent2']],
-['c3','Terceira classe','Cerca de 709 passageiros, muitos emigrantes da Irlanda, Escandinávia, Europa Central e Oriente Médio. Camarotes fechados, refeições incluídas e salas de convivência — padrão acima do comum na época. Homens sozinhos na proa; mulheres e famílias na popa.',[['Visitar uma cabine','visit','cabines:cab3'],['Salão de jantar','visit','jantar:jan3'],['Sala geral','visit','geral3'],['Sala de fumar','visit','fumar3'],['Comparar as três classes','tab','comp']],['cab3','z_jan3','z_geral3','z_ab3','z_cabE3','z_cabF3','z_cabG3','z_scot','popa']],
+['c3','Terceira classe','Cerca de 709 passageiros, muitos emigrantes da Irlanda, Escandinávia, Europa Central e Oriente Médio. Camarotes fechados, refeições incluídas e salas de convivência — padrão acima do comum na época. Homens sozinhos na proa; mulheres e famílias na popa.',[['Visitar uma cabine','visit','cabines:cab3'],['Salão de jantar','visit','jantar:jan3'],['Sala geral','visit','geral3'],['Sala de fumar','visit','fumar3'],['Scotland Road e tripulação','visit','tripulacao'],['Comparar as três classes','tab','comp']],['cab3','z_jan3','z_geral3','z_ab3','z_cabE3','z_cabF3','z_cabG3','z_scot','popa']],
 ['radio','Sala de rádio','Jack Phillips (25 anos) e Harold Bride (22) eram empregados da Marconi, não da White Star. Enviavam telegramas de passageiros e recebiam avisos de navegação. O indicativo do Titanic era MGY.',[['Visitar a sala','visit','radio'],['Simulador de código Morse','tab','morse']],['chaveMorse','receptor','fones','transmissor','antena','z_radio']],
 ['maq','Casa de máquinas','Duas máquinas alternativas de tripla expansão nos hélices laterais e uma turbina de baixa pressão no hélice central, movida pelo vapor que as máquinas já tinham usado.',[['Ver as máquinas','cam','maq'],['Caminhar na casa de máquinas','walk','maquinas'],['Operar o telégrafo','tab','tele']],['maquina','bielas','turbina','rotor','condensador','valvulas','telegrafoM','eixo','helice','dinamo','salaMaq','tubos']],
-['cald','Caldeiras e carvão','Do carvão ao vapor: 29 caldeiras, 159 fornalhas, mais de 600 t de carvão por dia. Os gases sobem pelos condutos até as três primeiras chaminés.',[['Ver as caldeiras','cam','cald'],['Caminhar entre as caldeiras','walk','caldeiras']],['caldeira','fornalha','carvao','salaCald','dutos','chamine','chamine4']],
+['cald','Caldeiras e carvão','Do carvão ao vapor: 29 caldeiras, 159 fornalhas, mais de 600 t de carvão por dia. Os gases sobem pelos condutos até as três primeiras chaminés.',[['Ver as caldeiras','cam','cald'],['Caminhar entre as caldeiras','walk','caldeiras'],['Alojamento e refeitório dos foguistas','visit','tripulacao']],['caldeira','fornalha','carvao','salaCald','dutos','chamine','chamine4']],
 ['seg','Sistemas de segurança','Dezesseis compartimentos, portas estanques comandadas da ponte e 20 botes. O navio flutuava com dois compartimentos quaisquer alagados, ou com os quatro primeiros.',[['Corte dos compartimentos','mode','corte'],['Simulação de alagamento','tab','flood'],['Reconstituição do naufrágio','tab','sink'],['Botes salva-vidas','go','bote']],['anteparas','portas','fundo','bote','z_ponte']],
 ['nav','Navegação','A rota da viagem inaugural e os instrumentos da ponte.',[['Rota da viagem','tab','rota'],['Mesa de cartas','visit','ponte:cartas'],['Gávea','gavea']],['cartas','bussola','relogioN','gavea','mastro']],
-['conv','Conveses','Dez níveis, do convés dos Botes ao fundo duplo. Escolha um para ver a planta.',[['Abrir as plantas','mode','conveses']],['conves','fundo','camarotes']],
+['conv','Conveses','Dez níveis, do convés dos Botes ao fundo duplo. Escolha um para ver a planta.',[['Abrir as plantas','mode','conveses'],['Caminhar no convés dos Botes','walk','ponte:botes'],['Passeio do convés A','walk','ponte:passeioA'],['Caminhar na proa','walk','ponte:proa'],['Caminhar na popa','walk','ponte:popa']],['conves','fundo','camarotes']],
 ['estr','Estrutura naval','Quilha, cavername, anteparas e chapeamento.',[['Blueprint','mode','blueprint'],['Vista explodida','mode','explodido'],['Corte longitudinal','mode','corte']],['casco','quilha','cavername','anteparas','portas','fundo','conves']]
 ];
 const ORDERS=['Full Astern','Half Astern','Slow Astern','Dead Slow Astern','Stop','Dead Slow Ahead','Slow Ahead','Half Ahead','Full Ahead'];
@@ -1614,7 +1766,7 @@ function applyLook(){const bp=S.bp,conv=S.mode==='conveses';S.closed=GL&&!bp&&!S
  {const on=S.fp&&!S.gavea&&(window.innerWidth>=900||!(S.tab&&sheet.classList.contains('show')));if(!on&&window.__joyEnd)window.__joyEnd();$('#dpad').classList.toggle('show',on);}
  const w=$('#where');if(inS){w.innerHTML=SETS[S.visit].n+'<small>Reconstrução visual · '+(S.fp?'arraste para olhar, setas para andar; atravesse uma porta para mudar de ambiente':'use o botão de caminhar ou toque numa porta para passar')+'</small>';w.classList.add('show');}
  else if(S.gavea){w.innerHTML='Gávea do mastro de proa<small>Arraste para olhar em volta</small>';w.classList.add('show');}
- else if(S.walk){w.innerHTML=(S.walk==='ponte'?'Ponte de comando':S.walk==='maquinas'?'Casa de máquinas':'Salas de caldeiras')+'<small>'+(S.walk==='ponte'?'Arraste para olhar · setas para andar<br>Toque: timão, telégrafo, alavanca do apito ou uma porta':'Arraste para olhar, setas para andar')+'</small>';w.classList.add('show');}else w.classList.remove('show');
+ else if(S.walk){S.where=S.walk==='ponte'?navZone(F.p.x,F.p.y):null;w.innerHTML=(S.walk==='ponte'?S.where:S.walk==='maquinas'?'Casa de máquinas':'Salas de caldeiras')+'<small>'+(S.walk==='ponte'?(S.where==='Ponte de comando'?'Arraste para olhar · setas para andar<br>Toque: timão, telégrafo, alavanca do apito ou uma porta':'Arraste para olhar · setas para andar · escadas e portas funcionam caminhando<br>Marcas azuis: acessos do museu entre conveses'):'Arraste para olhar, setas para andar')+'</small>';w.classList.add('show');}else w.classList.remove('show');
  if(S.fp){cam.near=.1;cam.updateProjectionMatrix();}if(S.tab==='sink'&&sk.bow)sinkApply();}
 
 /* ================= CÂMERA ================= */
@@ -1627,7 +1779,7 @@ function fly(o,ms){zoomCancel();tween={f:{t:C.t.clone(),th:C.th,ph:C.ph,r:C.r},t
 F.fovT=40;F.fov=40;function fpZoom(k){F.fovT=Math.max(9,Math.min(62,F.fovT*k));}
 function camUpdate(dt){
  {const tf=S.fp?F.fovT:40;F.fov+=(tf-F.fov)*(1-Math.exp(-Math.min(dt,.1)*8));if(Math.abs(cam.fov-F.fov)>.005){cam.fov=F.fov;cam.updateProjectionMatrix();}}
- if(S.fp){if(F.ys===undefined||Math.abs(F.p.y-F.ys)>1.6||!S.visit)F.ys=F.p.y;else F.ys+=(F.p.y-F.ys)*Math.min(1,dt*12);const ey=F.ys;cam.position.set(F.p.x,ey+1.62,F.p.z);const cp=Math.cos(F.pitch),tg=V(F.p.x-Math.sin(F.yaw)*cp,ey+1.62+Math.sin(F.pitch),F.p.z-Math.cos(F.yaw)*cp);if(!S.visit){root.updateMatrixWorld(true);cam.position.applyMatrix4(root.matrixWorld);tg.applyMatrix4(root.matrixWorld);}cam.lookAt(tg);return;}
+ if(S.fp){if(F.ys===undefined||Math.abs(F.p.y-F.ys)>1.6||(!S.visit&&S.walk!=='ponte'))F.ys=F.p.y;else F.ys+=(F.p.y-F.ys)*Math.min(1,dt*12);const ey=F.ys;cam.position.set(F.p.x,ey+1.62,F.p.z);const cp=Math.cos(F.pitch),tg=V(F.p.x-Math.sin(F.yaw)*cp,ey+1.62+Math.sin(F.pitch),F.p.z-Math.cos(F.yaw)*cp);if(!S.visit){root.updateMatrixWorld(true);cam.position.applyMatrix4(root.matrixWorld);tg.applyMatrix4(root.matrixWorld);}cam.lookAt(tg);return;}
  if(tween){zoomCancel();tween.k=Math.min(1,tween.k+dt*1000/tween.ms);const e=tween.k<.5?2*tween.k*tween.k:1-Math.pow(-2*tween.k+2,2)/2,f=tween.f,o=tween.to;C.t.lerpVectors(f.t,o.t,e);C.th=f.th+(o.th-f.th)*e;C.ph=f.ph+(o.ph-f.ph)*e;C.r=f.r+(o.r-f.r)*e;if(tween.k>=1)tween=null;}
  else zoomStep(dt);const sp=Math.sin(C.ph);cam.position.set(C.t.x+C.r*sp*Math.sin(C.th),C.t.y+C.r*Math.cos(C.ph),C.t.z+C.r*sp*Math.cos(C.th));cam.lookAt(C.t);if(S.closed||S.tab==='sink'){if(camPush(cam.position)){cam.lookAt(C.t);/* encostou no casco: não acumula mais aproximação, para o afastamento responder na hora */if(ZM.lr<0){ZM.lr=0;const dd=cam.position.distanceTo(C.t);if(dd>.3&&dd<C.r)C.r=dd;}}}if(S.tab==='sink'&&sk.t>=161.5){const fl=BED+bedH(cam.position.x,cam.position.z)+3;if(cam.position.y<fl){cam.position.y=fl;cam.lookAt(C.t);}}let nr=Math.max(.5,Math.min(30,C.r*.03));if(S.tab==='sink'&&sk.t>=161.5)nr=Math.max(.5,Math.min(nr,(cam.position.y-BED-bedH(cam.position.x,cam.position.z))*.45));if(Math.abs(cam.near-nr)>nr*.15){cam.near=nr;cam.updateProjectionMatrix();}}
 const cq=new T.Vector3(),CM=.45;function inHull(x,y,az){if(x<-137||x>137||y<-2.5)return false;if(y<24.5)return az<hb(x,Math.max(1.2,Math.min(21.5,y)))+CM;return Math.abs(x)<82&&y<36&&az<16.5;}
@@ -1665,15 +1817,28 @@ function preset(m){const full=rFor(225);
 function leave(){S.visit=null;S.fp=false;S.walk=null;S.gavea=false;morseStop();}
 function setMode(m,noFly){if(S.tab==='sink'||S.tab==='flood'||S.tab==='gavea')closeSheet();leave();S.mode=m;S.bp=m==='blueprint';S.cut=m==='corte';S.exT=m==='explodido'?1:0;S.ghost=m==='maq'||m==='cald';S.labels=m!=='navio';
  $$('#modes button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));applyLook();if(!noFly)fly(preset(m));if(m==='conveses'){if(cam.aspect>=1&&S.tab!=='ficha')openTab('deck');else if(cam.aspect<1&&S.tab&&S.tab!=='ficha')closeSheet();}else if(S.tab==='deck')closeSheet();}
-function buildSet(id){const s=SETS[id];if(s.g)return s;const g=G();g.position.copy(s.O);s.build(g);setsG.add(g);s.g=g;s.meshes=[];g.traverse(o=>{if(o.isMesh)s.meshes.push(o);});return s;}
+/* junta, num só objeto por material, as peças fixas de um cenário (menos chamadas de desenho). Ficam de fora peças clicáveis,
+   animadas, portas, luminárias, transparentes, instanciadas e tudo o que o cenário guarda em userData. */
+function mergeStatic(g){const keep=new Set();Object.values(g.userData).forEach(v=>{(Array.isArray(v)?v:[v]).forEach(o=>{if(o&&o.isObject3D)keep.add(o);else if(o&&o.o&&o.o.isObject3D)keep.add(o.o);});});
+ const by=new Map();g.children.forEach(o=>{if(!o.isMesh||o.isInstancedMesh||keep.has(o)||LAMPS.indexOf(o)>=0||Object.keys(o.userData).length||o.children.length)return;const m=o.material,ge=o.geometry;
+  if(Array.isArray(m)||m.transparent||!ge.attributes.position||!ge.attributes.normal)return;const k=m.uuid+(ge.attributes.uv?'u':'')+(ge.index?'i':'');(by.get(k)||by.set(k,[]).get(k)).push(o);});
+ let n0=0,n1=0;by.forEach(list=>{if(list.length<3)return;const uv=!!list[0].geometry.attributes.uv;let nv=0,ni=0;list.forEach(o=>{const ge=o.geometry;nv+=ge.attributes.position.count;ni+=ge.index?ge.index.count:ge.attributes.position.count;});
+  const P=new Float32Array(nv*3),N=new Float32Array(nv*3),U=uv?new Float32Array(nv*2):null,I=new Uint32Array(ni),v=new T.Vector3(),nm=new T.Matrix3();let ov=0,oi=0;
+  list.forEach(o=>{o.updateMatrix();nm.getNormalMatrix(o.matrix);const ge=o.geometry,p=ge.attributes.position,q=ge.attributes.normal,u=ge.attributes.uv;
+   for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i).applyMatrix4(o.matrix);P.set([v.x,v.y,v.z],(ov+i)*3);v.fromBufferAttribute(q,i).applyMatrix3(nm).normalize();N.set([v.x,v.y,v.z],(ov+i)*3);if(U)U.set([u.getX(i),u.getY(i)],(ov+i)*2);}
+   if(ge.index)for(let i=0;i<ge.index.count;i++)I[oi++]=ge.index.getX(i)+ov;else for(let i=0;i<p.count;i++)I[oi++]=i+ov;ov+=p.count;g.remove(o);n0++;});
+  const mg=new T.BufferGeometry();mg.setAttribute('position',new T.BufferAttribute(P,3));mg.setAttribute('normal',new T.BufferAttribute(N,3));if(U)mg.setAttribute('uv',new T.BufferAttribute(U,2));mg.setIndex(new T.BufferAttribute(I,1));mg.computeBoundingSphere();
+  const mm=new T.Mesh(mg,list[0].material);mm.castShadow=list[0].castShadow;mm.receiveShadow=list[0].receiveShadow;g.add(mm);n1++;});return [n0,n1];}
+function buildSet(id){const s=SETS[id];if(s.g)return s;const g=G();g.position.copy(s.O);s.build(g);s.merged=mergeStatic(g);setsG.add(g);s.g=g;s.meshes=[];g.traverse(o=>{if(o.isMesh)s.meshes.push(o);});return s;}
 function visit(id,focus){if(SETS[id].ship){walk('ponte');return;}const s=buildSet(id);leave();if(S.tab==='deck'||S.tab==='flood'||S.tab==='sink'||(window.innerWidth<900&&S.tab&&S.tab!=='ficha'&&!focus))closeSheet();S.visit=id;S.bp=false;S.cut=false;S.exT=0;S.ex=0;Object.keys(SETS).forEach(k=>{if(SETS[k].g)SETS[k].g.visible=k===id;});applyLook();
  const c=focus&&P[focus]?V(P[focus].a[0],P[focus].a[1],P[focus].a[2]):V(s.c[0],s.c[1],s.c[2]);zoomCancel();C.t.copy(s.O).add(c);C.r=focus?Math.max(6,rFor(5)):Math.max(s.r,rFor(s.r)*.8);C.th=focus==='cab2'||focus==='cab3'||focus==='cab1'?1.57:.9;C.ph=1.0;tween=null;}
 function startFP(from){F.fovT=40;if(window.innerWidth<900&&S.tab&&S.tab!=='lift')closeSheet();if(S.visit){const s=SETS[S.visit],sp=s.spawn,d=from&&s.doors&&s.doors.find(q=>q.t===from);
  if(d){F.p.set(s.O.x+d.p[0]+d.n[0]*1.3,s.O.y+d.p[1],s.O.z+d.p[2]+d.n[1]*1.3);F.yaw=Math.atan2(-d.n[0],-d.n[1]);pLock=true;}else{F.p.set(s.O.x+sp[0],s.O.y+sp[1],s.O.z+sp[2]);F.yaw=sp[3];}F.pitch=0;S.fp=true;applyLook();}}
 function fadeDo(fn){const f=$('#fade');f.classList.add('on');setTimeout(()=>{fn();setTimeout(()=>f.classList.remove('on'),160);},260);}
-function travel(t,from){from=from||S.walk;if(t==='lift'){pLock=true;S.liftFrom=from;openTab('lift');return;}const fp=S.fp,lm=t==='leme';if(lm)t='ponte';fadeDo(()=>{visit(t);if(fp)startFP(from);if(SETS[t]&&SETS[t].ship&&S.walk&&WALK[S.walk].doors){const d=WALK[S.walk].doors.find(q=>q.t===from&&(!!q.k===lm));if(d){F.p.set(d.p[0]+d.n[0]*1.3,d.p[1],d.p[2]+d.n[1]*1.3);F.yaw=Math.atan2(-d.n[0],-d.n[1]);pLock=true;}}if(S.tab==='lift')closeSheet();});}
+function travel(t,from){from=from||S.walk;if(t==='lift'){pLock=true;S.liftFrom=from;openTab('lift');return;}const fp=S.fp,lm=t==='leme';if(lm)t='ponte';fadeDo(()=>{visit(t);if(fp)startFP(from);if(SETS[t]&&SETS[t].ship&&S.walk&&WALK[S.walk].doors){const d=WALK[S.walk].doors.find(q=>q.t===from&&(!!q.k===lm));if(d){F.p.set(d.p[0]+d.n[0]*1.3,d.p[1],d.p[2]+d.n[1]*1.3);F.yaw=Math.atan2(-d.n[0],-d.n[1]);pLock=true;F.ys=undefined;applyLook();}}if(S.tab==='lift')closeSheet();});}
 function portals(){const s=S.visit?SETS[S.visit]:WALK[S.walk],O=S.visit?s.O:Z0;if(!s||!s.doors)return;let near=false;for(let i=0;i<s.doors.length;i++){const d=s.doors[i],dx=F.p.x-(O.x+d.p[0]),dz=F.p.z-(O.z+d.p[2]),dy=Math.abs(F.p.y-(O.y+d.p[1])),r=Math.hypot(dx,dz);if(dy>1)continue;if(r<1.5)near=true;if(r<.8&&!pLock){travel(d.t,d.k?'leme':(S.visit||S.walk));return;}}if(!near)pLock=false;}
-function walk(id){F.fovT=40;if(window.innerWidth<900&&S.tab)closeSheet();setMode(id==='ponte'?'navio':'maq',true);S.walk=id;const sp=WALK[id].spawn;F.p.set(sp[0],sp[1],sp[2]);F.yaw=sp[3];F.pitch=0;S.fp=true;applyLook();}
+function walk(id){const q=(id||'').split(':');id=q[0];F.fovT=40;if(window.innerWidth<900&&S.tab)closeSheet();setMode(id==='ponte'?'navio':'maq',true);S.walk=id;const sp=WALK[id].spawn;F.p.set(sp[0],sp[1],sp[2]);F.yaw=sp[3];F.pitch=0;F.ys=undefined;S.fp=true;
+ if(id==='ponte')navLoad(()=>{navMarkers();if(q[1]&&S.walk==='ponte')navSpawn(q[1]);applyLook();});applyLook();}
 function gavea(){setMode('navio',true);S.gavea=true;S.fp=true;F.p.set(NEST.x,NEST.y-.4,0);F.yaw=-PI/2;F.pitch=-.12;applyLook();openTab('gavea');}
 function exitAll(){const was=S.visit||S.walk||S.gavea;if(S.tab==='gavea')closeSheet();leave();if(was){S.mode='navio';setMode('navio');}}
 const Z0=V(0,0,0);
@@ -1682,6 +1847,9 @@ function surfY(list,O,x,z,y){if(list.solid){let b=null,blk=false;for(let i=0;i<l
 const keys={};
 function fpMove(dt){if(S.gavea)return;let f=(keys.w?1:0)-(keys.s?1:0),r=(keys.d?1:0)-(keys.a?1:0);if(!f&&!r)return;const sp=(S.walk?5:2.6)*dt,sx=-Math.sin(F.yaw),sz=-Math.cos(F.yaw),dx=(sx*f-sz*r)*sp,dz=(sz*f+sx*r)*sp;
  const list=S.visit?SETS[S.visit].surf:WALK[S.walk].surf,O=S.visit?SETS[S.visit].O:Z0;
+ if(S.walk==='ponte'&&NAV.d){const nS=Math.max(1,Math.ceil(Math.hypot(dx,dz)/.1)),ex=dx/nS,ez=dz/nS;const at=(x,z)=>{const a=navMove(F.p.x,F.p.z,F.p.y,x,z);if(a!==null)return a;return surfY(list,O,x,z,F.p.y);};
+  for(let i=0;i<nS;i++){let y=at(F.p.x+ex,F.p.z+ez);if(y!==null){F.p.x+=ex;F.p.z+=ez;F.p.y=y;continue;}y=at(F.p.x+ex,F.p.z);if(y!==null){F.p.x+=ex;F.p.y=y;continue;}y=at(F.p.x,F.p.z+ez);if(y!==null){F.p.z+=ez;F.p.y=y;continue;}break;}
+  portals();navLinks();if(S.where!==navZone(F.p.x,F.p.y))applyLook();return;}
  let y=surfY(list,O,F.p.x+dx,F.p.z+dz,F.p.y);if(y!==null){F.p.x+=dx;F.p.z+=dz;F.p.y=y;}
  else{y=surfY(list,O,F.p.x+dx,F.p.z,F.p.y);if(y!==null){F.p.x+=dx;F.p.y=y;}else{y=surfY(list,O,F.p.x,F.p.z+dz,F.p.y);if(y!==null){F.p.z+=dz;F.p.y=y;}}}
  if(S.visit||S.walk)portals();}
@@ -2475,7 +2643,7 @@ function animate(dt,time){const run=S.run;bergFadeStep(dt);
  smoke.forEach(sp=>{const u=sp.userData;if(run)u.life+=dt/6;if(u.life>=1){u.life=0;const f=funnelTops[u.f];sp.position.set(f.x+Math.random(),f.y+.5+Math.random(),(Math.random()-.5)*2);u.v.set(-Math.random(),3.6+Math.random(),(Math.random()-.5));u.on=Math.random()<.15+sim.burn;sp.material.color.setScalar(.26+Math.random()*.2);sp.material.rotation=Math.random()*6.28;u.rs=(Math.random()-.5)*.25;}
   if(run){sp.position.addScaledVector(u.v,dt);sp.position.x+=sim.smX*dt;}const k=u.life;sp.scale.setScalar(2.4+24*Math.pow(k,.75));if(run)sp.material.rotation+=(u.rs||0)*dt;sp.material.opacity=u.on?.42*Math.sin(PI*k)*Math.min(1,.2+sim.burn)*(1-.8*S.nf):0;sp.visible=smOn;});
  if(Math.abs(S.exT-S.ex)>.001){S.ex+=(S.exT-S.ex)*Math.min(1,dt*3.2);if(Math.abs(S.exT-S.ex)<.002){S.ex=S.exT;if(S.ex===0)setTimeout(applyLook,0);}items.forEach(it=>{it.o.position.copy(it.base).addScaledVector(it.ex,S.ex);});grid.position.y=-2-36*S.ex;}
- if(S.cut)clipSet();if(S.fp)fpMove(dt);floodStep(dt);rkStep(dt);if(flagU)flagU.uT.value=time;
+ if(S.cut)clipSet();if(S.fp)fpMove(dt);if(navG)navG.visible=S.walk==='ponte'&&S.fp;floodStep(dt);rkStep(dt);if(flagU)flagU.uT.value=time;
 
  if(scene.fog===uwF)uwF.density=(.42+.3*Math.max(0,uwD))/Math.max(110,cam.position.distanceTo(C.t));elxStep();if(S.tab==='sink'&&sk.play){const t=sk.t;sk.t=Math.min(176,t+dt*skRate(t));if(t<-.62&&sk.t>=-.62)bell3();if(t<-.4&&sk.t>=-.4)crashSnd();if(t<-.3&&sk.t>=-.3)wtdToggle(true);RK.T.forEach(q=>{if(t<q&&sk.t>=q)rocket();});SFX.forEach(q=>{if(t<q[0]&&sk.t>=q[0])sfx(q[1]);});if(sk.t>=176)sk.play=false;sinkApply();}
  const es=SETS.escadaria.g;if(es&&es.visible&&es.userData.cars)es.userData.cars.forEach(c=>{const u=((time*.16+c.ph)%2),v=u<1?u:2-u,q=Math.max(0,Math.min(1,(v-.25)/.5));c.o.position.y=3.2*q*q*(3-2*q);});
@@ -2650,7 +2818,10 @@ function ceilLamp(x,yc,z,g,i,d){const f=G();f.position.set(x,yc,z);g.add(f);cyl(
  [-1,1].forEach(s=>{const R=(x0,x1,a,b)=>W.surf.push([x0,x1,s>0?a:-b,s>0?b:-a,y]);
   R(72.45,76.1,4.5,6.2);R(72.45,75.4,6.2,7.4);R(72.4,74.75,7.4,8.4);R(72.1,74.15,8.4,9.4);R(71.95,73.55,9.4,14.35);
   R(69.45,72.6,3.75,6.75);R(69.45,70.3,3.0,3.85);R(68.3,68.85,3.0,3.7);R(64.65,68.75,3.65,6.6);});
- W.doors=[{p:[64.42,y,-5.3],n:[1,0],t:'radio'},{p:[64.42,y,5.3],n:[1,0],t:'capitao'}];
+ W.doors=[{p:[64.42,y,-5.3],n:[1,0],t:'radio'},{p:[64.42,y,5.3],n:[1,0],t:'capitao'},
+  /* convés dos Botes: entradas laterais da casa da Grande Escadaria (a ré dos aposentos dos oficiais) e porta do ginásio, a boreste; posições aproximadas */
+  {p:[40,28.98,8.75],n:[0,1],t:'escadaria'},{p:[40,28.98,-8.75],n:[0,-1],t:'escadaria'},{p:[33.5,28.98,8.75],n:[0,1],t:'ginasio'}];
+ [[40,8.75,'Grande Escadaria — entrada do convés dos Botes'],[40,-8.75,'Grande Escadaria — entrada do convés dos Botes'],[33.5,8.75,'Ginásio']].forEach(q=>CMD.doors.push({room:true,c:V(q[0],28.98,q[1]),lab:q[2]}));
  CMD.doors.push({room:true,c:V(64.45,Y0,-5.3),lab:'Corredor dos oficiais e sala Marconi'},{room:true,c:V(64.45,Y0,5.3),lab:'Aposentos do comandante'});
 
  /* ---- dica discreta perto de portas (substitui as placas grandes) ---- */
@@ -2702,7 +2873,7 @@ function cmdStep(dt){const now=performance.now(),k=Math.min(1,dt*7);
  /* luminárias das salas: escondidas quando se olha de cima de um cenário sem forro */
  if(S.visit&&!S.fp){LAMPS.forEach(f=>{f.getWorldPosition(_cmv);f.visible=cam.position.y<_cmv.y+.2;});}else if(LAMPS.length&&!LAMPS[0].visible)LAMPS.forEach(f=>f.visible=true);}
 
-window.__ship={items:items,STAFF:STAFF,mastG:mastG,berg:berg,bergLZ:bergLZ,bergClear:bergClear,hullHalf:hullHalf,bergL0:bergL0,hbF:hb,bergClearTrue:bergClearTrue,bergMin:bergMin,DSK:DSK,RP:RP,gavea:gavea,S:S,root:root,BF:BF,CMD:typeof CMD!=='undefined'?CMD:null,phoneRing:phoneRing,phoneAnswer:phoneAnswer,wtdToggle:wtdToggle,rootPos:rootPos,ZM:ZM,cam:cam,splitMesh:splitMesh,meshes:meshes,BTS:BTS,probe:(x,y,z,dx,dy,dz)=>{const r=new T.Raycaster(V(x,y,z),V(dx,dy,dz).normalize(),0,60),h=r.intersectObjects(meshes,false).filter(q=>q.object.userData.it.o.visible&&!q.object.userData.door);return h.length?[+h[0].distance.toFixed(2),h[0].object.userData.pid,h[0].object.userData.real.name||'']:null;},nav:nav,fx:fx,blowWhistle:blowWhistle,ringBell:ringBell,items:items,GLX:GLX,glbInfo:()=>({st:GL?'ok':'fallback',has:true}),seaMat:seaMat,SPL:SPL,sk:sk,sinkApply:sinkApply,SETS:SETS,travel:travel,S:S,sim:sim,tel:tel,fl:fl,setMode:setMode,goto:goto,openTab:openTab,visit:visit,walk:walk,gavea:gavea,startFP:startFP,sendOrder:sendOrder,C:C,F:F,keys:keys,hb:hb,CB:CB,BHTOP:BHTOP,BH:BH,WL:WL,root:root,cam:cam,sfx:sfx,crashSnd:crashSnd,rkBoom:rkBoom,rkLaunch:rkLaunch,ANC:ANC,ancToggle:ancToggle,ancStep:ancStep,fxG:fxG,sun:sun,hemi:hemi,fillL:fillL,R:R,scene:scene,SHD:SHD,uwPose:uwPose,BED:BED,stokers:stokers,stokerPose:stokerPose,berg:berg,SND:SND,fly:fly,preset:preset,sea:sea};
+window.__ship={items:items,STAFF:STAFF,mastG:mastG,berg:berg,bergLZ:bergLZ,bergClear:bergClear,hullHalf:hullHalf,bergL0:bergL0,hbF:hb,bergClearTrue:bergClearTrue,bergMin:bergMin,DSK:DSK,RP:RP,gavea:gavea,S:S,root:root,BF:BF,CMD:typeof CMD!=='undefined'?CMD:null,phoneRing:phoneRing,phoneAnswer:phoneAnswer,wtdToggle:wtdToggle,rootPos:rootPos,ZM:ZM,cam:cam,splitMesh:splitMesh,meshes:meshes,BTS:BTS,probe:(x,y,z,dx,dy,dz)=>{const r=new T.Raycaster(V(x,y,z),V(dx,dy,dz).normalize(),0,60),h=r.intersectObjects(meshes,false).filter(q=>q.object.userData.it.o.visible&&!q.object.userData.door);return h.length?[+h[0].distance.toFixed(2),h[0].object.userData.pid,h[0].object.userData.real.name||'']:null;},nav:nav,fx:fx,blowWhistle:blowWhistle,ringBell:ringBell,items:items,GLX:GLX,glbInfo:()=>({st:GL?'ok':'fallback',has:true}),seaMat:seaMat,SPL:SPL,sk:sk,sinkApply:sinkApply,SETS:SETS,travel:travel,S:S,sim:sim,tel:tel,fl:fl,setMode:setMode,goto:goto,openTab:openTab,visit:visit,walk:walk,NAV:NAV,navNear:navNear,navMove:navMove,act:act,gavea:gavea,startFP:startFP,sendOrder:sendOrder,C:C,F:F,keys:keys,hb:hb,CB:CB,BHTOP:BHTOP,BH:BH,WL:WL,root:root,cam:cam,sfx:sfx,crashSnd:crashSnd,rkBoom:rkBoom,rkLaunch:rkLaunch,ANC:ANC,ancToggle:ancToggle,ancStep:ancStep,fxG:fxG,sun:sun,hemi:hemi,fillL:fillL,R:R,scene:scene,SHD:SHD,uwPose:uwPose,BED:BED,stokers:stokers,stokerPose:stokerPose,berg:berg,SND:SND,fly:fly,preset:preset,sea:sea};
 requestAnimationFrame(loop);
 });
 })();
