@@ -94,3 +94,6 @@ Interiores da sala de cartas e da sala de navegação, telefones, chave das port
   - cabines: coletes salva-vidas de cortiça guardados em cada cabine, vigias, cortinas nos beliches da 2ª classe, tapete e campainha do camareiro na 1ª;
   - biblioteca da 2ª classe: cortinas de seda nas janelas (cor suposta); sala geral da 3ª classe: piano de armário, relógio e quadro de avisos;
   - casa de máquinas: mostradores dos manômetros da plataforma de manobra com escala em libras; a leitura de cerca de 215 lb/pol² corresponde à pressão de trabalho das caldeiras, as demais são ilustrativas.
+- Lâmpada de sinais Morse (asa de boreste): lâmpada elétrica com obturador de palhetas, como as lâmpadas de sinais de bordo do início do século XX, em que a luz fica acesa e as palhetas formam pontos e traços. As sequências SOS e “AA AA AA” (chamada geral) são demonstrações do código, com unidade de 0,16 s; não reproduzem nenhum sinal enviado pelo Titanic. Forma e posição: reconstrução aproximada.
+- Piano de armário da sala geral da 3ª classe: modelo e som sintetizado são reconstrução aproximada; não representam um instrumento identificado.
+- Ponta da proa: o visitante chega até junto à roda de proa pelos corredores ao longo da amurada do modelo; o pé do estai e outros topos de peças não contam como piso.
