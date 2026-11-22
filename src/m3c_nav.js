@@ -27,9 +27,9 @@ function navOpen(c,y){const d=NAV.d;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)
 function navNear(x,y,z,r){const d=NAV.d;if(!d)return null;let best=null,bd=1e9;const R=Math.ceil((r||3)/d.h),ci=Math.floor((x-d.x0)/d.h),cj=Math.floor((z-d.z0)/d.h);
  for(let i=ci-R;i<=ci+R;i++)for(let j=cj-R;j<=cj+R;j++){if(i<0||j<0||i>=d.nx||j>=d.nz)continue;const c=i*d.nz+j;for(let n=d.off[c];n<d.off[c+1];n++){if(d.e[n]!==15||!navOpen(c,d.y[n]/100))continue;const px=d.x0+(i+.5)*d.h,pz=d.z0+(j+.5)*d.h,py=d.y[n]/100;if(Math.abs(py-y)>1.2)continue;const q=Math.hypot(px-x,pz-z)+Math.abs(py-y)*3;if(q<bd){bd=q;best=[px,py,pz];}}}return best;}
 /* pontos de partida no convés (aproximados; ajustados ao piso real ao carregar) */
-const NAV_SPOTS={ponte:null,botes:[[48,29,12.4],-PI/2],proa:[[112,25.5,2.5],-PI/2],popa:[[-112,24.5,3],PI/2],passeioA:[[30,23.3,11],-PI/2]};
+const NAV_SPOTS={ponte:null,botes:[[48,29,12.4],-PI/2],proa:[[112,25.5,2.5],-PI/2],pontaProa:[[131.7,25.7,1.55],-1.0],popa:[[-112,24.5,3],PI/2],passeioA:[[30,23.3,11],-PI/2]};
 /* regiões, só para o letreiro do canto (ordem importa) */
-function navZone(x,y){if(y>27.4)return x>67.8?'Ponte de comando':'Convés dos Botes';if(x>66)return 'Proa · castelo e poço de vante';if(x<-59.5&&y>20.3)return 'Popa · poço de ré e tombadilho';if(y<21)return 'Convés B · passeio de ré da 2ª classe';return 'Convés A · passeio';}
+function navZone(x,y){if(y>27.4)return x>67.8?'Ponte de comando':'Convés dos Botes';if(x>129)return 'Ponta da proa';if(x>66)return 'Proa · castelo e poço de vante';if(x<-59.5&&y>20.3)return 'Popa · poço de ré e tombadilho';if(y<21)return 'Convés B · passeio de ré da 2ª classe';return 'Convés A · passeio';}
 /* Acessos do museu: ligam áreas do convés que, no navio real, se comunicavam por escadas internas não reconstruídas aqui.
    Não são escadas históricas; aparecem como marcas circulares azuis com a legenda “acesso do museu”. */
 const NAV_LINKS=[

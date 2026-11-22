@@ -1478,9 +1478,9 @@ function navOpen(c,y){const d=NAV.d;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)
 function navNear(x,y,z,r){const d=NAV.d;if(!d)return null;let best=null,bd=1e9;const R=Math.ceil((r||3)/d.h),ci=Math.floor((x-d.x0)/d.h),cj=Math.floor((z-d.z0)/d.h);
  for(let i=ci-R;i<=ci+R;i++)for(let j=cj-R;j<=cj+R;j++){if(i<0||j<0||i>=d.nx||j>=d.nz)continue;const c=i*d.nz+j;for(let n=d.off[c];n<d.off[c+1];n++){if(d.e[n]!==15||!navOpen(c,d.y[n]/100))continue;const px=d.x0+(i+.5)*d.h,pz=d.z0+(j+.5)*d.h,py=d.y[n]/100;if(Math.abs(py-y)>1.2)continue;const q=Math.hypot(px-x,pz-z)+Math.abs(py-y)*3;if(q<bd){bd=q;best=[px,py,pz];}}}return best;}
 /* pontos de partida no convés (aproximados; ajustados ao piso real ao carregar) */
-const NAV_SPOTS={ponte:null,botes:[[48,29,12.4],-PI/2],proa:[[112,25.5,2.5],-PI/2],popa:[[-112,24.5,3],PI/2],passeioA:[[30,23.3,11],-PI/2]};
+const NAV_SPOTS={ponte:null,botes:[[48,29,12.4],-PI/2],proa:[[112,25.5,2.5],-PI/2],pontaProa:[[131.7,25.7,1.55],-1.0],popa:[[-112,24.5,3],PI/2],passeioA:[[30,23.3,11],-PI/2]};
 /* regiões, só para o letreiro do canto (ordem importa) */
-function navZone(x,y){if(y>27.4)return x>67.8?'Ponte de comando':'Convés dos Botes';if(x>66)return 'Proa · castelo e poço de vante';if(x<-59.5&&y>20.3)return 'Popa · poço de ré e tombadilho';if(y<21)return 'Convés B · passeio de ré da 2ª classe';return 'Convés A · passeio';}
+function navZone(x,y){if(y>27.4)return x>67.8?'Ponte de comando':'Convés dos Botes';if(x>129)return 'Ponta da proa';if(x>66)return 'Proa · castelo e poço de vante';if(x<-59.5&&y>20.3)return 'Popa · poço de ré e tombadilho';if(y<21)return 'Convés B · passeio de ré da 2ª classe';return 'Convés A · passeio';}
 /* Acessos do museu: ligam áreas do convés que, no navio real, se comunicavam por escadas internas não reconstruídas aqui.
    Não são escadas históricas; aparecem como marcas circulares azuis com a legenda “acesso do museu”. */
 const NAV_LINKS=[
@@ -1593,10 +1593,48 @@ enrich('biblioteca',g=>{const d=9,cm=new T.MeshStandardMaterial({map:ctex(64,128
  [-3.5,0,3.5].forEach(x=>[[d/2-.06,PI],[-d/2+.06,0]].forEach(([z,ry])=>{[-1,1].forEach(sd=>{const m=new T.Mesh(new T.PlaneGeometry(.38,2.1),cm);m.position.set(x+sd*.78,1.72,z);m.rotation.y=ry;g.add(m);});
   const v=new T.Mesh(new T.PlaneGeometry(1.95,.28),cm);v.position.set(x,2.78,z+(z>0?-.01:.01));v.rotation.y=ry;g.add(v);}));});
 /* ---- sala geral da 3ª classe (convés C, popa): piano de armário, relógio e quadro de avisos ---- */
-enrich('geral3',g=>{const w=11,d=9;piano(g,w/2-.5,0,-PI/2);pc(g,bx(.5,.05,.4),km(0x3a2414),w/2-1.2,.47,0);
+enrich('geral3',g=>{const w=11,d=9;pianoUp(g,w/2-.4,0,-PI/2);cyl(.17,.17,.05,km(0x5a2a1c),w/2-1.15,.5,0,g,null,18);cyl(.025,.025,.48,km(0x2a1a10),w/2-1.15,.25,0,g,null,8);cyl(.16,.2,.03,km(0x2a1a10),w/2-1.15,.015,0,g,null,12);
  cyl(.2,.2,.05,km(0x6e2f1c),-w/2+.04,1.95,-2.8,g,'x',20);const f=new T.Mesh(new T.CircleGeometry(.17,24),new T.MeshStandardMaterial({color:0xf3efe2}));f.position.set(-w/2+.075,1.95,-2.8);f.rotation.y=PI/2;g.add(f);
  [[.12,.9],[.08,2.6]].forEach(([l,a])=>{const hd=pc(g,bx(.01,.02,l),km(0x111111),-w/2+.085,1.95,-2.8);hd.geometry=hd.geometry.clone();hd.geometry.translate(0,0,-l/2);hd.rotation.x=a;});
  const nb=new T.Mesh(new T.PlaneGeometry(1,.7),new T.MeshStandardMaterial({map:ctex(160,112,(c,W,H)=>{c.fillStyle='#6a4a2a';c.fillRect(0,0,W,H);c.fillStyle='#efe6cc';[[10,10],[60,14],[110,8],[22,60],[80,58]].forEach(p=>{c.fillRect(p[0],p[1],42,40);c.fillStyle='#888';for(let y=p[1]+8;y<p[1]+36;y+=6)c.fillRect(p[0]+4,y,34,1);c.fillStyle='#efe6cc';});})}));nb.position.set(0,1.6,d/2-.03);nb.rotation.y=PI;g.add(nb);});
+
+/* ---- piano de armário tocável (sala geral da 3ª classe): 88 teclas (lá 0 a dó 8) em duas instâncias, caixa de nogueira com
+   painel vazado, estante com partitura, pedais e rodízios. Toque/clique nas teclas toca a nota; o som sai pelo canal de efeitos. ---- */
+const PNO={keys:[],press:[],raf:0,voices:[]};
+function pianoUp(g,x,z,ry){const a=G();a.position.set(x,0,z);a.rotation.y=ry||0;
+ const wt=woodGrainT('#3b2416');wt.repeat.set(2,2);const wood=new T.MeshStandardMaterial({map:wt,roughness:.35,metalness:.05}),dark=M(0x1e130b,{roughness:.4}),brass=M(0xc9a24a,{metalness:.85,roughness:.3});
+ const W=1.48,KW=1.22,KY=.735;
+ /* caixa, tampo, rodapé e montantes laterais que sustentam o teclado */
+ pc(a,bx(W,1.28,.34),wood,0,.66,-.13);pc(a,bx(W+.04,.04,.4),wood,0,1.32,-.12);pc(a,bx(W,.1,.42),dark,0,.05,-.1);
+ [-1,1].forEach(s=>{pc(a,bx(.07,.82,.62),wood,s*(KW/2+.06),.41,.04);pc(a,bx(.09,.06,.66),wood,s*(KW/2+.06),.84,.05);pc(a,bx(.1,.12,.12),dark,s*(KW/2+.06),.06,.3);cyl(.025,.025,.03,brass,s*(KW/2+.06),.015,.33,a,'x',10);});
+ /* teclado: base, frente do teclado e régua de feltro atrás das teclas */
+ pc(a,bx(KW+.02,.05,.3),wood,0,KY-.035,.17);pc(a,bx(KW+.02,.05,.025),wood,0,KY-.02,.315);pc(a,bx(KW,.012,.02),M(0x7a1a1a,{roughness:.9}),0,KY+.022,.02);
+ /* painel superior vazado com fundo de seda e estante com partitura */
+ const fret=new T.MeshStandardMaterial({map:ctex(256,96,(c,w,h)=>{c.fillStyle='#6a1f1f';c.fillRect(0,0,w,h);c.strokeStyle='#2a170c';c.lineWidth=7;c.strokeRect(4,4,w-8,h-8);c.lineWidth=5;for(let i=0;i<5;i++){const cx=26+i*51;c.beginPath();c.ellipse(cx,h/2,20,30,0,0,PI*2);c.stroke();c.beginPath();c.moveTo(cx-20,h/2);c.quadraticCurveTo(cx,10,cx+20,h/2);c.quadraticCurveTo(cx,h-10,cx-20,h/2);c.stroke();}}),roughness:.6});
+ const fp=new T.Mesh(new T.PlaneGeometry(1.05,.36),fret);fp.position.set(0,1.08,.042);a.add(fp);pc(a,bx(1.12,.04,.03),wood,0,.88,.045);
+ const desk=pc(a,bx(.7,.02,.16),wood,0,.92,.1);desk.rotation.x=-.25;const sm=new T.Mesh(new T.PlaneGeometry(.42,.28),new T.MeshStandardMaterial({map:ctex(128,96,(c,w,h)=>{c.fillStyle='#efe6cc';c.fillRect(0,0,w,h);c.fillStyle='#333';for(let s=0;s<3;s++)for(let l=0;l<5;l++)c.fillRect(8,14+s*26+l*3,w-16,1);for(let i=0;i<24;i++)c.fillRect(10+i*4.5,12+(i%3)*26+(i*7%9),2.5,2.5);})}));sm.position.set(0,1.05,.07);sm.rotation.x=-.25;a.add(sm);
+ /* tampa do teclado aberta, encostada, e pedais de latão */
+ const fb=pc(a,bx(KW,.015,.12),wood,0,KY+.11,-.02);fb.rotation.x=-1.25;
+ [-.09,0,.09].forEach(px=>{pc(a,bx(.035,.015,.12),brass,px,.07,.27);});pc(a,bx(.3,.03,.05),dark,0,.05,.22);
+ /* teclas: 52 brancas e 36 pretas */
+ const bl=[1,3,6,8,10],ww=KW/52,wk=[],bk=[];let wi=0;for(let m=21;m<=108;m++){const isB=bl.includes(m%12);if(isB)bk.push([m,-KW/2+wi*ww]);else{wk.push([m,-KW/2+(wi+.5)*ww]);wi++;}}
+ const wm=new T.InstancedMesh(new T.BoxGeometry(ww*.93,.022,.15),new T.MeshStandardMaterial({color:0xf4efe2,roughness:.28}),wk.length),bm=new T.InstancedMesh(new T.BoxGeometry(ww*.56,.024,.092),new T.MeshStandardMaterial({color:0x14110e,roughness:.22}),bk.length),m4=new T.Matrix4();
+ wk.forEach((k,i)=>{m4.makeTranslation(k[1],KY,.235);wm.setMatrixAt(i,m4);});bk.forEach((k,i)=>{m4.makeTranslation(k[1],KY+.021,.19);bm.setMatrixAt(i,m4);});
+ wm.userData.pkey=wk;bm.userData.pkey=bk;wm.userData.base=[KY,.235];bm.userData.base=[KY+.021,.19];a.add(wm,bm);part(a,'piano3');g.add(a);PNO.keys=[wm,bm];return a;}
+/* tecla tocada: afunda 8 mm e volta; o som é sintetizado na hora */
+function pianoHit(o,id){const L=o.userData.pkey;if(!L||id===undefined||!L[id])return false;pianoNote(L[id][0]);PNO.press.push({o:o,i:id,t:0});if(!PNO.raf)PNO.raf=requestAnimationFrame(pianoAnim);return true;}
+function pianoAnim(){const m4=new T.Matrix4(),dt=1/60;PNO.press=PNO.press.filter(p=>{p.t+=dt;const b=p.o.userData.base,x=p.o.userData.pkey[p.i][1],d=p.t<.06?p.t/.06:p.t<.22?1:Math.max(0,1-(p.t-.22)/.1);m4.makeTranslation(x,b[0]-.008*d,b[1]);p.o.setMatrixAt(p.i,m4);p.o.instanceMatrix.needsUpdate=true;return p.t<.33;});PNO.raf=PNO.press.length?requestAnimationFrame(pianoAnim):0;}
+/* síntese de piano: duas cordas por nota levemente desafinadas, parciais inarmônicas com decaimento mais rápido nos agudos,
+   filtro que escurece ao longo da nota, batida curta do martelo e abafador depois de ~1,6 s. Sem efeitos além de um pouco de sala. */
+function pianoNote(m){if(!S.snd||!ac())return;const a=AC,t=a.currentTime+.005,f=440*Math.pow(2,(m-69)/12),B=.00035*Math.pow(f/261.6,1.2);
+ PNO.voices=PNO.voices.filter(v=>v.end>a.currentTime);if(PNO.voices.length>=14){const v=PNO.voices.shift();try{v.g.gain.cancelScheduledValues(a.currentTime);v.g.gain.setTargetAtTime(0,a.currentTime,.03);}catch(_){}}
+ const g=a.createGain(),lp=a.createBiquadFilter();lp.type='lowpass';lp.Q.value=.5;const br=Math.min(9000,f*9+600);lp.frequency.setValueAtTime(br,t);lp.frequency.exponentialRampToValueAtTime(Math.max(400,f*2.2),t+1.4);
+ const tau=Math.max(.35,Math.min(3.2,2.6*Math.sqrt(220/f))),hold=Math.min(1.6,tau*1.1),vol=.11*Math.min(1,Math.pow(261.6/f,.18));
+ g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.004);g.gain.setTargetAtTime(vol*.55,t+.004,.09);g.gain.setTargetAtTime(0,t+.25,tau);g.gain.setTargetAtTime(0,t+hold,.12);
+ const n=f>1800?3:f>700?5:7;for(let k=1;k<=n;k++){const fk=k*f*Math.sqrt(1+B*k*k);if(fk>14000)break;[-1,1].forEach(sg=>{const o=a.createOscillator(),og=a.createGain();o.frequency.value=fk*(1+sg*.0004);og.gain.setValueAtTime(.5/Math.pow(k,1.35),t);og.gain.setTargetAtTime(0,t,tau/(1+.55*(k-1)));o.connect(og);og.connect(lp);o.start(t);o.stop(t+hold+.6);});}
+ /* martelo: ruído curto filtrado */
+ try{const nb=a.createBuffer(1,a.sampleRate*.03|0,a.sampleRate),d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,3);const ns=a.createBufferSource(),nf=a.createBiquadFilter(),ng=a.createGain();ns.buffer=nb;nf.type='bandpass';nf.frequency.value=Math.min(5000,f*4+800);nf.Q.value=1.2;ng.gain.value=.05;ns.connect(nf);nf.connect(ng);ng.connect(lp);ns.start(t);}catch(_){}
+ lp.connect(g);g.connect(out());try{const r=a.createGain();r.gain.value=.12;g.connect(r);r.connect(rev());}catch(_){}PNO.voices.push({g:g,end:t+hold+.6});}
 /* ===== MÓDULO 4 — conteúdo: fichas, ambientes por convés, categorias, rota ===== */
 // tag: D = informação histórica documentada · R = reconstrução visual plausível · S = simplificação da simulação
 // [grupo, nome, inglês, tag, âncora, distância, texto]
@@ -1658,6 +1696,7 @@ cartas:['s','Mesa de cartas','Chart table','D',[-3.6,1,0],0,'Cartas do Atlântic
 relogioN:['s','Relógio de bordo','Ship’s clock','D',[-5.8,1.9,0],0,'A hora de bordo era ajustada todos os dias conforme a longitude; relógios-mestres comandavam os demais.'],
 chaveMorse:['s','Chave telegráfica','Morse key','D',[-.5,.9,-.95],0,'Manipulador com que o operador abre e fecha o circuito do transmissor, formando pontos e traços.'],
 receptor:['s','Receptor','Receiver','D',[.55,1.1,-1.3],0,'Detector magnético Marconi e sintonizador múltiplo. O sinal era ouvido como cliques e zumbidos nos fones — não havia alto-falante nem voz.'],
+piano3:['s','Piano de armário','Upright piano','D',[5,1,0],0,'Piano da sala geral da 3ª classe, espaço de música e convívio dos passageiros. Toque ou clique nas teclas para tocar; as notas saem pelo volume de efeitos sonoros. Modelo e som: reconstrução aproximada.'],
 fones:['s','Fones de ouvido','Headphones','D',[-1.05,.95,-1.0],0,'O operador passava horas com os fones, anotando letra por letra em formulários.'],
 transmissor:['s','Transmissor de centelha','Rotary spark transmitter','D',[3.6,1.1,-1.0],0,'Aparelho de 5 kW com centelhador rotativo, instalado numa “sala silenciosa” ao lado, forrada para abafar o ruído. Alcance garantido de cerca de 400 km de dia, muito maior à noite.'],
 cab1:['s','Camarote de 1ª classe','First-class stateroom','R',[0,1.2,0],0,'Cama de latão, sofá, guarda-roupa, lavatório de mármore com água corrente, aquecedor elétrico e painéis decorados em estilos de época. As suítes de luxo do convés B tinham ainda sala de estar, banheiro e passeio privativos.'],
@@ -1717,13 +1756,13 @@ const P={};Object.keys(PD).forEach(k=>{const d=PD[k];P[k]={g:d[0],n:d[1],en:d[2]
 const ZCOL={1:0xd9b36a,2:0x6fa8dc,3:0x7fc98f,t:0xb0b7bf};
 ZD.forEach(z=>{P[z[0]]={g:'z',n:z[7],en:'',tag:z[9],t:z[8],deck:z[1],cls:z[6],set:z[10]||null,zone:z.slice(2,6),a:[(z[2]+z[3])/2,DY[z[1]]+1.4,(z[4]+z[5])/2],r:Math.max(40,(z[3]-z[2])*2)};});
 ['cupula','relogio','querubim','balaustrada','elevador'].forEach(k=>P[k].set='escadaria');['timao','bussola','telegrafoP','telemotor','telefone','cartas','relogioN'].forEach(k=>P[k].set='ponte');
-['chaveMorse','receptor','fones','transmissor'].forEach(k=>P[k].set='radio');['cab1','cab2','cab3'].forEach(k=>P[k].set='cabines');P.jan1.set='jantar';P.ponte.set='ponte';
+['chaveMorse','receptor','fones','transmissor'].forEach(k=>P[k].set='radio');P.piano3.set='geral3';['cab1','cab2','cab3'].forEach(k=>P[k].set='cabines');P.jan1.set='jantar';P.ponte.set='ponte';
 const ORDER=Object.keys(P);ORDER.forEach((k,i)=>P[k].i=i+1);
 const TAGN={D:'Documentado',R:'Reconstrução visual',S:'Simplificação'};
 const CLSN={1:'1ª classe',2:'2ª classe',3:'3ª classe',t:'Tripulação e serviço'};
 // categorias do menu Explorar: [id, nome, introdução, ações [rótulo, tipo, argumento], peças]
 const CATS=[
-['ext','Visão externa','O Titanic em abril de 1912: 269 m, quatro chaminés (a quarta, de ventilação), dois mastros, três hélices.',[['Ver o navio','mode','navio'],['Caminhar no convés dos Botes','walk','ponte:botes'],['Caminhar na proa','walk','ponte:proa'],['Caminhar na popa','walk','ponte:popa'],['Proa','go','proa'],['Popa e hélices','go','helice'],['Noite / dia','night']],['casco','proa','popa','superestrutura','chamine','chamine4','mastro','antena','bote','ancora','corrente','conves_eq','leme','helice']],
+['ext','Visão externa','O Titanic em abril de 1912: 269 m, quatro chaminés (a quarta, de ventilação), dois mastros, três hélices.',[['Ver o navio','mode','navio'],['Caminhar no convés dos Botes','walk','ponte:botes'],['Caminhar na proa','walk','ponte:proa'],['Até a ponta da proa','walk','ponte:pontaProa'],['Caminhar na popa','walk','ponte:popa'],['Proa','go','proa'],['Popa e hélices','go','helice'],['Noite / dia','night']],['casco','proa','popa','superestrutura','chamine','chamine4','mastro','antena','bote','ancora','corrente','conves_eq','leme','helice']],
 ['ponte','Ponte de comando','Timão, bússolas, telégrafos e sala de cartas. O telégrafo transmitia ordens; quem as executava eram os maquinistas.',[['Entrar na ponte','visit','ponte'],['Leme e telégrafo','tab','tele'],['Apito a vapor','whistle'],['Aposentos do comandante','visit','capitao'],['Operar o telégrafo','tab','tele'],['Gávea: o posto do vigia','gavea']],['ponte','timao','bussola','telegrafoP','telemotor','telefone','cartas','relogioN','gavea']],
 ['esc','Grande Escadaria','A peça central da 1ª classe: carvalho, ferro forjado, relógio entalhado e cúpula de vidro. A escadaria de ré, entre a 3ª e a 4ª chaminés, repetia o estilo com menos ornamento e um relógio simples.',[['Visitar a escadaria','visit','escadaria'],['Elevadores','tab','lift'],['Onde fica (convés dos Botes)','go','z_esc']],['cupula','relogio','querubim','balaustrada','elevador','z_esc2','z_recep']],
 ['c1','Primeira classe','324 passageiros na viagem inaugural. Camarotes e suítes nos conveses B a E e salões nos conveses A, B e D.',[['Visitar um camarote','visit','cabines:cab1'],['Salão de jantar','visit','jantar:jan1'],['Lounge','visit','lounge'],['Sala de leitura','visit','leitura'],['Salão de fumar','visit','fumar'],['Restaurante','visit','restaurante'],['Café Parisien','visit','cafe'],['Ginásio','visit','ginasio'],['Piscina','visit','piscina'],['Banhos turcos','visit','turco'],['Squash','visit','squash'],['Corredor','visit','corredor'],['Comparar as três classes','tab','comp']],['cab1','jan1','z_suite','z_lounge','z_leitura','z_fumar','z_palm','z_rest','z_cafe','z_gin','z_pisc','z_turco','z_squash','elevador']],
@@ -1977,7 +2016,9 @@ const keys={};
 function fpMove(dt){if(S.gavea)return;let f=(keys.w?1:0)-(keys.s?1:0),r=(keys.d?1:0)-(keys.a?1:0);if(!f&&!r)return;const sp=(S.walk?5:2.6)*dt,sx=-Math.sin(F.yaw),sz=-Math.cos(F.yaw),dx=(sx*f-sz*r)*sp,dz=(sz*f+sx*r)*sp;
  const list=S.visit?SETS[S.visit].surf:WALK[S.walk].surf,O=S.visit?SETS[S.visit].O:Z0;
  if(S.walk==='ponte'&&NAV.d){const nS=Math.max(1,Math.ceil(Math.hypot(dx,dz)/.1)),ex=dx/nS,ez=dz/nS;const at=(x,z)=>{const a=navMove(F.p.x,F.p.z,F.p.y,x,z);if(a!==null)return a;return surfY(list,O,x,z,F.p.y);};
-  for(let i=0;i<nS;i++){let y=at(F.p.x+ex,F.p.z+ez);if(y!==null){F.p.x+=ex;F.p.z+=ez;F.p.y=y;continue;}y=at(F.p.x+ex,F.p.z);if(y!==null){F.p.x+=ex;F.p.y=y;continue;}y=at(F.p.x,F.p.z+ez);if(y!==null){F.p.z+=ez;F.p.y=y;continue;}break;}
+  for(let i=0;i<nS;i++){let y=at(F.p.x+ex,F.p.z+ez);if(y!==null){F.p.x+=ex;F.p.z+=ez;F.p.y=y;continue;}y=at(F.p.x+ex,F.p.z);if(y!==null){F.p.x+=ex;F.p.y=y;continue;}y=at(F.p.x,F.p.z+ez);if(y!==null){F.p.z+=ez;F.p.y=y;continue;}
+   /* quina: um passo curto para o lado em que o passo seguinte fica livre */
+   let ok=false;for(const sg of [1,-1]){const px=-ez*sg,pz=ex*sg,y1=at(F.p.x+px,F.p.z+pz);if(y1!==null&&navMove(F.p.x+px,F.p.z+pz,y1,F.p.x+px+ex,F.p.z+pz+ez)!==null){F.p.x+=px;F.p.z+=pz;F.p.y=y1;ok=true;break;}}if(!ok)break;}
   portals();navLinks();if(S.where!==navZone(F.p.x,F.p.y))applyLook();return;}
  let y=surfY(list,O,F.p.x+dx,F.p.z+dz,F.p.y);if(y!==null){F.p.x+=dx;F.p.z+=dz;F.p.y=y;}
  else{y=surfY(list,O,F.p.x+dx,F.p.z,F.p.y);if(y!==null){F.p.x+=dx;F.p.y=y;}else{y=surfY(list,O,F.p.x,F.p.z+dz,F.p.y);if(y!==null){F.p.z+=dz;F.p.y=y;}}}
@@ -2033,7 +2074,7 @@ cv.addEventListener('wheel',e=>{e.preventDefault();window.__usr=performance.now(
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 const ray=new T.Raycaster(),ndc=new T.Vector2();
 function pick(x,y){histNav();const r=cv.getBoundingClientRect();ndc.set((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1);ray.setFromCamera(ndc,cam);
- if(S.visit){const hs=ray.intersectObjects(SETS[S.visit].meshes,false);for(let i=0;i<hs.length;i++){if(hs[i].object.userData.door){travel(hs[i].object.userData.door,S.visit);return;}let p=hs[i].object,id=null;while(p){if(p.userData.part){id=p.userData.part;break;}p=p.parent;}if(id&&P[id]){S.sel=[id];openTab('ficha');return;}if(hs[i].object.material.opacity>.5)break;}return;}
+ if(S.visit){const hs=ray.intersectObjects(SETS[S.visit].meshes,false);for(let i=0;i<hs.length;i++){if(hs[i].object.userData.pkey&&pianoHit(hs[i].object,hs[i].instanceId))return;if(hs[i].object.userData.door){travel(hs[i].object.userData.door,S.visit);return;}let p=hs[i].object,id=null;while(p){if(p.userData.part){id=p.userData.part;break;}p=p.parent;}if(id&&P[id]){S.sel=[id];openTab('ficha');return;}if(hs[i].object.material.opacity>.5)break;}return;}
  const hs=ray.intersectObjects(meshes,false),conv=S.mode==='conveses';
  for(let i=0;i<hs.length;i++){const h=hs[i],m=h.object,it=m.userData.it;if(m.userData.noPick||!m.visible||(!it.o.visible&&!it.hg))continue;if((S.ghost||conv)&&it.shell&&!S.bp&&!(conv&&it.deck===S.deck))continue;if(conv&&it.layer!=='zone'&&it.layer!=='maq')continue;
   if(it.clip&&S.cut&&clip.distanceToPoint(h.point)<0)continue;if(m.userData.door){travel(m.userData.door,m.userData.dfrom||S.walk);return;}let id=m.userData.pid;const lp=root.worldToLocal(h.point.clone());
@@ -2236,7 +2277,7 @@ function renderTab(){const t=S.tab;let h='';
  if(t==='ficha'){const id=S.sel[0],p=P[id];if(!p){pDyn.innerHTML='<p class="note">Toque numa peça ou escolha um item em Explorar.</p>';return;}
   h='<div class="ficha"><div class="hd"><div class="num">'+p.i+'</div><div><h3>'+esc(p.n)+'</h3>'+(p.en?'<div class="en">'+esc(p.en)+'</div>':'')+'</div></div><div class="tags"><span class="tg '+p.tag+'">'+TAGN[p.tag]+'</span>'+(p.cls?'<span class="tg c'+p.cls+'">'+CLSN[p.cls]+'</span>':'')+(p.deck?'<span class="tg">'+DECKS.find(d=>d[0]===p.deck)[1]+'</span>':'')+(p.g==='s'?'<span class="tg R">Cenário reconstruído</span>':'')+'</div>'+(p.t?'<p class="txt">'+esc(p.t)+'</p>':'')+'<div class="row">';
   if(p.g!=='s')h+='<button class="btn" data-act="focus">'+ic('target')+' Enquadrar</button>';if(p.set&&S.visit!==p.set)h+='<button class="btn on" data-visit="'+p.set+(p.g==='s'?':'+id:'')+'">'+ic('walk')+' Visitar em 3D</button>';
-  if(id==='telegrafoP'||id==='telegrafoM')h+='<button class="btn on" data-tab="tele">'+ic('telegraph')+' Operar o telégrafo</button>';if(id==='chaveMorse'||id==='transmissor'||id==='z_radio')h+='<button class="btn" data-tab="morse">'+ic('morse')+' Simulador Morse</button>';
+  if(id==='telegrafoP'||id==='telegrafoM')h+='<button class="btn on" data-tab="tele">'+ic('telegraph')+' Operar o telégrafo</button>';if(id==='chaveMorse'||id==='transmissor'||id==='z_radio')h+='<button class="btn" data-tab="morse">'+ic('morse')+' Simulador Morse</button>';if(id==='lampadaMorse')h+='<button class="btn" data-lamp="sos">'+ic('morse')+' Sinalizar SOS</button><button class="btn" data-lamp="aa">'+ic('morse')+' Chamada geral (AA AA AA)</button>';
   if(id==='gavea')h+='<button class="btn on" data-act="gavea">'+ic('eye')+' Subir à gávea</button>';if((id==='ancora'||id==='proa')&&GLX.anc)h+='<button class="btn hot" data-a="whistle">'+ic('horn')+' Apito a vapor</button><button class="btn hot" data-act="anc">'+ancLbl()+'</button>';if(id==='apito')h+='<button class="btn hot" data-a="whistle">'+ic('horn')+' Acionar o apito</button>';if(id==='sino')h+='<button class="btn hot" data-act="sino">'+ic('bell')+' Tocar o sino</button><button class="btn" data-act="gavea">'+ic('eye')+' Subir à gávea</button>';if(id==='leme'||id==='helice'||id==='timao')h+='<button class="btn on" data-tab="tele">'+ic('helm')+' Leme e telégrafo</button>';if(id==='anteparas'||id==='portas')h+='<button class="btn on" data-tab="flood">'+ic('drop')+' Simular alagamento</button>';if(id==='cartas')h+='<button class="btn" data-tab="rota">'+ic('pin')+' Ver a rota</button>';
   if(/^cab|^jan1/.test(id))h+='<button class="btn" data-tab="comp">'+ic('columns')+' Comparar classes</button>';h+='</div>';[].concat(HMAP[id]||(p.set&&HSET[p.set])||[]).forEach(hk=>{const k=HIMG[hk];if(k){const src=k.f?'https://commons.wikimedia.org/wiki/File:'+encodeURIComponent(k.f.replace(/ /g,'_')):'';h+='<figure class="hist" data-k="'+hk+'" data-cap="'+esc(k.c+' — '+k.a)+'"><img alt="" loading="lazy" src="assets/images/historical/'+k.l+'"><figcaption><b>'+k.t+'</b> '+esc(k.c)+'<br>'+esc(k.a)+(k.f?' · <a href="'+src+'" target="_blank" rel="noopener">fonte: Wikimedia Commons</a>':'')+'</figcaption></figure>';}});if(p.set&&SETS[p.set].ph)h+='<p class="note"><a href="https://commons.wikimedia.org/w/index.php?search='+encodeURIComponent(SETS[p.set].ph)+'" target="_blank" rel="noopener">Fotografias de época no Wikimedia Commons ↗</a> (abre fora do museu)</p>';h+='</div>';}
  else if(t==='explorar'){h='<div class="catl">'+CATS.map((c,i)=>'<button data-cat="'+i+'"><i>'+(i<9?'0':'')+(i+1)+'</i>'+c[1]+'</button>').join('')+'</div><p class="note">Qualquer ambiente pode ser aberto daqui, sem percorrer o navio.</p>';}
@@ -2829,6 +2870,7 @@ setTimeout(()=>{const t0=performance.now();uwWarm();window.__uwWarmMs=performanc
  DRAG='<path d="M9 13V6a1.5 1.5 0 0 1 3 0v5M12 10V5a1.5 1.5 0 0 1 3 0v6M15 10a1.5 1.5 0 0 1 3 0v4a6 6 0 0 1-6 6h-1a6 6 0 0 1-4.4-2l-2.3-2.6a1.5 1.5 0 0 1 2.2-2L9 13"/><path d="M3 6h3M4.5 4.5L3 6l1.5 1.5"/>',PINCH='<circle cx="7" cy="17" r="2"/><circle cx="17" cy="7" r="2"/><path d="M9 15l2.5-2.5M15 9l-2.5 2.5M4 20l1.5-1.5M20 4l-1.5 1.5"/>',TAP='<path d="M9 13V6a1.5 1.5 0 0 1 3 0v5M12 10V5a1.5 1.5 0 0 1 3 0v6M15 10a1.5 1.5 0 0 1 3 0v4a6 6 0 0 1-6 6h-1a6 6 0 0 1-4.4-2l-2.3-2.6a1.5 1.5 0 0 1 2.2-2L9 13"/><circle cx="10.5" cy="3.5" r="2.5" stroke-dasharray="2 2"/>',JOY='<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/>';
  const L=touch?[[DRAG,'Arraste o dedo para girar'],[PINCH,'Pinça para aproximar · dois dedos para deslocar'],[TAP,'Toque numa peça para abrir a ficha'],[JOY,'Ao caminhar, use o controle analógico']]:[[MOUSE,'Arraste para girar'],[WHEEL,'Roda do mouse para aproximar'],[RIGHT,'Botão direito ou Shift + arrastar para deslocar'],[KEYS,'← → leme · ↑ ↓ telégrafo · H apito · setas/WASD ao caminhar']];
  const h=$('#hint');h.innerHTML=L.map(q=>'<span>'+I(q[0])+q[1]+'</span>').join('');setTimeout(()=>{h.style.opacity=0;},9000);}
+const MLAMP={q:[],i:0,t:0,on:0,a:0};/* estado da lâmpada de sinais da asa de boreste */
 /* ================= COMANDO: casa do leme, salas de cartas e de navegação, asas da ponte, telefones, portas estanques ================= */
 /* Os espaços ficam no lugar real, dentro do modelo: entra-se pelas portas do próprio navio, que se abrem quando o visitante se aproxima.
    Só a sala do comandante e a sala Marconi, mais a ré, continuam sendo cenários à parte (com transição). */
@@ -2953,15 +2995,41 @@ function ceilLamp(x,yc,z,g,i,d){const f=G();f.position.set(x,yc,z);g.add(f);cyl(
  [[40,8.75,'Grande Escadaria — entrada do convés dos Botes'],[40,-8.75,'Grande Escadaria — entrada do convés dos Botes'],[33.5,8.75,'Ginásio']].forEach(q=>CMD.doors.push({room:true,c:V(q[0],28.98,q[1]),lab:q[2]}));
  CMD.doors.push({room:true,c:V(64.45,Y0,-5.3),lab:'Corredor dos oficiais e sala Marconi'},{room:true,c:V(64.45,Y0,5.3),lab:'Aposentos do comandante'});
 
- /* ---- asa de boreste: lâmpada de sinais Morse e foguetes de socorro (usados por Boxhall na noite do naufrágio); forma aproximada ---- */
+ /* ---- asa de boreste: lâmpada de sinais Morse e foguetes de socorro (usados por Boxhall na noite do naufrágio); forma aproximada ----
+    Lâmpada elétrica de sinais sobre pedestal, com a cabeça acima da proteção da asa (topo a ~1,38 m do piso) para o facho passar livre.
+    O operador abria e fechava um obturador de palhetas: luz contínua por trás, pontos e traços formados pelas palhetas. */
  {const y=29.62,br=M(0xb8924a,{metalness:.8,roughness:.32}),blk=M(0x1c1c1c,{roughness:.6}),wdB=M(0x6e4a28,{roughness:.7});
-  const lm=G();cyl(.035,.045,1.05,blk,73.4,y+.52,11.2,lm,null,10);const hd=G();hd.position.set(73.4,y+1.2,11.2);
-  box(.26,.3,.26,br,0,0,0,hd);cyl(.11,.11,.05,M(0xf4f1e2,{emissive:0x332a10,roughness:.2}),.15,0,0,hd,'x',20);cyl(.13,.13,.04,br,.13,0,0,hd,'x',20);
-  for(let i=0;i<4;i++)box(.02,.03,.24,br,.165,-.09+i*.06,0,hd);cyl(.03,.04,.08,br,0,.19,0,hd);box(.05,.14,.03,blk,-.15,-.05,0,hd);lm.add(hd);
+  const lm=G();cyl(.09,.12,.05,blk,73.62,y+.025,11.2,lm,null,14);cyl(.035,.045,1.55,blk,73.62,y+.8,11.2,lm,null,10);
+  const hd=G();hd.position.set(73.62,y+1.73,11.2);hd.rotation.y=-.3;
+  box(.26,.3,.26,br,0,0,0,hd);cyl(.13,.13,.04,br,.13,0,0,hd,'x',24);cyl(.035,.045,.1,br,0,.19,0,hd,null,10);box(.1,.03,.2,br,0,.25,0,hd);
+  const lens=cyl(.11,.11,.02,M(0xf4f1e2,{emissive:0xfff2d0,emissiveIntensity:.05,roughness:.15}),.152,0,0,hd,'x',24);
+  /* obturador: cinco palhetas horizontais na frente da lente; fechadas ficam em pé, abertas giram 90° */
+  const sl=[];for(let i=0;i<5;i++){const p=G();p.position.set(.17,-.088+i*.044,0);box(.012,.046,.25,br,0,0,0,p);hd.add(p);sl.push(p);}
+  /* gatilho do obturador atrás da cabeça e alça */
+  const tr=G();tr.position.set(-.14,-.06,0);box(.12,.02,.03,blk,-.06,0,0,tr);hd.add(tr);box(.03,.12,.03,blk,-.15,.02,.0,hd);lm.add(hd);
+  /* facho (cone aditivo, mais forte junto à lente) e brilho da lente */
+  const bt=ctex(4,128,(c,w,h)=>{const g2=c.createLinearGradient(0,0,0,h);g2.addColorStop(0,'rgba(255,255,255,1)');g2.addColorStop(.3,'rgba(255,255,255,.35)');g2.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g2;c.fillRect(0,0,w,h);});
+  const bm=new T.MeshBasicMaterial({color:0xfff3dc,map:bt,transparent:true,opacity:0,blending:T.AdditiveBlending,depthWrite:false,side:DS});
+  const L=36,beam=new T.Mesh(new T.ConeGeometry(1.6,L,24,1,true),bm);beam.rotation.z=PI/2;beam.position.set(.17+L/2,0,0);beam.userData.noPick=true;beam.visible=false;hd.add(beam);
+  const gt=ctex(64,64,(c,w,h)=>{const g2=c.createRadialGradient(32,32,0,32,32,32);g2.addColorStop(0,'rgba(255,250,235,1)');g2.addColorStop(.25,'rgba(255,240,200,.6)');g2.addColorStop(1,'rgba(255,240,200,0)');c.fillStyle=g2;c.fillRect(0,0,w,h);});
+  const glare=new T.Sprite(new T.SpriteMaterial({map:gt,color:0xffffff,transparent:true,opacity:0,blending:T.AdditiveBlending,depthWrite:false}));glare.position.set(.2,0,0);glare.scale.set(1.6,1.6,1);glare.userData.noPick=true;hd.add(glare);
   regItem(add('lampadaMorse',lm,{layer:'ext',clip:false}));
-  const rk=G();const so=cyl(.05,.05,.38,blk,73.45,y+1.18,12.25,rk,null,10);so.rotation.z=-.25;cyl(.06,.06,.05,blk,73.4,y+1.0,12.25,rk);
+  MLAMP.sl=sl;MLAMP.tr=tr;MLAMP.lens=lens;MLAMP.beam=beam;MLAMP.bm=bm;MLAMP.glare=glare;
+  /* foguetes: soquete de ferro preso por duas braçadeiras à face interna da proteção (x≈73,87), com a boca acima do topo; caixa no piso */
+  const rk=G();const so=cyl(.045,.05,.42,blk,73.79,y+1.36,12.25,rk,null,12);[y+1.22,y+1.46].forEach(yy=>{box(.1,.035,.11,blk,73.82,yy,12.25,rk);});
   box(.7,.3,.4,wdB,72.5,y+.15,12.1,rk);box(.72,.04,.42,M(0x5a3a1e,{roughness:.7}),72.5,y+.32,12.1,rk);for(let i=0;i<4;i++)cyl(.03,.03,.5,M(0xdedad0),72.32+i*.12,y+.16,12.1,rk,'x',8);
   regItem(add('foguetes',rk,{layer:'ext',clip:false}));}
+ /* sequenciador da lâmpada: unidade de 0,16 s (ritmo plausível de sinalização luminosa manual); ponto = 1, traço = 3, intervalo entre
+    sinais = 1, entre letras = 3, entre palavras = 7. SOS vai como um só sinal (...---...), sem pausa entre as letras. Demonstração, não reprodução de um sinal do Titanic. */
+ function lampSeq(groups){const u=.16,q=[];groups.forEach((w,wi)=>{if(wi)q.push([0,7*u]);w.forEach((ch,ci)=>{if(ci)q.push([0,3*u]);ch.split('').forEach((s,si)=>{if(si)q.push([0,u]);q.push([1,(s==='-'?3:1)*u]);});});});q.push([0,u]);return q;}
+ function lampPlay(k){const sos='...---...',aa=MORSE.A+MORSE.A;MLAMP.q=k==='sos'?lampSeq([[sos],[sos]]):lampSeq([[aa],[aa],[aa]]);MLAMP.i=0;MLAMP.t=0;MLAMP.k=k;ac();
+  if(S.walk==='ponte')flash(k==='sos'?'Lâmpada: SOS  ···−−−···  (demonstração)':'Lâmpada: chamada geral AA AA AA  (demonstração)');}
+ document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('[data-lamp]');if(b){e.preventDefault();lampPlay(b.dataset.lamp);}});
+ MLAMP.step=lampStep;
+ function lampClick(){if(!AC||!S.snd)return;try{lay({D:.035,ty:'bandpass',f:2200,q:3,v:.06,a:.002});}catch(_){}}
+ function lampStep(dt){const L=MLAMP;if(!L.sl)return;let want=0;if(L.q.length){L.t+=dt;while(L.i<L.q.length&&L.t>=L.q[L.i][1]){L.t-=L.q[L.i][1];L.i++;}if(L.i>=L.q.length){L.q=[];}else want=L.q[L.i][0];}
+  if(want!==L.on){L.on=want;lampClick();}const a0=L.a;L.a+=(want-L.a)*Math.min(1,dt*45);if(Math.abs(L.a-a0)<1e-4&&L.a<.002&&!want)return;
+  const a=L.a;L.sl.forEach(p=>p.rotation.z=a*PI/2);L.tr.rotation.z=-.35*a;L.lens.material.emissiveIntensity=.05+2.2*a;const nt=S.night?1.5:1;L.bm.opacity=.16*a*nt;L.beam.visible=a>.01;L.glare.material.opacity=Math.min(1,a*1.1);}
  /* ---- dica discreta perto de portas (substitui as placas grandes) ---- */
  const tip=document.createElement('div');tip.id='doorTip';tip.style.cssText='position:fixed;left:50%;bottom:132px;transform:translateX(-50%);padding:6px 12px;border-radius:8px;background:rgba(14,22,34,.72);color:#efe3c2;font:500 13px/1.2 Barlow,system-ui,sans-serif;letter-spacing:.03em;pointer-events:none;opacity:0;transition:opacity .35s;z-index:30';document.body.appendChild(tip);CMD.tip=tip;
 })();
@@ -2997,7 +3065,7 @@ function wtdToggle(force){const W=CMD.wtd;if(force!==undefined&&W.closed===force
  tone(120,.12,'square',.05);tone(85,.25,'sine',.12,.05);tone(2400,.03,'square',.02,.06);if(W.closed){cmdTrill(1,880,1060,18,.035);setTimeout(()=>{tone(48,1.2,'sine',.12);tone(62,.9,'triangle',.05,.1);},1300);}
  if(force===undefined)flash(W.closed?'Chave em CLOSED: o eletroímã solta as portas estanques das salas de caldeiras e máquinas, que descem pelo próprio peso.':'Chave em OPEN: as portas só se reabrem à mão, no local.');}
 function cmdReset(){if(CMD.ringN)CMD.ringN.stop();CMD.call=false;CMD.ring=0;CMD.wtd.closed=false;CMD.wtd.tg=0;}
-function cmdStep(dt){const now=performance.now(),k=Math.min(1,dt*7);
+function cmdStep(dt){const now=performance.now(),k=Math.min(1,dt*7);if(MLAMP.step)MLAMP.step(dt);
  /* portas: abrem com o visitante perto, fecham devagar quando ele se afasta */
  let tipS='';if(S.walk==='ponte'){CMD.doors.forEach(d=>{const r=Math.hypot(F.p.x-d.c.x,F.p.z-d.c.z);if(r<1.5&&d.lab)tipS=d.lab;if(d.h){const tg=r<1.55?d.open:(r>2.3?0:null);if(tg!==null)d.a+=(tg-d.a)*Math.min(1,dt*(tg?4:2.2));d.h.rotation.y=d.a;}});}
  else CMD.doors.forEach(d=>{if(d.h&&d.a){d.a+=(0-d.a)*k;d.h.rotation.y=d.a;}});

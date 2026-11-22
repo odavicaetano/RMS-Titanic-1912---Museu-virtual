@@ -56,6 +56,14 @@ const SEEDS=JSON.parse(process.argv[3]||'[[73.3,29.62,0]]');
 const comp=new Int32Array(Ly.length).fill(-1);
 function near(x,y,z){const i=Math.floor((x-X0)/H),j=Math.floor((z-Z0)/H),c=i*NZ+j,f=layers[c];if(!f)return -1;let b=-1,bd=3;f.forEach((yy,k)=>{if(Math.abs(yy-y)<bd){bd=Math.abs(yy-y);b=k;}});return b<0?-1:id.get(c*8+b);}
 const nb=(n,bit)=>{const c=Lc[n],y=Ly[n],c2=bit===1?c+NZ:bit===2?c-NZ:bit===4?c+1:c-1,f=layers[c2];let b=-1,bd=9;f.forEach((yy,k)=>{const d=Math.abs(yy-y);if(d<=STEP&&d<bd){bd=d;b=k;}});return id.get(c2*8+b);};
+/* pedestais: ilha pequena (< 3 m²) de mesma altura, cercada só por quedas de 30 cm ou mais e sem nada mais alto ligado a ela,
+   é o topo de uma peça (pé de estai, cabeço, cabrestante), não piso. Escadas e patamares seguem para outro nível e ficam. */
+{const BACK={1:2,2:1,4:8,8:4},seen=new Uint8Array(Ly.length);let np=0,nc=0;
+ for(let n0=0;n0<Ly.length;n0++){if(seen[n0])continue;const patch=[n0],st=[n0];seen[n0]=1;let up=false,ext=0,low=true;
+  while(st.length){const n=st.pop();for(const bit of [1,2,4,8]){if(!(E[n]&bit))continue;const m=nb(n,bit);if(m===undefined)continue;const dy=Ly[m]-Ly[n];
+   if(Math.abs(dy)<=.06){if(!seen[m]){seen[m]=1;patch.push(m);st.push(m);}}else{ext++;if(dy>0)up=true;else if(dy>-.3)low=false;}}}
+  if(!up&&low&&ext>0&&patch.length*H*H<3){np++;nc+=patch.length;for(const n of patch)for(const bit of [1,2,4,8]){if(!(E[n]&bit))continue;const m=nb(n,bit);E[n]&=~bit;if(m!==undefined)E[m]&=~BACK[bit];}}}
+ console.log('pedestais removidos',np,'células',nc);}
 let keep=new Uint8Array(Ly.length);
 SEEDS.forEach((s,si)=>{const n0=near(s[0],s[1],s[2]);if(n0<0){console.log('semente sem piso',s);return;}if(keep[n0]){console.log('semente',si,'já alcançada');return;}let st=[n0],cnt=0,bb=[1e9,-1e9,1e9,-1e9,1e9,-1e9];keep[n0]=1;
  while(st.length){const n=st.pop();cnt++;const x=X0+(Math.floor(Lc[n]/NZ)+.5)*H,z=Z0+(Lc[n]%NZ+.5)*H;bb=[Math.min(bb[0],x),Math.max(bb[1],x),Math.min(bb[2],Ly[n]),Math.max(bb[3],Ly[n]),Math.min(bb[4],z),Math.max(bb[5],z)];

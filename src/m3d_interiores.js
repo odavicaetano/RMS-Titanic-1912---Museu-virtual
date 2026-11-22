@@ -87,7 +87,45 @@ enrich('biblioteca',g=>{const d=9,cm=new T.MeshStandardMaterial({map:ctex(64,128
  [-3.5,0,3.5].forEach(x=>[[d/2-.06,PI],[-d/2+.06,0]].forEach(([z,ry])=>{[-1,1].forEach(sd=>{const m=new T.Mesh(new T.PlaneGeometry(.38,2.1),cm);m.position.set(x+sd*.78,1.72,z);m.rotation.y=ry;g.add(m);});
   const v=new T.Mesh(new T.PlaneGeometry(1.95,.28),cm);v.position.set(x,2.78,z+(z>0?-.01:.01));v.rotation.y=ry;g.add(v);}));});
 /* ---- sala geral da 3ª classe (convés C, popa): piano de armário, relógio e quadro de avisos ---- */
-enrich('geral3',g=>{const w=11,d=9;piano(g,w/2-.5,0,-PI/2);pc(g,bx(.5,.05,.4),km(0x3a2414),w/2-1.2,.47,0);
+enrich('geral3',g=>{const w=11,d=9;pianoUp(g,w/2-.4,0,-PI/2);cyl(.17,.17,.05,km(0x5a2a1c),w/2-1.15,.5,0,g,null,18);cyl(.025,.025,.48,km(0x2a1a10),w/2-1.15,.25,0,g,null,8);cyl(.16,.2,.03,km(0x2a1a10),w/2-1.15,.015,0,g,null,12);
  cyl(.2,.2,.05,km(0x6e2f1c),-w/2+.04,1.95,-2.8,g,'x',20);const f=new T.Mesh(new T.CircleGeometry(.17,24),new T.MeshStandardMaterial({color:0xf3efe2}));f.position.set(-w/2+.075,1.95,-2.8);f.rotation.y=PI/2;g.add(f);
  [[.12,.9],[.08,2.6]].forEach(([l,a])=>{const hd=pc(g,bx(.01,.02,l),km(0x111111),-w/2+.085,1.95,-2.8);hd.geometry=hd.geometry.clone();hd.geometry.translate(0,0,-l/2);hd.rotation.x=a;});
  const nb=new T.Mesh(new T.PlaneGeometry(1,.7),new T.MeshStandardMaterial({map:ctex(160,112,(c,W,H)=>{c.fillStyle='#6a4a2a';c.fillRect(0,0,W,H);c.fillStyle='#efe6cc';[[10,10],[60,14],[110,8],[22,60],[80,58]].forEach(p=>{c.fillRect(p[0],p[1],42,40);c.fillStyle='#888';for(let y=p[1]+8;y<p[1]+36;y+=6)c.fillRect(p[0]+4,y,34,1);c.fillStyle='#efe6cc';});})}));nb.position.set(0,1.6,d/2-.03);nb.rotation.y=PI;g.add(nb);});
+
+/* ---- piano de armário tocável (sala geral da 3ª classe): 88 teclas (lá 0 a dó 8) em duas instâncias, caixa de nogueira com
+   painel vazado, estante com partitura, pedais e rodízios. Toque/clique nas teclas toca a nota; o som sai pelo canal de efeitos. ---- */
+const PNO={keys:[],press:[],raf:0,voices:[]};
+function pianoUp(g,x,z,ry){const a=G();a.position.set(x,0,z);a.rotation.y=ry||0;
+ const wt=woodGrainT('#3b2416');wt.repeat.set(2,2);const wood=new T.MeshStandardMaterial({map:wt,roughness:.35,metalness:.05}),dark=M(0x1e130b,{roughness:.4}),brass=M(0xc9a24a,{metalness:.85,roughness:.3});
+ const W=1.48,KW=1.22,KY=.735;
+ /* caixa, tampo, rodapé e montantes laterais que sustentam o teclado */
+ pc(a,bx(W,1.28,.34),wood,0,.66,-.13);pc(a,bx(W+.04,.04,.4),wood,0,1.32,-.12);pc(a,bx(W,.1,.42),dark,0,.05,-.1);
+ [-1,1].forEach(s=>{pc(a,bx(.07,.82,.62),wood,s*(KW/2+.06),.41,.04);pc(a,bx(.09,.06,.66),wood,s*(KW/2+.06),.84,.05);pc(a,bx(.1,.12,.12),dark,s*(KW/2+.06),.06,.3);cyl(.025,.025,.03,brass,s*(KW/2+.06),.015,.33,a,'x',10);});
+ /* teclado: base, frente do teclado e régua de feltro atrás das teclas */
+ pc(a,bx(KW+.02,.05,.3),wood,0,KY-.035,.17);pc(a,bx(KW+.02,.05,.025),wood,0,KY-.02,.315);pc(a,bx(KW,.012,.02),M(0x7a1a1a,{roughness:.9}),0,KY+.022,.02);
+ /* painel superior vazado com fundo de seda e estante com partitura */
+ const fret=new T.MeshStandardMaterial({map:ctex(256,96,(c,w,h)=>{c.fillStyle='#6a1f1f';c.fillRect(0,0,w,h);c.strokeStyle='#2a170c';c.lineWidth=7;c.strokeRect(4,4,w-8,h-8);c.lineWidth=5;for(let i=0;i<5;i++){const cx=26+i*51;c.beginPath();c.ellipse(cx,h/2,20,30,0,0,PI*2);c.stroke();c.beginPath();c.moveTo(cx-20,h/2);c.quadraticCurveTo(cx,10,cx+20,h/2);c.quadraticCurveTo(cx,h-10,cx-20,h/2);c.stroke();}}),roughness:.6});
+ const fp=new T.Mesh(new T.PlaneGeometry(1.05,.36),fret);fp.position.set(0,1.08,.042);a.add(fp);pc(a,bx(1.12,.04,.03),wood,0,.88,.045);
+ const desk=pc(a,bx(.7,.02,.16),wood,0,.92,.1);desk.rotation.x=-.25;const sm=new T.Mesh(new T.PlaneGeometry(.42,.28),new T.MeshStandardMaterial({map:ctex(128,96,(c,w,h)=>{c.fillStyle='#efe6cc';c.fillRect(0,0,w,h);c.fillStyle='#333';for(let s=0;s<3;s++)for(let l=0;l<5;l++)c.fillRect(8,14+s*26+l*3,w-16,1);for(let i=0;i<24;i++)c.fillRect(10+i*4.5,12+(i%3)*26+(i*7%9),2.5,2.5);})}));sm.position.set(0,1.05,.07);sm.rotation.x=-.25;a.add(sm);
+ /* tampa do teclado aberta, encostada, e pedais de latão */
+ const fb=pc(a,bx(KW,.015,.12),wood,0,KY+.11,-.02);fb.rotation.x=-1.25;
+ [-.09,0,.09].forEach(px=>{pc(a,bx(.035,.015,.12),brass,px,.07,.27);});pc(a,bx(.3,.03,.05),dark,0,.05,.22);
+ /* teclas: 52 brancas e 36 pretas */
+ const bl=[1,3,6,8,10],ww=KW/52,wk=[],bk=[];let wi=0;for(let m=21;m<=108;m++){const isB=bl.includes(m%12);if(isB)bk.push([m,-KW/2+wi*ww]);else{wk.push([m,-KW/2+(wi+.5)*ww]);wi++;}}
+ const wm=new T.InstancedMesh(new T.BoxGeometry(ww*.93,.022,.15),new T.MeshStandardMaterial({color:0xf4efe2,roughness:.28}),wk.length),bm=new T.InstancedMesh(new T.BoxGeometry(ww*.56,.024,.092),new T.MeshStandardMaterial({color:0x14110e,roughness:.22}),bk.length),m4=new T.Matrix4();
+ wk.forEach((k,i)=>{m4.makeTranslation(k[1],KY,.235);wm.setMatrixAt(i,m4);});bk.forEach((k,i)=>{m4.makeTranslation(k[1],KY+.021,.19);bm.setMatrixAt(i,m4);});
+ wm.userData.pkey=wk;bm.userData.pkey=bk;wm.userData.base=[KY,.235];bm.userData.base=[KY+.021,.19];a.add(wm,bm);part(a,'piano3');g.add(a);PNO.keys=[wm,bm];return a;}
+/* tecla tocada: afunda 8 mm e volta; o som é sintetizado na hora */
+function pianoHit(o,id){const L=o.userData.pkey;if(!L||id===undefined||!L[id])return false;pianoNote(L[id][0]);PNO.press.push({o:o,i:id,t:0});if(!PNO.raf)PNO.raf=requestAnimationFrame(pianoAnim);return true;}
+function pianoAnim(){const m4=new T.Matrix4(),dt=1/60;PNO.press=PNO.press.filter(p=>{p.t+=dt;const b=p.o.userData.base,x=p.o.userData.pkey[p.i][1],d=p.t<.06?p.t/.06:p.t<.22?1:Math.max(0,1-(p.t-.22)/.1);m4.makeTranslation(x,b[0]-.008*d,b[1]);p.o.setMatrixAt(p.i,m4);p.o.instanceMatrix.needsUpdate=true;return p.t<.33;});PNO.raf=PNO.press.length?requestAnimationFrame(pianoAnim):0;}
+/* síntese de piano: duas cordas por nota levemente desafinadas, parciais inarmônicas com decaimento mais rápido nos agudos,
+   filtro que escurece ao longo da nota, batida curta do martelo e abafador depois de ~1,6 s. Sem efeitos além de um pouco de sala. */
+function pianoNote(m){if(!S.snd||!ac())return;const a=AC,t=a.currentTime+.005,f=440*Math.pow(2,(m-69)/12),B=.00035*Math.pow(f/261.6,1.2);
+ PNO.voices=PNO.voices.filter(v=>v.end>a.currentTime);if(PNO.voices.length>=14){const v=PNO.voices.shift();try{v.g.gain.cancelScheduledValues(a.currentTime);v.g.gain.setTargetAtTime(0,a.currentTime,.03);}catch(_){}}
+ const g=a.createGain(),lp=a.createBiquadFilter();lp.type='lowpass';lp.Q.value=.5;const br=Math.min(9000,f*9+600);lp.frequency.setValueAtTime(br,t);lp.frequency.exponentialRampToValueAtTime(Math.max(400,f*2.2),t+1.4);
+ const tau=Math.max(.35,Math.min(3.2,2.6*Math.sqrt(220/f))),hold=Math.min(1.6,tau*1.1),vol=.11*Math.min(1,Math.pow(261.6/f,.18));
+ g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.004);g.gain.setTargetAtTime(vol*.55,t+.004,.09);g.gain.setTargetAtTime(0,t+.25,tau);g.gain.setTargetAtTime(0,t+hold,.12);
+ const n=f>1800?3:f>700?5:7;for(let k=1;k<=n;k++){const fk=k*f*Math.sqrt(1+B*k*k);if(fk>14000)break;[-1,1].forEach(sg=>{const o=a.createOscillator(),og=a.createGain();o.frequency.value=fk*(1+sg*.0004);og.gain.setValueAtTime(.5/Math.pow(k,1.35),t);og.gain.setTargetAtTime(0,t,tau/(1+.55*(k-1)));o.connect(og);og.connect(lp);o.start(t);o.stop(t+hold+.6);});}
+ /* martelo: ruído curto filtrado */
+ try{const nb=a.createBuffer(1,a.sampleRate*.03|0,a.sampleRate),d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,3);const ns=a.createBufferSource(),nf=a.createBiquadFilter(),ng=a.createGain();ns.buffer=nb;nf.type='bandpass';nf.frequency.value=Math.min(5000,f*4+800);nf.Q.value=1.2;ng.gain.value=.05;ns.connect(nf);nf.connect(ng);ng.connect(lp);ns.start(t);}catch(_){}
+ lp.connect(g);g.connect(out());try{const r=a.createGain();r.gain.value=.12;g.connect(r);r.connect(rev());}catch(_){}PNO.voices.push({g:g,end:t+hold+.6});}
