@@ -1678,10 +1678,16 @@ document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.targ
  #top,#hud,#cutbar,#deckbar,#where,#side,#dpad,#sheet,#hint,#bottom,#labels,#pwaI,#pnoUI{transition:opacity .6s ease}
  body.zen #top,body.zen #hud,body.zen #cutbar,body.zen #deckbar,body.zen #where,body.zen #side,body.zen #dpad,body.zen #sheet,body.zen #hint,body.zen #bottom,body.zen #labels,body.zen #pwaI{opacity:0!important;pointer-events:none!important}
  #zenB{position:fixed;left:0;right:0;bottom:calc(26px + env(safe-area-inset-bottom));margin:0 auto;width:max-content;z-index:60;display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;
-  background:rgba(10,17,32,.55);color:#efe6cc;border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font:600 14px Barlow,system-ui,sans-serif;letter-spacing:.02em;
-  cursor:pointer;opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .45s ease,transform .45s ease}
+  min-height:44px;background:rgba(12,20,36,.3);color:#fbf7ec;border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(10px) saturate(1.2);-webkit-backdrop-filter:blur(10px) saturate(1.2);text-shadow:0 1px 2px rgba(0,0,0,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.18);font:600 14px Barlow,system-ui,sans-serif;letter-spacing:.02em;
+  cursor:pointer;opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .45s ease,transform .45s ease,background .3s ease,border-color .3s ease}
  #zenB svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
- body.zen.zenAct #zenB{opacity:1;pointer-events:auto;transform:none}
+ body.zen.zenAct #zenB{opacity:.6;pointer-events:auto;transform:none}
+ body.zen.zenAct #zenB:hover,body.zen.zenAct #zenB:focus-visible{opacity:1;background:rgba(12,20,36,.5);border-color:rgba(255,255,255,.42)}
+ @media (hover:none){body.zen.zenAct #zenB{opacity:.72}}
+ /* botão de moldura (Wallpaper) com o mesmo acabamento 3D dos botões escuros da coluna */
+ #bZen{background:radial-gradient(circle at 35% 28%,#46597a 0%,#1f2e49 48%,#0a1220 100%);border-color:rgba(170,205,240,.5);color:#eaf3ff;box-shadow:inset 0 1px 0 rgba(200,225,255,.35),inset 0 -2px 4px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.35);transition:transform .15s ease,filter .2s ease}
+ #bZen:hover{filter:brightness(1.12)}#bZen:active{transform:scale(.94)}
+ #side{left:calc(14px + env(safe-area-inset-left,0px))}@media (max-width:899px){#side{left:auto;right:calc(10px + env(safe-area-inset-right,0px))}}
  #zenTip{position:fixed;left:0;right:0;top:40%;margin:0 auto;width:max-content;max-width:86vw;text-align:center;z-index:60;padding:10px 16px;border-radius:12px;background:rgba(10,17,32,.5);color:#efe6cc;
   font:500 14px Barlow,system-ui,sans-serif;opacity:0;pointer-events:none;transition:opacity .6s ease}#zenTip.on{opacity:1}`;document.head.appendChild(st);
  const b=document.createElement('button');b.id='zenB';b.type='button';b.innerHTML='<svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Mostrar interface';document.body.appendChild(b);
@@ -2292,7 +2298,16 @@ $('#fxW').addEventListener('pointerdown',e=>{e.stopPropagation();volIdle();});fx
 function ambApply0(){const w=$('#ambW');w.style.setProperty('--v',S.ambV/100);$('#bAmb').title='Som ambiente (mar, água no casco, máquinas) — volume '+S.ambV+'%';}
 /* celular: a coluna de botões rola na vertical entre o topo e o painel aberto; as pontas somem em degradê */
 {const sd=$('#side'),fade=()=>{const mx=sd.scrollHeight-sd.clientHeight;sd.style.setProperty('--mt',sd.scrollTop>2?'26px':'0px');sd.style.setProperty('--mb',mx>2&&sd.scrollTop<mx-2?'26px':'0px');},
- fit=()=>{if(window.innerWidth>=900){sd.style.maxHeight='';sd.style.setProperty('--mt','0px');sd.style.setProperty('--mb','0px');return;}const r=sd.getBoundingClientRect(),sh=$('#sheet'),on=sh.classList.contains('show'),lim=(on?sh.getBoundingClientRect().top:$('#tools').getBoundingClientRect().top)-6;sd.style.maxHeight=Math.max(96,lim-r.top)+'px';fade();};
+ /* a coluna mede o espaço até a barra de baixo (ou até o painel aberto, no celular) e se reduz por igual até 70–72%;
+    se ainda faltar espaço, os botões se dividem em colunas (nada fica escondido nem depende de rolagem) */
+ fit=()=>{const dk=window.innerWidth>=900,sh=$('#sheet'),on=!dk&&sh.classList.contains('show');sd.style.transform='';sd.style.maxHeight='';sd.style.flexWrap='';sd.style.alignContent='';sd.style.columnGap='';
+  const r=sd.getBoundingClientRect(),lim=(on?sh.getBoundingClientRect().top:$('#tools').getBoundingClientRect().top)-8,av=Math.max(96,lim-r.top);
+  const kids=[...sd.children].filter(e=>e.offsetParent),nat=kids.length?Math.max(...kids.map(e=>e.getBoundingClientRect().bottom))-r.top+4:0;
+  let k=nat?Math.min(1,av/nat):1;const mn=dk?.7:.72;sd.style.transformOrigin=dk?'top left':'top right';
+  /* sem espaço nem com a redução mínima: os botões se dividem em colunas, em tamanho ainda fácil de tocar */
+  if(k<mn){k=.85;sd.style.flexWrap=dk?'wrap':'wrap-reverse';sd.style.alignContent=dk?'flex-start':'flex-end';sd.style.columnGap='8px';sd.style.maxHeight=(av/k)+'px';}
+  else if(!dk)sd.style.maxHeight=(av/k)+'px';
+  sd.style.transform=k<.999?'scale('+k.toFixed(3)+')':'';if(dk){sd.style.setProperty('--mt','0px');sd.style.setProperty('--mb','0px');return;}fade();};
  sd.addEventListener('scroll',fade,{passive:true});window.addEventListener('resize',()=>setTimeout(fit,60));new MutationObserver(()=>{fit();setTimeout(fit,320);}).observe($('#sheet'),{attributes:true,attributeFilter:['class']});new MutationObserver(()=>setTimeout(fit,260)).observe(sd,{attributes:true,attributeFilter:['class'],subtree:true});setTimeout(fit,400);window.__sideFit=fit;}
 window.addEventListener('pointerdown',function f1(){window.removeEventListener('pointerdown',f1);if(!S.ambMute&&S.ambV>0){ac();ambStart();}});
 function rudUI(){const ir=$('#iRud'),l=$('#lRud');if(ir){ir.value=nav.rud;ir.style.setProperty('--r',(nav.rud*6)+'deg');}if(l)l.textContent=nav.rud===0?'a meio':Math.abs(nav.rud)+'° a '+(nav.rud>0?'boreste':'bombordo');}

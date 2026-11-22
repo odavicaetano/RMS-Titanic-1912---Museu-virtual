@@ -399,7 +399,16 @@ $('#fxW').addEventListener('pointerdown',e=>{e.stopPropagation();volIdle();});fx
 function ambApply0(){const w=$('#ambW');w.style.setProperty('--v',S.ambV/100);$('#bAmb').title='Som ambiente (mar, água no casco, máquinas) — volume '+S.ambV+'%';}
 /* celular: a coluna de botões rola na vertical entre o topo e o painel aberto; as pontas somem em degradê */
 {const sd=$('#side'),fade=()=>{const mx=sd.scrollHeight-sd.clientHeight;sd.style.setProperty('--mt',sd.scrollTop>2?'26px':'0px');sd.style.setProperty('--mb',mx>2&&sd.scrollTop<mx-2?'26px':'0px');},
- fit=()=>{if(window.innerWidth>=900){sd.style.maxHeight='';sd.style.setProperty('--mt','0px');sd.style.setProperty('--mb','0px');return;}const r=sd.getBoundingClientRect(),sh=$('#sheet'),on=sh.classList.contains('show'),lim=(on?sh.getBoundingClientRect().top:$('#tools').getBoundingClientRect().top)-6;sd.style.maxHeight=Math.max(96,lim-r.top)+'px';fade();};
+ /* a coluna mede o espaço até a barra de baixo (ou até o painel aberto, no celular) e se reduz por igual até 70–72%;
+    se ainda faltar espaço, os botões se dividem em colunas (nada fica escondido nem depende de rolagem) */
+ fit=()=>{const dk=window.innerWidth>=900,sh=$('#sheet'),on=!dk&&sh.classList.contains('show');sd.style.transform='';sd.style.maxHeight='';sd.style.flexWrap='';sd.style.alignContent='';sd.style.columnGap='';
+  const r=sd.getBoundingClientRect(),lim=(on?sh.getBoundingClientRect().top:$('#tools').getBoundingClientRect().top)-8,av=Math.max(96,lim-r.top);
+  const kids=[...sd.children].filter(e=>e.offsetParent),nat=kids.length?Math.max(...kids.map(e=>e.getBoundingClientRect().bottom))-r.top+4:0;
+  let k=nat?Math.min(1,av/nat):1;const mn=dk?.7:.72;sd.style.transformOrigin=dk?'top left':'top right';
+  /* sem espaço nem com a redução mínima: os botões se dividem em colunas, em tamanho ainda fácil de tocar */
+  if(k<mn){k=.85;sd.style.flexWrap=dk?'wrap':'wrap-reverse';sd.style.alignContent=dk?'flex-start':'flex-end';sd.style.columnGap='8px';sd.style.maxHeight=(av/k)+'px';}
+  else if(!dk)sd.style.maxHeight=(av/k)+'px';
+  sd.style.transform=k<.999?'scale('+k.toFixed(3)+')':'';if(dk){sd.style.setProperty('--mt','0px');sd.style.setProperty('--mb','0px');return;}fade();};
  sd.addEventListener('scroll',fade,{passive:true});window.addEventListener('resize',()=>setTimeout(fit,60));new MutationObserver(()=>{fit();setTimeout(fit,320);}).observe($('#sheet'),{attributes:true,attributeFilter:['class']});new MutationObserver(()=>setTimeout(fit,260)).observe(sd,{attributes:true,attributeFilter:['class'],subtree:true});setTimeout(fit,400);window.__sideFit=fit;}
 window.addEventListener('pointerdown',function f1(){window.removeEventListener('pointerdown',f1);if(!S.ambMute&&S.ambV>0){ac();ambStart();}});
 function rudUI(){const ir=$('#iRud'),l=$('#lRud');if(ir){ir.value=nav.rud;ir.style.setProperty('--r',(nav.rud*6)+'deg');}if(l)l.textContent=nav.rud===0?'a meio':Math.abs(nav.rud)+'° a '+(nav.rud>0?'boreste':'bombordo');}
