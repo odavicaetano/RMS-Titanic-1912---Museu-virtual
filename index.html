@@ -988,7 +988,11 @@ let rotor;const dynos=[];
    const gg=sph(.065,mBrass,-.16,.7,0,u);gg.scale.set(.45,1,1);cyl(.012,.012,.1,mBrass,-.11,.7,0,u,'x',8);}
   else{lathe([[.3,0],[.14,.15],[.1,1.1],[.2,1.2],[0,1.2]],mBrass,0,0,0,u,12);const dm=M(0xffffff,{map:dialTex()}),d=new T.Mesh(new T.CylinderGeometry(.42,.42,.2,24),[mBrass,dm,dm]);d.rotation.z=PI/2;d.position.y=1.45;u.add(d);const hd=G();hd.position.set(0,1.45,0);box(.05,.6,.05,mDark,-.15,.3,0,hd);u.add(hd);tHs.push(hd);}});
  t.userData.hs=tHs;t.userData.ns=tNs;t.userData.k=telSrc?.36:.5;
- const gb=new T.Mesh(new T.BoxGeometry(.15,2,4),mBrass);gb.position.set(-33.5,5,0);t.add(gb);for(let i=0;i<6;i++)cyl(.28,.28,.08,M(0xf3efe2),-33.6,4.5+(i/3|0)*.9,-1.2+(i%3)*1.2,t,'x',16);
+ const gb=new T.Mesh(new T.BoxGeometry(.15,2,4),mBrass);gb.position.set(-33.5,5,0);t.add(gb);/* manômetros com escala em libras por polegada quadrada e ponteiro (valores de leitura ilustrativos) */
+ const gT=(v,lab)=>ctex(128,128,(c,w,h)=>{c.fillStyle='#f3efe2';c.fillRect(0,0,w,h);c.strokeStyle='#222';c.fillStyle='#222';c.lineWidth=2;c.textAlign='center';c.font='9px Georgia';
+  for(let k=0;k<=10;k++){const an=PI*.75+k/10*PI*1.5;c.beginPath();c.moveTo(64+Math.cos(an)*44,64+Math.sin(an)*44);c.lineTo(64+Math.cos(an)*(k%5?50:54),64+Math.sin(an)*(k%5?50:54));c.stroke();if(k%2===0)c.fillText(String(k*25),64+Math.cos(an)*34,67+Math.sin(an)*34);}
+  c.font='bold 9px Georgia';c.fillText(lab,64,108);c.font='8px Georgia';c.fillText('LBS',64,118);const an=PI*.75+v*PI*1.5;c.strokeStyle='#8a1a12';c.lineWidth=3;c.beginPath();c.moveTo(64,64);c.lineTo(64+Math.cos(an)*42,64+Math.sin(an)*42);c.stroke();c.beginPath();c.arc(64,64,4,0,PI*2);c.fill();});
+ [['STEAM',.85],['STEAM',.83],['RECEIVER',.3],['RECEIVER',.12],['VACUUM',.55],['VACUUM',.56]].forEach((q,i)=>{const gm=new T.MeshStandardMaterial({map:gT(q[1],q[0]),roughness:.3});const gc=cyl(.28,.28,.08,[mBrass,gm,gm],-33.6,4.5+(i/3|0)*.9,-1.2+(i%3)*1.2,t,'x',16);});
  add('telegrafoM',t,{ex:V(0,-28,0),layer:'maq',clip:false});
  /* sala dos dínamos: 4 grupos de 400 kW */
  const d=G();[[-76,-4.5],[-76,4.5],[-83,-4.5],[-83,4.5]].forEach(p=>{box(2.4,2.6,1.6,mIronG,p[0]+1.6,3.2,p[1],d);cyl(1.25,1.25,1.8,M(0x2c4a3a),p[0]-.9,3.2,p[1],d,'x',20);const fw=G();fw.position.set(p[0]+.25,3.2,p[1]);cyl(1.1,1.1,.22,mIron,0,0,0,fw,'x',20);box(.24,.3,.3,mBrass,0,.9,0,fw);d.add(fw);dynos.push(fw);cyl(.25,.25,.5,mBrass,p[0]-2,3.2,p[1],d,'x');});
