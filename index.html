@@ -1817,7 +1817,19 @@ function preset(m){const full=rFor(225);
 function leave(){S.visit=null;S.fp=false;S.walk=null;S.gavea=false;morseStop();}
 function setMode(m,noFly){if(S.tab==='sink'||S.tab==='flood'||S.tab==='gavea')closeSheet();leave();S.mode=m;S.bp=m==='blueprint';S.cut=m==='corte';S.exT=m==='explodido'?1:0;S.ghost=m==='maq'||m==='cald';S.labels=m!=='navio';
  $$('#modes button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));applyLook();if(!noFly)fly(preset(m));if(m==='conveses'){if(cam.aspect>=1&&S.tab!=='ficha')openTab('deck');else if(cam.aspect<1&&S.tab&&S.tab!=='ficha')closeSheet();}else if(S.tab==='deck')closeSheet();}
-function buildSet(id){const s=SETS[id];if(s.g)return s;const g=G();g.position.copy(s.O);s.build(g);setsG.add(g);s.g=g;s.meshes=[];g.traverse(o=>{if(o.isMesh)s.meshes.push(o);});return s;}
+/* junta, num só objeto por material, as peças fixas de um cenário (menos chamadas de desenho). Ficam de fora peças clicáveis,
+   animadas, portas, luminárias, transparentes, instanciadas e tudo o que o cenário guarda em userData. */
+function mergeStatic(g){const keep=new Set();Object.values(g.userData).forEach(v=>{(Array.isArray(v)?v:[v]).forEach(o=>{if(o&&o.isObject3D)keep.add(o);else if(o&&o.o&&o.o.isObject3D)keep.add(o.o);});});
+ const by=new Map();g.children.forEach(o=>{if(!o.isMesh||o.isInstancedMesh||keep.has(o)||LAMPS.indexOf(o)>=0||Object.keys(o.userData).length||o.children.length)return;const m=o.material,ge=o.geometry;
+  if(Array.isArray(m)||m.transparent||!ge.attributes.position||!ge.attributes.normal)return;const k=m.uuid+(ge.attributes.uv?'u':'')+(ge.index?'i':'');(by.get(k)||by.set(k,[]).get(k)).push(o);});
+ let n0=0,n1=0;by.forEach(list=>{if(list.length<3)return;const uv=!!list[0].geometry.attributes.uv;let nv=0,ni=0;list.forEach(o=>{const ge=o.geometry;nv+=ge.attributes.position.count;ni+=ge.index?ge.index.count:ge.attributes.position.count;});
+  const P=new Float32Array(nv*3),N=new Float32Array(nv*3),U=uv?new Float32Array(nv*2):null,I=new Uint32Array(ni),v=new T.Vector3(),nm=new T.Matrix3();let ov=0,oi=0;
+  list.forEach(o=>{o.updateMatrix();nm.getNormalMatrix(o.matrix);const ge=o.geometry,p=ge.attributes.position,q=ge.attributes.normal,u=ge.attributes.uv;
+   for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i).applyMatrix4(o.matrix);P.set([v.x,v.y,v.z],(ov+i)*3);v.fromBufferAttribute(q,i).applyMatrix3(nm).normalize();N.set([v.x,v.y,v.z],(ov+i)*3);if(U)U.set([u.getX(i),u.getY(i)],(ov+i)*2);}
+   if(ge.index)for(let i=0;i<ge.index.count;i++)I[oi++]=ge.index.getX(i)+ov;else for(let i=0;i<p.count;i++)I[oi++]=i+ov;ov+=p.count;g.remove(o);n0++;});
+  const mg=new T.BufferGeometry();mg.setAttribute('position',new T.BufferAttribute(P,3));mg.setAttribute('normal',new T.BufferAttribute(N,3));if(U)mg.setAttribute('uv',new T.BufferAttribute(U,2));mg.setIndex(new T.BufferAttribute(I,1));mg.computeBoundingSphere();
+  const mm=new T.Mesh(mg,list[0].material);mm.castShadow=list[0].castShadow;mm.receiveShadow=list[0].receiveShadow;g.add(mm);n1++;});return [n0,n1];}
+function buildSet(id){const s=SETS[id];if(s.g)return s;const g=G();g.position.copy(s.O);s.build(g);s.merged=mergeStatic(g);setsG.add(g);s.g=g;s.meshes=[];g.traverse(o=>{if(o.isMesh)s.meshes.push(o);});return s;}
 function visit(id,focus){if(SETS[id].ship){walk('ponte');return;}const s=buildSet(id);leave();if(S.tab==='deck'||S.tab==='flood'||S.tab==='sink'||(window.innerWidth<900&&S.tab&&S.tab!=='ficha'&&!focus))closeSheet();S.visit=id;S.bp=false;S.cut=false;S.exT=0;S.ex=0;Object.keys(SETS).forEach(k=>{if(SETS[k].g)SETS[k].g.visible=k===id;});applyLook();
  const c=focus&&P[focus]?V(P[focus].a[0],P[focus].a[1],P[focus].a[2]):V(s.c[0],s.c[1],s.c[2]);zoomCancel();C.t.copy(s.O).add(c);C.r=focus?Math.max(6,rFor(5)):Math.max(s.r,rFor(s.r)*.8);C.th=focus==='cab2'||focus==='cab3'||focus==='cab1'?1.57:.9;C.ph=1.0;tween=null;}
 function startFP(from){F.fovT=40;if(window.innerWidth<900&&S.tab&&S.tab!=='lift')closeSheet();if(S.visit){const s=SETS[S.visit],sp=s.spawn,d=from&&s.doors&&s.doors.find(q=>q.t===from);
