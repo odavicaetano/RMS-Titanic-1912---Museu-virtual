@@ -190,7 +190,9 @@ const keys={};
 function fpMove(dt){if(S.gavea)return;let f=(keys.w?1:0)-(keys.s?1:0),r=(keys.d?1:0)-(keys.a?1:0);if(!f&&!r)return;const sp=(S.walk?5:2.6)*dt,sx=-Math.sin(F.yaw),sz=-Math.cos(F.yaw),dx=(sx*f-sz*r)*sp,dz=(sz*f+sx*r)*sp;
  const list=S.visit?SETS[S.visit].surf:WALK[S.walk].surf,O=S.visit?SETS[S.visit].O:Z0;
  if(S.walk==='ponte'&&NAV.d){const nS=Math.max(1,Math.ceil(Math.hypot(dx,dz)/.1)),ex=dx/nS,ez=dz/nS;const at=(x,z)=>{const a=navMove(F.p.x,F.p.z,F.p.y,x,z);if(a!==null)return a;return surfY(list,O,x,z,F.p.y);};
-  for(let i=0;i<nS;i++){let y=at(F.p.x+ex,F.p.z+ez);if(y!==null){F.p.x+=ex;F.p.z+=ez;F.p.y=y;continue;}y=at(F.p.x+ex,F.p.z);if(y!==null){F.p.x+=ex;F.p.y=y;continue;}y=at(F.p.x,F.p.z+ez);if(y!==null){F.p.z+=ez;F.p.y=y;continue;}break;}
+  for(let i=0;i<nS;i++){let y=at(F.p.x+ex,F.p.z+ez);if(y!==null){F.p.x+=ex;F.p.z+=ez;F.p.y=y;continue;}y=at(F.p.x+ex,F.p.z);if(y!==null){F.p.x+=ex;F.p.y=y;continue;}y=at(F.p.x,F.p.z+ez);if(y!==null){F.p.z+=ez;F.p.y=y;continue;}
+   /* quina: um passo curto para o lado em que o passo seguinte fica livre */
+   let ok=false;for(const sg of [1,-1]){const px=-ez*sg,pz=ex*sg,y1=at(F.p.x+px,F.p.z+pz);if(y1!==null&&navMove(F.p.x+px,F.p.z+pz,y1,F.p.x+px+ex,F.p.z+pz+ez)!==null){F.p.x+=px;F.p.z+=pz;F.p.y=y1;ok=true;break;}}if(!ok)break;}
   portals();navLinks();if(S.where!==navZone(F.p.x,F.p.y))applyLook();return;}
  let y=surfY(list,O,F.p.x+dx,F.p.z+dz,F.p.y);if(y!==null){F.p.x+=dx;F.p.z+=dz;F.p.y=y;}
  else{y=surfY(list,O,F.p.x+dx,F.p.z,F.p.y);if(y!==null){F.p.x+=dx;F.p.y=y;}else{y=surfY(list,O,F.p.x,F.p.z+dz,F.p.y);if(y!==null){F.p.z+=dz;F.p.y=y;}}}
