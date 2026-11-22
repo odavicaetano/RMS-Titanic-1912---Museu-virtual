@@ -168,3 +168,26 @@ window.addEventListener('keydown',e=>{if(!S.pianoLock)return;if(e.target&&e.targ
  if(PKM[k]!==undefined){e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;const r=pianoFind(PNO.cur,60+12*PNO.oct+PKM[k]);if(r)pianoHit(r[0],r[1],true);}},true);
 window.addEventListener('keyup',e=>{if(S.pianoLock&&PKM[e.key.toLowerCase()]!==undefined)e.stopImmediatePropagation();},true);
 document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('[data-piano]');if(b){e.preventDefault();const s=S.visit&&SETS[S.visit];let a=null;if(s&&s.g)s.g.traverse(o=>{if(o.userData.keys)a=o;});if(a)pianoEnter(a);}});
+/* ---- modo contemplação: esconde toda a interface e deixa só o navio ----
+   Entrar: botão de moldura na coluna da esquerda. Dentro: girar e aproximar continuam; ao mexer o mouse ou tocar na tela aparece
+   um único botão “Mostrar interface”, que some sozinho depois de 2,5 s parado. Esc também sai. Toques no navio não abrem fichas. */
+{const st=document.createElement('style');st.textContent=`
+ #top,#hud,#cutbar,#deckbar,#where,#side,#dpad,#sheet,#hint,#bottom,#labels,#pwaI,#pnoUI{transition:opacity .6s ease}
+ body.zen #top,body.zen #hud,body.zen #cutbar,body.zen #deckbar,body.zen #where,body.zen #side,body.zen #dpad,body.zen #sheet,body.zen #hint,body.zen #bottom,body.zen #labels,body.zen #pwaI{opacity:0!important;pointer-events:none!important}
+ #zenB{position:fixed;left:0;right:0;bottom:calc(26px + env(safe-area-inset-bottom));margin:0 auto;width:max-content;z-index:60;display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;
+  background:rgba(10,17,32,.55);color:#efe6cc;border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font:600 14px Barlow,system-ui,sans-serif;letter-spacing:.02em;
+  cursor:pointer;opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .45s ease,transform .45s ease}
+ #zenB svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+ body.zen.zenAct #zenB{opacity:1;pointer-events:auto;transform:none}
+ #zenTip{position:fixed;left:0;right:0;top:40%;margin:0 auto;width:max-content;max-width:86vw;text-align:center;z-index:60;padding:10px 16px;border-radius:12px;background:rgba(10,17,32,.5);color:#efe6cc;
+  font:500 14px Barlow,system-ui,sans-serif;opacity:0;pointer-events:none;transition:opacity .6s ease}#zenTip.on{opacity:1}`;document.head.appendChild(st);
+ const b=document.createElement('button');b.id='zenB';b.type='button';b.innerHTML='<svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Mostrar interface';document.body.appendChild(b);
+ const tip=document.createElement('div');tip.id='zenTip';tip.textContent=(matchMedia('(pointer:fine)').matches?'Mova o mouse':'Toque na tela')+' para trazer o botão de voltar';document.body.appendChild(tip);
+ let tm=0;const wake=()=>{if(!S.zen)return;document.body.classList.add('zenAct');clearTimeout(tm);tm=setTimeout(()=>document.body.classList.remove('zenAct'),2500);};
+ ['pointermove','pointerdown','wheel','touchstart'].forEach(v=>window.addEventListener(v,wake,{passive:true}));
+ window.zenOn=()=>{if(S.zen)return;if(S.tab)closeSheet();if(S.pianoLock)pianoExit();S.zen=true;document.body.classList.add('zen');document.body.classList.remove('zenAct');
+  if(!localStorage.getItem('zenTip')){tip.classList.add('on');setTimeout(()=>tip.classList.remove('on'),3200);try{localStorage.setItem('zenTip','1');}catch(_){}}};
+ window.zenOff=()=>{if(!S.zen)return;S.zen=false;clearTimeout(tm);document.body.classList.remove('zen','zenAct');tip.classList.remove('on');};
+ b.addEventListener('pointerdown',e=>e.stopPropagation());b.addEventListener('click',e=>{e.stopPropagation();zenOff();});
+ window.addEventListener('keydown',e=>{if(S.zen&&e.key==='Escape'){zenOff();e.preventDefault();}});
+ $('#bZen').addEventListener('click',()=>zenOn());}
