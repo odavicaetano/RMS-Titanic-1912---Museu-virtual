@@ -24,10 +24,26 @@ const LAMPS=[];let _lampG=null,_lampS=null;
 function lamp(x,y,z,g,i,d){if(!_lampG){_lampG=new T.LatheGeometry([[.025,.06],[.07,.04],[.13,-.03],[.15,-.08],[.12,-.1],[0,-.105]].map(q=>new T.Vector2(q[0],q[1])),20);_lampS=new T.MeshStandardMaterial({color:0xfff5e2,emissive:0xffe2b0,emissiveIntensity:.8,roughness:.45});}
  const f=G();f.position.set(x,y,z);g.add(f);cyl(.007,.007,.52,mBrass,0,.32,0,f,null,6);cyl(.055,.055,.014,mBrass,0,.58,0,f,null,14);cyl(.03,.035,.035,mBrass,0,.07,0,f,null,12);f.add(new T.Mesh(_lampG,_lampS));
  const l=new T.PointLight(0xffdca0,i||.7,d||14,1.5);l.position.set(x,y-.12,z);g.add(l);LAMPS.push(f);}
-const baluGeo=new T.LatheGeometry([[.03,0],[.05,.05],[.025,.15],[.06,.42],[.025,.7],[.05,.84],[.03,.9]].map(q=>new T.Vector2(q[0],q[1])),8);
-function balustrade(segs,g,mRail){const tr=[];segs.forEach(s=>{const a=V(s[0],s[1],s[2]),b=V(s[3],s[4],s[5]),len=a.distanceTo(b),n=Math.max(2,Math.round(len/.28));for(let i=0;i<=n;i++)tr.push(a.clone().lerp(b,i/n));
+function balustrade(segs,g,mRail){segs.forEach(s=>{const a=V(s[0],s[1],s[2]),b=V(s[3],s[4],s[5]);
   const r=rod(a.clone().setY(a.y+.95),b.clone().setY(b.y+.95),.07,.07,mRail,g,8);part(r,'balaustrada');[a,b].forEach(p=>lathe([[.11,0],[.09,.1],[.07,1],[.12,1.06],[.1,1.16],[0,1.2]],mRail,p.x,p.y,p.z,g,10));});
- const im=new T.InstancedMesh(baluGeo,M(0x2a2118,{metalness:.6,roughness:.4}),tr.length),m4=new T.Matrix4();tr.forEach((p,i)=>{m4.makeTranslation(p.x,p.y,p.z);im.setMatrixAt(i,m4);});part(im,'balaustrada');g.add(im);}
+ /* painéis de ferro forjado (volutas em C, estilo Luís XIV, com rosetas douradas) entre o corrimão de carvalho e o piso, como na Grande Escadaria;
+    desenho aproximado a partir de fotografias do Olympic */
+ const pos=[],uv=[],ix=[];segs.forEach(q=>{const a=V(q[0],q[1],q[2]),b=V(q[3],q[4],q[5]),u=a.distanceTo(b)/.55,k=pos.length/3;
+  pos.push(a.x,a.y+.06,a.z, b.x,b.y+.06,b.z, b.x,b.y+.9,b.z, a.x,a.y+.9,a.z);uv.push(0,0,u,0,u,1,0,1);ix.push(k,k+1,k+2,k,k+2,k+3);});
+ const gg=new T.BufferGeometry();gg.setAttribute('position',new T.Float32BufferAttribute(pos,3));gg.setAttribute('uv',new T.Float32BufferAttribute(uv,2));gg.setIndex(ix);gg.computeVertexNormals();
+ const gm=new T.Mesh(gg,grilleMat());part(gm,'balaustrada');g.add(gm);}
+let _grM=null;function grilleMat(){if(_grM)return _grM;const t=ctex(256,384,(c,w,h)=>{c.clearRect(0,0,w,h);const iron='#1f1b17',gold='#c9a24a';c.lineCap='round';
+ c.strokeStyle=iron;c.lineWidth=14;c.strokeRect(7,7,w-14,h-14);c.lineWidth=9;
+ const S=(x,y,r,a0,a1,cw)=>{c.beginPath();c.arc(x,y,r,a0,a1,cw);c.stroke();};
+ /* volutas em C espelhadas, em cima e embaixo, e eixo central */
+ [[1,1],[-1,1],[1,-1],[-1,-1]].forEach(([sx,sy])=>{c.save();c.translate(w/2,h/2);c.scale(sx,sy);c.strokeStyle=iron;c.lineWidth=9;
+  c.beginPath();c.moveTo(0,-20);c.bezierCurveTo(10,-80,90,-60,95,-120);c.stroke();S(70,-132,26,0,PI*1.6,false);S(70,-132,10,0,PI*2,false);
+  c.beginPath();c.moveTo(18,0);c.bezierCurveTo(60,10,105,-10,104,-50);c.stroke();S(86,-52,18,PI*.1,PI*1.5,true);c.restore();});
+ c.beginPath();c.moveTo(w/2,14);c.lineTo(w/2,h-14);c.stroke();
+ /* medalhão oval e rosetas douradas */
+ c.lineWidth=8;c.beginPath();c.ellipse(w/2,h/2,34,46,0,0,PI*2);c.stroke();c.fillStyle=gold;c.beginPath();c.ellipse(w/2,h/2,18,26,0,0,PI*2);c.fill();
+ [[w/2,40],[w/2,h-40],[40,h/2],[w-40,h/2]].forEach(p=>{c.beginPath();c.arc(p[0],p[1],9,0,PI*2);c.fill();});});
+ t.wrapS=T.RepeatWrapping;t.anisotropy=4;_grM=new T.MeshStandardMaterial({map:t,alphaTest:.45,transparent:false,side:DS,metalness:.55,roughness:.45});return _grM;}
 function chairs(list,g,col){const s=new T.InstancedMesh(new T.BoxGeometry(.45,.08,.45),M(col),list.length),b=new T.InstancedMesh(new T.BoxGeometry(.45,.5,.06),M(col),list.length),l=new T.InstancedMesh(new T.BoxGeometry(.4,.45,.4),M(0x3a2414),list.length),m4=new T.Matrix4();
  list.forEach((p,i)=>{m4.makeTranslation(p[0],.47,p[1]);s.setMatrixAt(i,m4);m4.makeTranslation(p[0],.76,p[1]+(p[2]||0)*.22);b.setMatrixAt(i,m4);m4.makeTranslation(p[0],.22,p[1]);l.setMatrixAt(i,m4);});g.add(s,b,l);}
 function teleg(x,z,g,key){const t=part(G(),'telegrafoP');lathe([[.26,0],[.12,.12],[.09,.95],[.17,1.05],[0,1.05]],mBrass,x,0,z,t,12);const dm=M(0xffffff,{map:dialTex()});cyl(.3,.3,.2,dm,x,1.3,z,t,'z',24);const h=G();h.position.set(x,1.3,z);box(.04,.5,.04,mBrass,0,.25,.13,h);sph(.05,M(0x3a2414),0,.52,.13,h);box(.04,.5,.04,mBrass,0,.25,-.13,h);t.add(h);g.add(t);(g.userData.handles=g.userData.handles||[]).push(h);}
