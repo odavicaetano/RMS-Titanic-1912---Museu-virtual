@@ -84,3 +84,5 @@ Interiores da sala de cartas e da sala de navegação, telefones, chave das port
 - Grande Escadaria: painéis de ferro forjado com volutas e rosetas douradas, desenhados a partir do estilo conhecido por fotografias do Olympic; o desenho exato dos painéis do Titanic não foi reproduzido.
 - Scotland Road, refeitório e alojamento dos foguistas: reunidos lado a lado para a visita; no navio ficavam em conveses diferentes. Medidas, móveis e acabamentos aproximados.
 - Portas do convés dos Botes para a Grande Escadaria e o ginásio: posições aproximadas.
+- Relógio “Honour and Glory Crowning Time”: figuras da Honra (com livro) e da Glória (com coroa de louros) em baixo-relevo simplificado, com pilastras e arco; composição aproximada, não reproduz o entalhe original. O mostrador marca a hora local do visitante.
+- Asa de boreste da ponte: lâmpada de sinais Morse e foguetes de socorro, a partir dos depoimentos do 4º oficial Joseph Boxhall nos inquéritos de 1912 (tentativa de chamar com a lâmpada um navio visto ao longe; cerca de oito foguetes). Forma, suporte, soquete e caixa: reconstrução aproximada.

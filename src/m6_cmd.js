@@ -122,6 +122,15 @@ function ceilLamp(x,yc,z,g,i,d){const f=G();f.position.set(x,yc,z);g.add(f);cyl(
  [[40,8.75,'Grande Escadaria — entrada do convés dos Botes'],[40,-8.75,'Grande Escadaria — entrada do convés dos Botes'],[33.5,8.75,'Ginásio']].forEach(q=>CMD.doors.push({room:true,c:V(q[0],28.98,q[1]),lab:q[2]}));
  CMD.doors.push({room:true,c:V(64.45,Y0,-5.3),lab:'Corredor dos oficiais e sala Marconi'},{room:true,c:V(64.45,Y0,5.3),lab:'Aposentos do comandante'});
 
+ /* ---- asa de boreste: lâmpada de sinais Morse e foguetes de socorro (usados por Boxhall na noite do naufrágio); forma aproximada ---- */
+ {const y=29.62,br=M(0xb8924a,{metalness:.8,roughness:.32}),blk=M(0x1c1c1c,{roughness:.6}),wdB=M(0x6e4a28,{roughness:.7});
+  const lm=G();cyl(.035,.045,1.05,blk,73.4,y+.52,11.2,lm,null,10);const hd=G();hd.position.set(73.4,y+1.2,11.2);
+  box(.26,.3,.26,br,0,0,0,hd);cyl(.11,.11,.05,M(0xf4f1e2,{emissive:0x332a10,roughness:.2}),.15,0,0,hd,'x',20);cyl(.13,.13,.04,br,.13,0,0,hd,'x',20);
+  for(let i=0;i<4;i++)box(.02,.03,.24,br,.165,-.09+i*.06,0,hd);cyl(.03,.04,.08,br,0,.19,0,hd);box(.05,.14,.03,blk,-.15,-.05,0,hd);lm.add(hd);
+  regItem(add('lampadaMorse',lm,{layer:'ext',clip:false}));
+  const rk=G();const so=cyl(.05,.05,.38,blk,73.45,y+1.18,12.25,rk,null,10);so.rotation.z=-.25;cyl(.06,.06,.05,blk,73.4,y+1.0,12.25,rk);
+  box(.7,.3,.4,wdB,72.5,y+.15,12.1,rk);box(.72,.04,.42,M(0x5a3a1e,{roughness:.7}),72.5,y+.32,12.1,rk);for(let i=0;i<4;i++)cyl(.03,.03,.5,M(0xdedad0),72.32+i*.12,y+.16,12.1,rk,'x',8);
+  regItem(add('foguetes',rk,{layer:'ext',clip:false}));}
  /* ---- dica discreta perto de portas (substitui as placas grandes) ---- */
  const tip=document.createElement('div');tip.id='doorTip';tip.style.cssText='position:fixed;left:50%;bottom:132px;transform:translateX(-50%);padding:6px 12px;border-radius:8px;background:rgba(14,22,34,.72);color:#efe3c2;font:500 13px/1.2 Barlow,system-ui,sans-serif;letter-spacing:.03em;pointer-events:none;opacity:0;transition:opacity .35s;z-index:30';document.body.appendChild(tip);CMD.tip=tip;
 })();
