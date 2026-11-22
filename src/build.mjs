@@ -2,7 +2,7 @@
 import {readFileSync as r,writeFileSync as w} from 'node:fs';
 import {dirname,join} from 'node:path';import {fileURLToPath} from 'node:url';
 const S=dirname(fileURLToPath(import.meta.url)),R=join(S,'..'),PERM=process.argv[2]||'0.85';
-const parts=['a_head.html','m1_core.js','m2_mach.js','m3_sets.js','m3b_rooms.js','m4_data.js','m5_app.js'];
+const parts=['a_head.html','m1_core.js','m2_mach.js','m3_sets.js','m3b_rooms.js','m3c_nav.js','m4_data.js','m5_app.js'];
 let s=parts.map(f=>r(join(S,f),'utf8')).join('').replaceAll('__PERM__',PERM);
 s=s.replace('/*@@CMD@@*/',()=>r(join(S,'m6_cmd.js'),'utf8'));
 for(const f of ['iceberg','foguista']){const tag=`<script src="assets/models/${f}.js"></script>`;

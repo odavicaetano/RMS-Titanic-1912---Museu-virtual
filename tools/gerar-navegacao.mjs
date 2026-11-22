@@ -7,7 +7,7 @@ import {dirname,join} from 'node:path';import {fileURLToPath} from 'node:url';
 const ROOT=join(dirname(fileURLToPath(import.meta.url)),'..');
 const buf=readFileSync(process.argv[2]);const P=new Float32Array(buf.buffer,buf.byteOffset,buf.byteLength/4);const NT=P.length/9;
 const H=0.25,X0=-137,X1=137,Z0=-15.5,Z1=15.5,NX=Math.round((X1-X0)/H),NZ=Math.round((Z1-Z0)/H);
-const CLEAR=1.95,STEP=0.42,EYE=[0.5,1.2,1.75];
+const CLEAR=1.95,STEP=0.42,EYE=[0.6,1.2,1.75];
 /* --- índice 2D (raios verticais) e 3D (segmentos horizontais) --- */
 const B2=0.5,B2X=Math.ceil((X1-X0)/B2),B2Z=Math.ceil((Z1-Z0)/B2),bin2=new Array(B2X*B2Z);
 const B3=0.5,Y0=-4,Y1=48,B3Y=Math.ceil((Y1-Y0)/B3),bin3=new Map();

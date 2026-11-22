@@ -1248,7 +1248,7 @@ function colm(g,x,z,h,c){lathe([[.2,0],[.2,.3],[.13,.4],[.13,h-.35],[.2,h-.15],[
 function bench(g,x,z,w,ry){const a=G();a.position.set(x,0,z);a.rotation.y=ry||0;const m=km(0x9a6a3a);pc(a,bx(w,.06,.45),m,0,.45,0);pc(a,bx(w,.45,.05),m,0,.75,-.2);pc(a,bx(w*.9,.42,.3),km(0x3a2414),0,.21,0);g.add(a);}
 function bed(g,x,z,ry,c){const a=G();a.position.set(x,0,z);a.rotation.y=ry||0;pc(a,bx(2,.3,1.1),km(0x6e2f1c),0,.25,0);pc(a,bx(1.95,.25,1.05),km(c||0xf2efe6),0,.52,0);pc(a,bx(.08,1,1.1),km(0x6e2f1c),-1,.6,0);g.add(a);}
 /* portas de passagem: registram-se em set.doors e levam a outro ambiente */
-const DLBL={escadaria:'Grande Escadaria',lounge:'Lounge',leitura:'Sala de leitura',fumar:'Salão de fumar',cafe:'Café Parisien',restaurante:'Restaurante',ginasio:'Ginásio',piscina:'Piscina',turco:'Banhos turcos',squash:'Squash',biblioteca:'Biblioteca 2ª',geral3:'Sala geral 3ª',fumar3:'Fumar 3ª',capitao:'Comandante',cartas:'Sala de cartas',navega:'Sala de navegação',leme:'Casa do leme',corredor:'Corredor B',cabines:'Camarotes',jantar:'Salão de jantar',ponte:'Ponte',radio:'Rádio Marconi',lift:'Elevador'};
+const DLBL={escadaria:'Grande Escadaria',lounge:'Lounge',leitura:'Sala de leitura',fumar:'Salão de fumar',cafe:'Café Parisien',restaurante:'Restaurante',ginasio:'Ginásio',piscina:'Piscina',turco:'Banhos turcos',squash:'Squash',biblioteca:'Biblioteca 2ª',geral3:'Sala geral 3ª',fumar3:'Fumar 3ª',capitao:'Comandante',cartas:'Sala de cartas',navega:'Sala de navegação',leme:'Casa do leme',corredor:'Corredor B',cabines:'Camarotes',jantar:'Salão de jantar',ponte:'Convés dos Botes',radio:'Rádio Marconi',lift:'Elevador'};
 /* plaquinha de latão gravada na própria porta (em vez da placa grande iluminada) */
 function plaqueT(txt){return ctex(256,56,(c,w,h)=>{const gr=c.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#e3c983');gr.addColorStop(.5,'#c4a45c');gr.addColorStop(1,'#9c7c3c');c.fillStyle=gr;c.fillRect(0,0,w,h);c.strokeStyle='#6d5424';c.lineWidth=3;c.strokeRect(3,3,w-6,h-6);c.fillStyle='#2b1d0a';c.font='600 '+(txt.length>16?20:24)+'px Georgia,serif';c.textAlign='center';c.textBaseline='middle';c.fillText(txt,w/2,h/2+1);[[10,h/2],[w-10,h/2]].forEach(q=>{c.fillStyle='#7d6430';c.beginPath();c.arc(q[0],q[1],3.2,0,7);c.fill();});});}
 function addDoor(g,s,x,y,z,nx,nz,target){const ry=Math.atan2(nx,nz),d=new T.Mesh(new T.PlaneGeometry(.92,2.08),new T.MeshStandardMaterial({map:doorT,roughness:.6}));d.position.set(x+nx*.04,y+1.04,z+nz*.04);d.rotation.y=ry;d.userData.door=target;g.add(d);
@@ -1275,7 +1275,7 @@ mkRoom('ginasio','Ginásio (convés dos Botes, boreste)',13,2.9,5.5,pineT,linoT,
  const rw=G();rw.position.set(.5,0,-1);pc(rw,bx(2.2,.12,.5),km(0x5a3a1e),0,.2,0);pc(rw,bx(.4,.08,.4),km(0x8a5a3a),-.3,.34,0);rod(V(.6,.3,-.5),V(1.4,.6,-.9),.02,.02,km(0x9a6a3a),rw,6);rod(V(.6,.3,.5),V(1.4,.6,.9),.02,.02,km(0x9a6a3a),rw,6);g.add(rw);
  [3,4.6].forEach((x,i)=>{pc(g,bx(.5,.8,.9),ir,x,.4,-1);const sd=sph(.3,km(0x6a3a1e),x,1,-1,g);sd.scale.set(.7,.5,1.4+i*.4);});
  const bag=sph(.2,km(0x6a3a1e),5.5,1.7,1.4,g);bag.scale.y=1.4;pc(g,bx(.6,.05,.6),km(0x5a3a1e),5.5,2.1,1.4);for(let i=0;i<4;i++)cyl(.03,.03,2,km(0x9a6a3a),-5.9,1,1+i*.3,g,null,6);
- [-4,-1,2,5].forEach(x=>win(g,x,1.7,d/2-.03,PI,1.3,1.6));lamp(-3,h-.4,0,g,.7,12);lamp(3,h-.4,0,g,.7,12);},[['W',0,'escadaria']],'Titanic gymnasium');
+ [-4,-1,2,5].forEach(x=>win(g,x,1.7,d/2-.03,PI,1.3,1.6));lamp(-3,h-.4,0,g,.7,12);lamp(3,h-.4,0,g,.7,12);},[['W',0,'escadaria'],['S',-5.7,'ponte']],'Titanic gymnasium');
 mkRoom('piscina','Piscina (convés F, boreste)',14,3,7.5,wtileT,wtileT,(g,w,d,h)=>{const wm=new T.MeshStandardMaterial({color:0x3fa6b8,transparent:true,opacity:.75,roughness:.1,metalness:.2}),wp=new T.Mesh(new T.PlaneGeometry(9.1,4.2),wm);wp.rotation.x=-PI/2;wp.position.set(-1.5,.06,-.6);g.add(wp);g.userData.water=wp;
  [[-1.5,-2.75,9.4,.12],[-1.5,1.55,9.4,.12]].forEach(q=>pc(g,bx(q[2],.3,q[3]),km(0xdde3e3),q[0],.15,q[1]));[[-6.15],[3.15]].forEach(q=>pc(g,bx(.12,.3,4.4),km(0xdde3e3),q[0],.15,-.6));
  for(let x=-6;x<=5;x+=1.2)pc(g,bx(1.1,2,.9),km(0xe6e2d6),x,1,d/2-.5);rod(V(3.1,0,-2),V(3.1,1,-2),.025,.025,mBrass,g,6);rod(V(3.1,0,-1.5),V(3.1,1,-1.5),.025,.025,mBrass,g,6);
@@ -1318,6 +1318,61 @@ SETS.escadaria.surf.solid=true;SETS.escadaria.ph='Titanic grand staircase';SETS.
 Object.keys(SETS).forEach((k,i)=>{SETS[k].O=V((i%6)*160-400,-600-Math.floor(i/6)*200,0);});
 /* destinos do elevador (os elevadores da 1ª classe serviam dos conveses A ao E) */
 const LIFT=[['A','Convés A — Grande Escadaria','escadaria'],['B','Convés B — corredor, camarotes, restaurante','corredor'],['C','Convés C — camarotes de 1ª classe','cabines'],['D','Convés D — recepção e salão de jantar','jantar'],['E','Convés E — e escada até a piscina (F)','piscina']];
+
+/* ===== MÓDULO 3c — caminhada nos conveses do navio (malha de navegação gerada do modelo) =====
+   assets/models/conves_nav.js (tools/gerar-navegacao.mjs): grade de 25 cm em coordenadas locais do navio; em cada coluna, os pisos
+   com pé-direito livre e, em cada piso, as ligações com os vizinhos (degrau até 42 cm, sem parede, balaústre ou bote no caminho).
+   Carregada só quando o visitante começa a caminhar. Os pisos retangulares da ponte (WALK.ponte.surf) continuam valendo. */
+const NAV={d:null,ld:false,cbs:[]};
+function navLoad(cb){if(NAV.d){cb&&cb();return;}if(cb)NAV.cbs.push(cb);if(NAV.ld)return;NAV.ld=true;
+ const fin=()=>{const r=window.CONVES_NAV;if(!r)return;const b=s=>{const t=atob(s),u=new Uint8Array(t.length);for(let i=0;i<t.length;i++)u[i]=t.charCodeAt(i);return u;};
+  const cnt=b(r.cnt),yb=b(r.y),off=new Uint32Array(cnt.length+1);for(let i=0;i<cnt.length;i++)off[i+1]=off[i]+cnt[i];
+  NAV.d={x0:r.x0,z0:r.z0,h:r.h,nx:r.nx,nz:r.nz,off,y:new Int16Array(yb.buffer,0,yb.length/2),e:b(r.e)};delete window.CONVES_NAV;NAV.cbs.splice(0).forEach(f=>f());};
+ if(window.CONVES_NAV){fin();return;}const s=document.createElement('script');s.src='assets/models/conves_nav.js';s.onload=fin;s.onerror=()=>{NAV.ld=false;};document.head.appendChild(s);}
+const NAV_STEP=.42;
+function navCell(x,z){const d=NAV.d,i=Math.floor((x-d.x0)/d.h),j=Math.floor((z-d.z0)/d.h);return i<0||j<0||i>=d.nx||j>=d.nz?-1:i*d.nz+j;}
+/* piso da coluna c mais próximo da altura y (dentro de tol); devolve o índice da camada ou -1 */
+function navLayer(c,y,tol){const d=NAV.d;if(c<0)return -1;let b=-1,bd=tol;for(let n=d.off[c];n<d.off[c+1];n++){const q=Math.abs(d.y[n]/100-y);if(q<=bd){bd=q;b=n;}}return b;}
+/* passo para uma coluna vizinha (di,dj ∈ {-1,0,1}, só um eixo): exige a ligação gravada */
+function navAdj(n,c,di,dj){const d=NAV.d,bit=di>0?1:di<0?2:dj>0?4:8;if(!(d.e[n]&bit))return -1;return navLayer(c+di*d.nz+dj,d.y[n]/100,NAV_STEP);}
+/* altura do piso em (x1,z1) partindo de (x0,z0,y) ou null se o caminho estiver bloqueado */
+function navMove(x0,z0,y,x1,z1){const d=NAV.d;if(!d)return null;const c0=navCell(x0,z0),n0=navLayer(c0,y,.6);if(n0<0)return null;const c1=navCell(x1,z1);if(c1<0)return null;if(c1===c0)return d.y[n0]/100;
+ const di=Math.floor((x1-d.x0)/d.h)-Math.floor((x0-d.x0)/d.h),dj=Math.floor((z1-d.z0)/d.h)-Math.floor((z0-d.z0)/d.h);if(Math.abs(di)>1||Math.abs(dj)>1)return null;
+ if(!di||!dj){const n=navAdj(n0,c0,di,dj);return n<0?null:d.y[n]/100;}
+ /* diagonal: passa por uma das duas colunas laterais */
+ for(const [a,b] of [[di,0],[0,dj]]){const m=navAdj(n0,c0,a,b);if(m<0)continue;const n=navAdj(m,c0+a*d.nz+b,b?di:0,a?dj:0);if(n>=0)return d.y[n]/100;}return null;}
+/* coluna livre em volta (3×3 com todas as ligações), para não pôr marcas encostadas em obstáculos */
+function navOpen(c,y){const d=NAV.d;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const n=navLayer(c+a*d.nz+b,y,.3);if(n<0||d.e[n]!==15)return false;}return true;}
+/* ponto de piso mais próximo de (x,y,z) num raio de r metros (para pontos de partida e acessos) */
+function navNear(x,y,z,r){const d=NAV.d;if(!d)return null;let best=null,bd=1e9;const R=Math.ceil((r||3)/d.h),ci=Math.floor((x-d.x0)/d.h),cj=Math.floor((z-d.z0)/d.h);
+ for(let i=ci-R;i<=ci+R;i++)for(let j=cj-R;j<=cj+R;j++){if(i<0||j<0||i>=d.nx||j>=d.nz)continue;const c=i*d.nz+j;for(let n=d.off[c];n<d.off[c+1];n++){if(d.e[n]!==15||!navOpen(c,d.y[n]/100))continue;const px=d.x0+(i+.5)*d.h,pz=d.z0+(j+.5)*d.h,py=d.y[n]/100;if(Math.abs(py-y)>1.2)continue;const q=Math.hypot(px-x,pz-z)+Math.abs(py-y)*3;if(q<bd){bd=q;best=[px,py,pz];}}}return best;}
+/* pontos de partida no convés (aproximados; ajustados ao piso real ao carregar) */
+const NAV_SPOTS={ponte:null,botes:[[48,29,12.4],-PI/2],proa:[[112,25.5,2.5],-PI/2],popa:[[-112,24.5,3],PI/2],passeioA:[[30,23.3,11],-PI/2]};
+/* regiões, só para o letreiro do canto (ordem importa) */
+function navZone(x,y){if(y>27.4)return x>67.8?'Ponte de comando':'Convés dos Botes';if(x>66)return 'Proa · castelo e poço de vante';if(x<-59.5&&y>20.3)return 'Popa · poço de ré e tombadilho';if(y<21)return 'Convés B · passeio de ré da 2ª classe';return 'Convés A · passeio';}
+/* Acessos do museu: ligam áreas do convés que, no navio real, se comunicavam por escadas internas não reconstruídas aqui.
+   Não são escadas históricas; aparecem como marcas circulares azuis com a legenda “acesso do museu”. */
+const NAV_LINKS=[
+ {a:[[62,29,8.3],PI/2],b:[[82,21.2,8.5],-PI/2],la:'Descer à proa',lb:'Subir ao convés dos Botes'},
+ {a:[[62,29,-8.3],PI/2],b:[[82,21.2,-8.5],-PI/2],la:'Descer à proa',lb:'Subir ao convés dos Botes'},
+ {a:[[38,29,12.2],PI/2],b:[[38,23.3,11],PI/2],la:'Descer ao passeio do convés A',lb:'Subir ao convés dos Botes'},
+ {a:[[38,29,-12.2],PI/2],b:[[38,23.3,-11],PI/2],la:'Descer ao passeio do convés A',lb:'Subir ao convés dos Botes'},
+ {a:[[-62,28.6,2],PI/2],b:[[-58.2,23,2],PI/2],la:'Descer ao convés A, à ré',lb:'Subir ao convés dos Botes'},
+ {a:[[-70,28.6,8],PI/2],b:[[-92,21.2,8],PI/2],la:'Descer à popa',lb:'Subir ao convés dos Botes'},
+ {a:[[-70,20.3,12],PI/2],b:[[-100,21.2,9],PI/2],la:'Ir ao poço de ré',lb:'Ir ao passeio do convés B'}];
+let navG=null,navLock=true;
+function navMarkers(){if(navG||!NAV.d)return;navG=G();navG.visible=false;
+ const rm=new T.MeshBasicMaterial({color:0x7fd0ff,transparent:true,opacity:.75,depthWrite:false,side:DS}),rg=new T.RingGeometry(.42,.55,40);
+ const lab=t=>{const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');x.fillStyle='rgba(10,17,32,.82)';x.fillRect(0,0,512,128);x.strokeStyle='#7fd0ff';x.lineWidth=4;x.strokeRect(2,2,508,124);x.fillStyle='#e8f4ff';x.font='600 40px Barlow, sans-serif';x.textAlign='center';x.fillText(t,256,58);x.fillStyle='#9fc3d6';x.font='28px Barlow, sans-serif';x.fillText('acesso do museu (não histórico)',256,100);
+  const s=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(c),depthTest:true,transparent:true}));s.scale.set(1.6,.4,1);return s;};
+ NAV.pts=[];NAV_LINKS.forEach((L,i)=>{['a','b'].forEach(k=>{const p=navNear(L[k][0][0],L[k][0][1],L[k][0][2],4);if(!p)return;L[k+'p']=p;const r=new T.Mesh(rg,rm);r.rotation.x=-PI/2;r.position.set(p[0],p[1]+.03,p[2]);r.userData.noPick=true;navG.add(r);
+  const s=lab(k==='a'?L.la:L.lb);s.position.set(p[0],p[1]+1.9,p[2]);navG.add(s);NAV.pts.push({p,L,k});});});
+ root.add(navG);}
+/* chegou a uma marca de acesso: atravessa com o esmaecimento já usado nas portas */
+function navLinks(){if(!NAV.pts)return;let near=false;for(const q of NAV.pts){const r=Math.hypot(F.p.x-q.p[0],F.p.z-q.p[2]);if(Math.abs(F.p.y-q.p[1])>1)continue;if(r<1.4)near=true;
+  if(r<.5&&!navLock){const o=q.k==='a'?'b':'a',to=q.L[o+'p'],yaw=q.L[o][1];if(!to)return;navLock=true;fadeDo(()=>{F.p.set(to[0],to[1],to[2]);F.yaw=yaw;F.ys=undefined;applyLook();});return;}}
+ if(!near)navLock=false;}
+function navSpawn(k){const s=NAV_SPOTS[k];if(!s||!NAV.d)return;const p=navNear(s[0][0],s[0][1],s[0][2],4);if(!p)return;F.p.set(p[0],p[1],p[2]);F.yaw=s[1];F.pitch=0;F.ys=undefined;navLock=true;}
 /* ===== MÓDULO 4 — conteúdo: fichas, ambientes por convés, categorias, rota ===== */
 // tag: D = informação histórica documentada · R = reconstrução visual plausível · S = simplificação da simulação
 // [grupo, nome, inglês, tag, âncora, distância, texto]
@@ -1442,7 +1497,7 @@ const TAGN={D:'Documentado',R:'Reconstrução visual',S:'Simplificação'};
 const CLSN={1:'1ª classe',2:'2ª classe',3:'3ª classe',t:'Tripulação e serviço'};
 // categorias do menu Explorar: [id, nome, introdução, ações [rótulo, tipo, argumento], peças]
 const CATS=[
-['ext','Visão externa','O Titanic em abril de 1912: 269 m, quatro chaminés (a quarta, de ventilação), dois mastros, três hélices.',[['Ver o navio','mode','navio'],['Proa','go','proa'],['Popa e hélices','go','helice'],['Noite / dia','night']],['casco','proa','popa','superestrutura','chamine','chamine4','mastro','antena','bote','ancora','corrente','conves_eq','leme','helice']],
+['ext','Visão externa','O Titanic em abril de 1912: 269 m, quatro chaminés (a quarta, de ventilação), dois mastros, três hélices.',[['Ver o navio','mode','navio'],['Caminhar no convés dos Botes','walk','ponte:botes'],['Caminhar na proa','walk','ponte:proa'],['Caminhar na popa','walk','ponte:popa'],['Proa','go','proa'],['Popa e hélices','go','helice'],['Noite / dia','night']],['casco','proa','popa','superestrutura','chamine','chamine4','mastro','antena','bote','ancora','corrente','conves_eq','leme','helice']],
 ['ponte','Ponte de comando','Timão, bússolas, telégrafos e sala de cartas. O telégrafo transmitia ordens; quem as executava eram os maquinistas.',[['Entrar na ponte','visit','ponte'],['Leme e telégrafo','tab','tele'],['Apito a vapor','whistle'],['Aposentos do comandante','visit','capitao'],['Operar o telégrafo','tab','tele'],['Gávea: o posto do vigia','gavea']],['ponte','timao','bussola','telegrafoP','telemotor','telefone','cartas','relogioN','gavea']],
 ['esc','Grande Escadaria','A peça central da 1ª classe: carvalho, ferro forjado, relógio entalhado e cúpula de vidro. A escadaria de ré, entre a 3ª e a 4ª chaminés, repetia o estilo com menos ornamento e um relógio simples.',[['Visitar a escadaria','visit','escadaria'],['Elevadores','tab','lift'],['Onde fica (convés dos Botes)','go','z_esc']],['cupula','relogio','querubim','balaustrada','elevador','z_esc2','z_recep']],
 ['c1','Primeira classe','324 passageiros na viagem inaugural. Camarotes e suítes nos conveses B a E e salões nos conveses A, B e D.',[['Visitar um camarote','visit','cabines:cab1'],['Salão de jantar','visit','jantar:jan1'],['Lounge','visit','lounge'],['Sala de leitura','visit','leitura'],['Salão de fumar','visit','fumar'],['Restaurante','visit','restaurante'],['Café Parisien','visit','cafe'],['Ginásio','visit','ginasio'],['Piscina','visit','piscina'],['Banhos turcos','visit','turco'],['Squash','visit','squash'],['Corredor','visit','corredor'],['Comparar as três classes','tab','comp']],['cab1','jan1','z_suite','z_lounge','z_leitura','z_fumar','z_palm','z_rest','z_cafe','z_gin','z_pisc','z_turco','z_squash','elevador']],
@@ -1453,7 +1508,7 @@ const CATS=[
 ['cald','Caldeiras e carvão','Do carvão ao vapor: 29 caldeiras, 159 fornalhas, mais de 600 t de carvão por dia. Os gases sobem pelos condutos até as três primeiras chaminés.',[['Ver as caldeiras','cam','cald'],['Caminhar entre as caldeiras','walk','caldeiras']],['caldeira','fornalha','carvao','salaCald','dutos','chamine','chamine4']],
 ['seg','Sistemas de segurança','Dezesseis compartimentos, portas estanques comandadas da ponte e 20 botes. O navio flutuava com dois compartimentos quaisquer alagados, ou com os quatro primeiros.',[['Corte dos compartimentos','mode','corte'],['Simulação de alagamento','tab','flood'],['Reconstituição do naufrágio','tab','sink'],['Botes salva-vidas','go','bote']],['anteparas','portas','fundo','bote','z_ponte']],
 ['nav','Navegação','A rota da viagem inaugural e os instrumentos da ponte.',[['Rota da viagem','tab','rota'],['Mesa de cartas','visit','ponte:cartas'],['Gávea','gavea']],['cartas','bussola','relogioN','gavea','mastro']],
-['conv','Conveses','Dez níveis, do convés dos Botes ao fundo duplo. Escolha um para ver a planta.',[['Abrir as plantas','mode','conveses']],['conves','fundo','camarotes']],
+['conv','Conveses','Dez níveis, do convés dos Botes ao fundo duplo. Escolha um para ver a planta.',[['Abrir as plantas','mode','conveses'],['Caminhar no convés dos Botes','walk','ponte:botes'],['Passeio do convés A','walk','ponte:passeioA'],['Caminhar na proa','walk','ponte:proa'],['Caminhar na popa','walk','ponte:popa']],['conves','fundo','camarotes']],
 ['estr','Estrutura naval','Quilha, cavername, anteparas e chapeamento.',[['Blueprint','mode','blueprint'],['Vista explodida','mode','explodido'],['Corte longitudinal','mode','corte']],['casco','quilha','cavername','anteparas','portas','fundo','conves']]
 ];
 const ORDERS=['Full Astern','Half Astern','Slow Astern','Dead Slow Astern','Stop','Dead Slow Ahead','Slow Ahead','Half Ahead','Full Ahead'];
@@ -1614,7 +1669,7 @@ function applyLook(){const bp=S.bp,conv=S.mode==='conveses';S.closed=GL&&!bp&&!S
  {const on=S.fp&&!S.gavea&&(window.innerWidth>=900||!(S.tab&&sheet.classList.contains('show')));if(!on&&window.__joyEnd)window.__joyEnd();$('#dpad').classList.toggle('show',on);}
  const w=$('#where');if(inS){w.innerHTML=SETS[S.visit].n+'<small>Reconstrução visual · '+(S.fp?'arraste para olhar, setas para andar; atravesse uma porta para mudar de ambiente':'use o botão de caminhar ou toque numa porta para passar')+'</small>';w.classList.add('show');}
  else if(S.gavea){w.innerHTML='Gávea do mastro de proa<small>Arraste para olhar em volta</small>';w.classList.add('show');}
- else if(S.walk){w.innerHTML=(S.walk==='ponte'?'Ponte de comando':S.walk==='maquinas'?'Casa de máquinas':'Salas de caldeiras')+'<small>'+(S.walk==='ponte'?'Arraste para olhar · setas para andar<br>Toque: timão, telégrafo, alavanca do apito ou uma porta':'Arraste para olhar, setas para andar')+'</small>';w.classList.add('show');}else w.classList.remove('show');
+ else if(S.walk){S.where=S.walk==='ponte'?navZone(F.p.x,F.p.y):null;w.innerHTML=(S.walk==='ponte'?S.where:S.walk==='maquinas'?'Casa de máquinas':'Salas de caldeiras')+'<small>'+(S.walk==='ponte'?(S.where==='Ponte de comando'?'Arraste para olhar · setas para andar<br>Toque: timão, telégrafo, alavanca do apito ou uma porta':'Arraste para olhar · setas para andar · escadas e portas funcionam caminhando<br>Marcas azuis: acessos do museu entre conveses'):'Arraste para olhar, setas para andar')+'</small>';w.classList.add('show');}else w.classList.remove('show');
  if(S.fp){cam.near=.1;cam.updateProjectionMatrix();}if(S.tab==='sink'&&sk.bow)sinkApply();}
 
 /* ================= CÂMERA ================= */
@@ -1627,7 +1682,7 @@ function fly(o,ms){zoomCancel();tween={f:{t:C.t.clone(),th:C.th,ph:C.ph,r:C.r},t
 F.fovT=40;F.fov=40;function fpZoom(k){F.fovT=Math.max(9,Math.min(62,F.fovT*k));}
 function camUpdate(dt){
  {const tf=S.fp?F.fovT:40;F.fov+=(tf-F.fov)*(1-Math.exp(-Math.min(dt,.1)*8));if(Math.abs(cam.fov-F.fov)>.005){cam.fov=F.fov;cam.updateProjectionMatrix();}}
- if(S.fp){if(F.ys===undefined||Math.abs(F.p.y-F.ys)>1.6||!S.visit)F.ys=F.p.y;else F.ys+=(F.p.y-F.ys)*Math.min(1,dt*12);const ey=F.ys;cam.position.set(F.p.x,ey+1.62,F.p.z);const cp=Math.cos(F.pitch),tg=V(F.p.x-Math.sin(F.yaw)*cp,ey+1.62+Math.sin(F.pitch),F.p.z-Math.cos(F.yaw)*cp);if(!S.visit){root.updateMatrixWorld(true);cam.position.applyMatrix4(root.matrixWorld);tg.applyMatrix4(root.matrixWorld);}cam.lookAt(tg);return;}
+ if(S.fp){if(F.ys===undefined||Math.abs(F.p.y-F.ys)>1.6||(!S.visit&&S.walk!=='ponte'))F.ys=F.p.y;else F.ys+=(F.p.y-F.ys)*Math.min(1,dt*12);const ey=F.ys;cam.position.set(F.p.x,ey+1.62,F.p.z);const cp=Math.cos(F.pitch),tg=V(F.p.x-Math.sin(F.yaw)*cp,ey+1.62+Math.sin(F.pitch),F.p.z-Math.cos(F.yaw)*cp);if(!S.visit){root.updateMatrixWorld(true);cam.position.applyMatrix4(root.matrixWorld);tg.applyMatrix4(root.matrixWorld);}cam.lookAt(tg);return;}
  if(tween){zoomCancel();tween.k=Math.min(1,tween.k+dt*1000/tween.ms);const e=tween.k<.5?2*tween.k*tween.k:1-Math.pow(-2*tween.k+2,2)/2,f=tween.f,o=tween.to;C.t.lerpVectors(f.t,o.t,e);C.th=f.th+(o.th-f.th)*e;C.ph=f.ph+(o.ph-f.ph)*e;C.r=f.r+(o.r-f.r)*e;if(tween.k>=1)tween=null;}
  else zoomStep(dt);const sp=Math.sin(C.ph);cam.position.set(C.t.x+C.r*sp*Math.sin(C.th),C.t.y+C.r*Math.cos(C.ph),C.t.z+C.r*sp*Math.cos(C.th));cam.lookAt(C.t);if(S.closed||S.tab==='sink'){if(camPush(cam.position)){cam.lookAt(C.t);/* encostou no casco: não acumula mais aproximação, para o afastamento responder na hora */if(ZM.lr<0){ZM.lr=0;const dd=cam.position.distanceTo(C.t);if(dd>.3&&dd<C.r)C.r=dd;}}}if(S.tab==='sink'&&sk.t>=161.5){const fl=BED+bedH(cam.position.x,cam.position.z)+3;if(cam.position.y<fl){cam.position.y=fl;cam.lookAt(C.t);}}let nr=Math.max(.5,Math.min(30,C.r*.03));if(S.tab==='sink'&&sk.t>=161.5)nr=Math.max(.5,Math.min(nr,(cam.position.y-BED-bedH(cam.position.x,cam.position.z))*.45));if(Math.abs(cam.near-nr)>nr*.15){cam.near=nr;cam.updateProjectionMatrix();}}
 const cq=new T.Vector3(),CM=.45;function inHull(x,y,az){if(x<-137||x>137||y<-2.5)return false;if(y<24.5)return az<hb(x,Math.max(1.2,Math.min(21.5,y)))+CM;return Math.abs(x)<82&&y<36&&az<16.5;}
@@ -1671,9 +1726,10 @@ function visit(id,focus){if(SETS[id].ship){walk('ponte');return;}const s=buildSe
 function startFP(from){F.fovT=40;if(window.innerWidth<900&&S.tab&&S.tab!=='lift')closeSheet();if(S.visit){const s=SETS[S.visit],sp=s.spawn,d=from&&s.doors&&s.doors.find(q=>q.t===from);
  if(d){F.p.set(s.O.x+d.p[0]+d.n[0]*1.3,s.O.y+d.p[1],s.O.z+d.p[2]+d.n[1]*1.3);F.yaw=Math.atan2(-d.n[0],-d.n[1]);pLock=true;}else{F.p.set(s.O.x+sp[0],s.O.y+sp[1],s.O.z+sp[2]);F.yaw=sp[3];}F.pitch=0;S.fp=true;applyLook();}}
 function fadeDo(fn){const f=$('#fade');f.classList.add('on');setTimeout(()=>{fn();setTimeout(()=>f.classList.remove('on'),160);},260);}
-function travel(t,from){from=from||S.walk;if(t==='lift'){pLock=true;S.liftFrom=from;openTab('lift');return;}const fp=S.fp,lm=t==='leme';if(lm)t='ponte';fadeDo(()=>{visit(t);if(fp)startFP(from);if(SETS[t]&&SETS[t].ship&&S.walk&&WALK[S.walk].doors){const d=WALK[S.walk].doors.find(q=>q.t===from&&(!!q.k===lm));if(d){F.p.set(d.p[0]+d.n[0]*1.3,d.p[1],d.p[2]+d.n[1]*1.3);F.yaw=Math.atan2(-d.n[0],-d.n[1]);pLock=true;}}if(S.tab==='lift')closeSheet();});}
+function travel(t,from){from=from||S.walk;if(t==='lift'){pLock=true;S.liftFrom=from;openTab('lift');return;}const fp=S.fp,lm=t==='leme';if(lm)t='ponte';fadeDo(()=>{visit(t);if(fp)startFP(from);if(SETS[t]&&SETS[t].ship&&S.walk&&WALK[S.walk].doors){const d=WALK[S.walk].doors.find(q=>q.t===from&&(!!q.k===lm));if(d){F.p.set(d.p[0]+d.n[0]*1.3,d.p[1],d.p[2]+d.n[1]*1.3);F.yaw=Math.atan2(-d.n[0],-d.n[1]);pLock=true;F.ys=undefined;applyLook();}}if(S.tab==='lift')closeSheet();});}
 function portals(){const s=S.visit?SETS[S.visit]:WALK[S.walk],O=S.visit?s.O:Z0;if(!s||!s.doors)return;let near=false;for(let i=0;i<s.doors.length;i++){const d=s.doors[i],dx=F.p.x-(O.x+d.p[0]),dz=F.p.z-(O.z+d.p[2]),dy=Math.abs(F.p.y-(O.y+d.p[1])),r=Math.hypot(dx,dz);if(dy>1)continue;if(r<1.5)near=true;if(r<.8&&!pLock){travel(d.t,d.k?'leme':(S.visit||S.walk));return;}}if(!near)pLock=false;}
-function walk(id){F.fovT=40;if(window.innerWidth<900&&S.tab)closeSheet();setMode(id==='ponte'?'navio':'maq',true);S.walk=id;const sp=WALK[id].spawn;F.p.set(sp[0],sp[1],sp[2]);F.yaw=sp[3];F.pitch=0;S.fp=true;applyLook();}
+function walk(id){const q=(id||'').split(':');id=q[0];F.fovT=40;if(window.innerWidth<900&&S.tab)closeSheet();setMode(id==='ponte'?'navio':'maq',true);S.walk=id;const sp=WALK[id].spawn;F.p.set(sp[0],sp[1],sp[2]);F.yaw=sp[3];F.pitch=0;F.ys=undefined;S.fp=true;
+ if(id==='ponte')navLoad(()=>{navMarkers();if(q[1]&&S.walk==='ponte')navSpawn(q[1]);applyLook();});applyLook();}
 function gavea(){setMode('navio',true);S.gavea=true;S.fp=true;F.p.set(NEST.x,NEST.y-.4,0);F.yaw=-PI/2;F.pitch=-.12;applyLook();openTab('gavea');}
 function exitAll(){const was=S.visit||S.walk||S.gavea;if(S.tab==='gavea')closeSheet();leave();if(was){S.mode='navio';setMode('navio');}}
 const Z0=V(0,0,0);
@@ -1682,6 +1738,9 @@ function surfY(list,O,x,z,y){if(list.solid){let b=null,blk=false;for(let i=0;i<l
 const keys={};
 function fpMove(dt){if(S.gavea)return;let f=(keys.w?1:0)-(keys.s?1:0),r=(keys.d?1:0)-(keys.a?1:0);if(!f&&!r)return;const sp=(S.walk?5:2.6)*dt,sx=-Math.sin(F.yaw),sz=-Math.cos(F.yaw),dx=(sx*f-sz*r)*sp,dz=(sz*f+sx*r)*sp;
  const list=S.visit?SETS[S.visit].surf:WALK[S.walk].surf,O=S.visit?SETS[S.visit].O:Z0;
+ if(S.walk==='ponte'&&NAV.d){const nS=Math.max(1,Math.ceil(Math.hypot(dx,dz)/.1)),ex=dx/nS,ez=dz/nS;const at=(x,z)=>{const a=navMove(F.p.x,F.p.z,F.p.y,x,z);if(a!==null)return a;return surfY(list,O,x,z,F.p.y);};
+  for(let i=0;i<nS;i++){let y=at(F.p.x+ex,F.p.z+ez);if(y!==null){F.p.x+=ex;F.p.z+=ez;F.p.y=y;continue;}y=at(F.p.x+ex,F.p.z);if(y!==null){F.p.x+=ex;F.p.y=y;continue;}y=at(F.p.x,F.p.z+ez);if(y!==null){F.p.z+=ez;F.p.y=y;continue;}break;}
+  portals();navLinks();if(S.where!==navZone(F.p.x,F.p.y))applyLook();return;}
  let y=surfY(list,O,F.p.x+dx,F.p.z+dz,F.p.y);if(y!==null){F.p.x+=dx;F.p.z+=dz;F.p.y=y;}
  else{y=surfY(list,O,F.p.x+dx,F.p.z,F.p.y);if(y!==null){F.p.x+=dx;F.p.y=y;}else{y=surfY(list,O,F.p.x,F.p.z+dz,F.p.y);if(y!==null){F.p.z+=dz;F.p.y=y;}}}
  if(S.visit||S.walk)portals();}
@@ -2475,7 +2534,7 @@ function animate(dt,time){const run=S.run;bergFadeStep(dt);
  smoke.forEach(sp=>{const u=sp.userData;if(run)u.life+=dt/6;if(u.life>=1){u.life=0;const f=funnelTops[u.f];sp.position.set(f.x+Math.random(),f.y+.5+Math.random(),(Math.random()-.5)*2);u.v.set(-Math.random(),3.6+Math.random(),(Math.random()-.5));u.on=Math.random()<.15+sim.burn;sp.material.color.setScalar(.26+Math.random()*.2);sp.material.rotation=Math.random()*6.28;u.rs=(Math.random()-.5)*.25;}
   if(run){sp.position.addScaledVector(u.v,dt);sp.position.x+=sim.smX*dt;}const k=u.life;sp.scale.setScalar(2.4+24*Math.pow(k,.75));if(run)sp.material.rotation+=(u.rs||0)*dt;sp.material.opacity=u.on?.42*Math.sin(PI*k)*Math.min(1,.2+sim.burn)*(1-.8*S.nf):0;sp.visible=smOn;});
  if(Math.abs(S.exT-S.ex)>.001){S.ex+=(S.exT-S.ex)*Math.min(1,dt*3.2);if(Math.abs(S.exT-S.ex)<.002){S.ex=S.exT;if(S.ex===0)setTimeout(applyLook,0);}items.forEach(it=>{it.o.position.copy(it.base).addScaledVector(it.ex,S.ex);});grid.position.y=-2-36*S.ex;}
- if(S.cut)clipSet();if(S.fp)fpMove(dt);floodStep(dt);rkStep(dt);if(flagU)flagU.uT.value=time;
+ if(S.cut)clipSet();if(S.fp)fpMove(dt);if(navG)navG.visible=S.walk==='ponte'&&S.fp;floodStep(dt);rkStep(dt);if(flagU)flagU.uT.value=time;
 
  if(scene.fog===uwF)uwF.density=(.42+.3*Math.max(0,uwD))/Math.max(110,cam.position.distanceTo(C.t));elxStep();if(S.tab==='sink'&&sk.play){const t=sk.t;sk.t=Math.min(176,t+dt*skRate(t));if(t<-.62&&sk.t>=-.62)bell3();if(t<-.4&&sk.t>=-.4)crashSnd();if(t<-.3&&sk.t>=-.3)wtdToggle(true);RK.T.forEach(q=>{if(t<q&&sk.t>=q)rocket();});SFX.forEach(q=>{if(t<q[0]&&sk.t>=q[0])sfx(q[1]);});if(sk.t>=176)sk.play=false;sinkApply();}
  const es=SETS.escadaria.g;if(es&&es.visible&&es.userData.cars)es.userData.cars.forEach(c=>{const u=((time*.16+c.ph)%2),v=u<1?u:2-u,q=Math.max(0,Math.min(1,(v-.25)/.5));c.o.position.y=3.2*q*q*(3-2*q);});
@@ -2650,7 +2709,10 @@ function ceilLamp(x,yc,z,g,i,d){const f=G();f.position.set(x,yc,z);g.add(f);cyl(
  [-1,1].forEach(s=>{const R=(x0,x1,a,b)=>W.surf.push([x0,x1,s>0?a:-b,s>0?b:-a,y]);
   R(72.45,76.1,4.5,6.2);R(72.45,75.4,6.2,7.4);R(72.4,74.75,7.4,8.4);R(72.1,74.15,8.4,9.4);R(71.95,73.55,9.4,14.35);
   R(69.45,72.6,3.75,6.75);R(69.45,70.3,3.0,3.85);R(68.3,68.85,3.0,3.7);R(64.65,68.75,3.65,6.6);});
- W.doors=[{p:[64.42,y,-5.3],n:[1,0],t:'radio'},{p:[64.42,y,5.3],n:[1,0],t:'capitao'}];
+ W.doors=[{p:[64.42,y,-5.3],n:[1,0],t:'radio'},{p:[64.42,y,5.3],n:[1,0],t:'capitao'},
+  /* convés dos Botes: entradas laterais da casa da Grande Escadaria (a ré dos aposentos dos oficiais) e porta do ginásio, a boreste; posições aproximadas */
+  {p:[40,28.98,8.75],n:[0,1],t:'escadaria'},{p:[40,28.98,-8.75],n:[0,-1],t:'escadaria'},{p:[33.5,28.98,8.75],n:[0,1],t:'ginasio'}];
+ [[40,8.75,'Grande Escadaria — entrada do convés dos Botes'],[40,-8.75,'Grande Escadaria — entrada do convés dos Botes'],[33.5,8.75,'Ginásio']].forEach(q=>CMD.doors.push({room:true,c:V(q[0],28.98,q[1]),lab:q[2]}));
  CMD.doors.push({room:true,c:V(64.45,Y0,-5.3),lab:'Corredor dos oficiais e sala Marconi'},{room:true,c:V(64.45,Y0,5.3),lab:'Aposentos do comandante'});
 
  /* ---- dica discreta perto de portas (substitui as placas grandes) ---- */
@@ -2702,7 +2764,7 @@ function cmdStep(dt){const now=performance.now(),k=Math.min(1,dt*7);
  /* luminárias das salas: escondidas quando se olha de cima de um cenário sem forro */
  if(S.visit&&!S.fp){LAMPS.forEach(f=>{f.getWorldPosition(_cmv);f.visible=cam.position.y<_cmv.y+.2;});}else if(LAMPS.length&&!LAMPS[0].visible)LAMPS.forEach(f=>f.visible=true);}
 
-window.__ship={items:items,STAFF:STAFF,mastG:mastG,berg:berg,bergLZ:bergLZ,bergClear:bergClear,hullHalf:hullHalf,bergL0:bergL0,hbF:hb,bergClearTrue:bergClearTrue,bergMin:bergMin,DSK:DSK,RP:RP,gavea:gavea,S:S,root:root,BF:BF,CMD:typeof CMD!=='undefined'?CMD:null,phoneRing:phoneRing,phoneAnswer:phoneAnswer,wtdToggle:wtdToggle,rootPos:rootPos,ZM:ZM,cam:cam,splitMesh:splitMesh,meshes:meshes,BTS:BTS,probe:(x,y,z,dx,dy,dz)=>{const r=new T.Raycaster(V(x,y,z),V(dx,dy,dz).normalize(),0,60),h=r.intersectObjects(meshes,false).filter(q=>q.object.userData.it.o.visible&&!q.object.userData.door);return h.length?[+h[0].distance.toFixed(2),h[0].object.userData.pid,h[0].object.userData.real.name||'']:null;},nav:nav,fx:fx,blowWhistle:blowWhistle,ringBell:ringBell,items:items,GLX:GLX,glbInfo:()=>({st:GL?'ok':'fallback',has:true}),seaMat:seaMat,SPL:SPL,sk:sk,sinkApply:sinkApply,SETS:SETS,travel:travel,S:S,sim:sim,tel:tel,fl:fl,setMode:setMode,goto:goto,openTab:openTab,visit:visit,walk:walk,gavea:gavea,startFP:startFP,sendOrder:sendOrder,C:C,F:F,keys:keys,hb:hb,CB:CB,BHTOP:BHTOP,BH:BH,WL:WL,root:root,cam:cam,sfx:sfx,crashSnd:crashSnd,rkBoom:rkBoom,rkLaunch:rkLaunch,ANC:ANC,ancToggle:ancToggle,ancStep:ancStep,fxG:fxG,sun:sun,hemi:hemi,fillL:fillL,R:R,scene:scene,SHD:SHD,uwPose:uwPose,BED:BED,stokers:stokers,stokerPose:stokerPose,berg:berg,SND:SND,fly:fly,preset:preset,sea:sea};
+window.__ship={items:items,STAFF:STAFF,mastG:mastG,berg:berg,bergLZ:bergLZ,bergClear:bergClear,hullHalf:hullHalf,bergL0:bergL0,hbF:hb,bergClearTrue:bergClearTrue,bergMin:bergMin,DSK:DSK,RP:RP,gavea:gavea,S:S,root:root,BF:BF,CMD:typeof CMD!=='undefined'?CMD:null,phoneRing:phoneRing,phoneAnswer:phoneAnswer,wtdToggle:wtdToggle,rootPos:rootPos,ZM:ZM,cam:cam,splitMesh:splitMesh,meshes:meshes,BTS:BTS,probe:(x,y,z,dx,dy,dz)=>{const r=new T.Raycaster(V(x,y,z),V(dx,dy,dz).normalize(),0,60),h=r.intersectObjects(meshes,false).filter(q=>q.object.userData.it.o.visible&&!q.object.userData.door);return h.length?[+h[0].distance.toFixed(2),h[0].object.userData.pid,h[0].object.userData.real.name||'']:null;},nav:nav,fx:fx,blowWhistle:blowWhistle,ringBell:ringBell,items:items,GLX:GLX,glbInfo:()=>({st:GL?'ok':'fallback',has:true}),seaMat:seaMat,SPL:SPL,sk:sk,sinkApply:sinkApply,SETS:SETS,travel:travel,S:S,sim:sim,tel:tel,fl:fl,setMode:setMode,goto:goto,openTab:openTab,visit:visit,walk:walk,NAV:NAV,navNear:navNear,navMove:navMove,act:act,gavea:gavea,startFP:startFP,sendOrder:sendOrder,C:C,F:F,keys:keys,hb:hb,CB:CB,BHTOP:BHTOP,BH:BH,WL:WL,root:root,cam:cam,sfx:sfx,crashSnd:crashSnd,rkBoom:rkBoom,rkLaunch:rkLaunch,ANC:ANC,ancToggle:ancToggle,ancStep:ancStep,fxG:fxG,sun:sun,hemi:hemi,fillL:fillL,R:R,scene:scene,SHD:SHD,uwPose:uwPose,BED:BED,stokers:stokers,stokerPose:stokerPose,berg:berg,SND:SND,fly:fly,preset:preset,sea:sea};
 requestAnimationFrame(loop);
 });
 })();
