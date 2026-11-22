@@ -69,3 +69,16 @@ enrich('leitura',(g,s)=>{const d=9;[-4,-1.5,1.5,4].forEach(x=>{const z=d/2-.8;pc
 enrich('cafe',(g,s)=>{const w=13,d=5,h=2.9;const lv=new T.InstancedMesh(new T.SphereGeometry(.06,5,4),M(0x3f6e34,{roughness:.8}),360),m4=new T.Matrix4();let k=0;
  for(let x=-w/2+.6;x<w/2-.4&&k<360;x+=1.3){if(Math.abs(Math.abs(x)-3)<.8)continue;for(let i=0;i<30&&k<360;i++){const y=.3+i*.085,zz=-d/2+.05+Math.random()*.03;m4.makeTranslation(x+Math.sin(i*.9)*.18,y,zz);lv.setMatrixAt(k++,m4);}}
  lv.count=k;g.add(lv);});
+/* ---- cabines das três classes: coletes salva-vidas de cortiça guardados na cabine, vigias, cortinas dos beliches da 2ª classe,
+   tapete e campainha do camareiro na 1ª. Posições aproximadas. ---- */
+enrich('cabines',g=>{const lb=(x,y,z,ry,n)=>{for(let i=0;i<n;i++){const a=G();a.position.set(x+Math.sin(ry)*i*.06,y+i*.07,z+Math.cos(ry)*i*.06);a.rotation.y=ry;pc(a,bx(.5,.06,.34),km(0xefe9d8),0,0,0);for(let j=-1;j<=1;j++)pc(a,bx(.012,.064,.34),km(0xb9b2a0),j*.16,0,0);g.add(a);}};
+ const port=(x,y,z,ry)=>{const r=new T.Mesh(new T.TorusGeometry(.17,.03,8,24),mBrass);r.position.set(x,y,z);r.rotation.y=ry;g.add(r);const gl=new T.Mesh(new T.CircleGeometry(.16,24),new T.MeshStandardMaterial({color:0xa9c8da,emissive:0x5a7f96,emissiveIntensity:.6,roughness:.1}));gl.position.set(x+Math.sin(ry)*-.005,y,z+Math.cos(ry)*-.005);gl.rotation.y=ry;g.add(gl);};
+ /* 1ª classe */
+ lb(-1.6,2.04,1.8,0,2);port(1.5,1.65,-2.08,0);floorOver(g,2.2,1.4,.6,.3,ctex(128,128,(c,W,H)=>{c.fillStyle='#6a2a30';c.fillRect(0,0,W,H);c.strokeStyle='#c9a24a';c.lineWidth=4;c.strokeRect(8,8,W-16,H-16);}),2.2).position.y=.003;
+ pc(g,bx(.07,.1,.02),mBrass,-.35,.95,-2.08);sph(.015,km(0xf4f1e2),-.35,.95,-2.065,g);
+ /* 2ª classe: cortinas meio fechadas na frente dos dois leitos, vigia sobre o sofá e coletes no alto */
+ const ct=new T.MeshStandardMaterial({map:ctex(64,128,(c,W,H)=>{c.fillStyle='#2f4a6a';c.fillRect(0,0,W,H);for(let x=0;x<W;x+=8){c.fillStyle='rgba(0,0,0,.18)';c.fillRect(x,0,3,H);}}),side:DS,roughness:.9});
+ [.45,1.35].forEach(y=>{const m=new T.Mesh(new T.PlaneGeometry(.7,.75),ct);m.position.set(-1.05,y+.55,6.58);g.add(m);pc(g,bx(2,.02,.02),mBrass,-.45,y+.93,6.58);});
+ port(-.3,1.6,8.28,PI);pc(g,bx(.38,.03,.6),km(0x6e2f1c),-1.3,1.955,7.4);lb(-1.3,2.0,7.4,PI/2,2);
+ /* 3ª classe: coletes numa prateleira alta */
+ pc(g,bx(.9,.03,.36),km(0xdcdcd6),0,2.0,11.6);lb(0,2.05,11.6,0,3);});
