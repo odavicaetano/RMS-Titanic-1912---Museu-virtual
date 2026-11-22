@@ -1,3 +1,4 @@
+const MLAMP={q:[],i:0,t:0,on:0,a:0};/* estado da lâmpada de sinais da asa de boreste */
 /* ================= COMANDO: casa do leme, salas de cartas e de navegação, asas da ponte, telefones, portas estanques ================= */
 /* Os espaços ficam no lugar real, dentro do modelo: entra-se pelas portas do próprio navio, que se abrem quando o visitante se aproxima.
    Só a sala do comandante e a sala Marconi, mais a ré, continuam sendo cenários à parte (com transição). */
@@ -122,15 +123,41 @@ function ceilLamp(x,yc,z,g,i,d){const f=G();f.position.set(x,yc,z);g.add(f);cyl(
  [[40,8.75,'Grande Escadaria — entrada do convés dos Botes'],[40,-8.75,'Grande Escadaria — entrada do convés dos Botes'],[33.5,8.75,'Ginásio']].forEach(q=>CMD.doors.push({room:true,c:V(q[0],28.98,q[1]),lab:q[2]}));
  CMD.doors.push({room:true,c:V(64.45,Y0,-5.3),lab:'Corredor dos oficiais e sala Marconi'},{room:true,c:V(64.45,Y0,5.3),lab:'Aposentos do comandante'});
 
- /* ---- asa de boreste: lâmpada de sinais Morse e foguetes de socorro (usados por Boxhall na noite do naufrágio); forma aproximada ---- */
+ /* ---- asa de boreste: lâmpada de sinais Morse e foguetes de socorro (usados por Boxhall na noite do naufrágio); forma aproximada ----
+    Lâmpada elétrica de sinais sobre pedestal, com a cabeça acima da proteção da asa (topo a ~1,38 m do piso) para o facho passar livre.
+    O operador abria e fechava um obturador de palhetas: luz contínua por trás, pontos e traços formados pelas palhetas. */
  {const y=29.62,br=M(0xb8924a,{metalness:.8,roughness:.32}),blk=M(0x1c1c1c,{roughness:.6}),wdB=M(0x6e4a28,{roughness:.7});
-  const lm=G();cyl(.035,.045,1.05,blk,73.4,y+.52,11.2,lm,null,10);const hd=G();hd.position.set(73.4,y+1.2,11.2);
-  box(.26,.3,.26,br,0,0,0,hd);cyl(.11,.11,.05,M(0xf4f1e2,{emissive:0x332a10,roughness:.2}),.15,0,0,hd,'x',20);cyl(.13,.13,.04,br,.13,0,0,hd,'x',20);
-  for(let i=0;i<4;i++)box(.02,.03,.24,br,.165,-.09+i*.06,0,hd);cyl(.03,.04,.08,br,0,.19,0,hd);box(.05,.14,.03,blk,-.15,-.05,0,hd);lm.add(hd);
+  const lm=G();cyl(.09,.12,.05,blk,73.62,y+.025,11.2,lm,null,14);cyl(.035,.045,1.55,blk,73.62,y+.8,11.2,lm,null,10);
+  const hd=G();hd.position.set(73.62,y+1.73,11.2);hd.rotation.y=-.3;
+  box(.26,.3,.26,br,0,0,0,hd);cyl(.13,.13,.04,br,.13,0,0,hd,'x',24);cyl(.035,.045,.1,br,0,.19,0,hd,null,10);box(.1,.03,.2,br,0,.25,0,hd);
+  const lens=cyl(.11,.11,.02,M(0xf4f1e2,{emissive:0xfff2d0,emissiveIntensity:.05,roughness:.15}),.152,0,0,hd,'x',24);
+  /* obturador: cinco palhetas horizontais na frente da lente; fechadas ficam em pé, abertas giram 90° */
+  const sl=[];for(let i=0;i<5;i++){const p=G();p.position.set(.17,-.088+i*.044,0);box(.012,.046,.25,br,0,0,0,p);hd.add(p);sl.push(p);}
+  /* gatilho do obturador atrás da cabeça e alça */
+  const tr=G();tr.position.set(-.14,-.06,0);box(.12,.02,.03,blk,-.06,0,0,tr);hd.add(tr);box(.03,.12,.03,blk,-.15,.02,.0,hd);lm.add(hd);
+  /* facho (cone aditivo, mais forte junto à lente) e brilho da lente */
+  const bt=ctex(4,128,(c,w,h)=>{const g2=c.createLinearGradient(0,0,0,h);g2.addColorStop(0,'rgba(255,255,255,1)');g2.addColorStop(.3,'rgba(255,255,255,.35)');g2.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g2;c.fillRect(0,0,w,h);});
+  const bm=new T.MeshBasicMaterial({color:0xfff3dc,map:bt,transparent:true,opacity:0,blending:T.AdditiveBlending,depthWrite:false,side:DS});
+  const L=36,beam=new T.Mesh(new T.ConeGeometry(1.6,L,24,1,true),bm);beam.rotation.z=PI/2;beam.position.set(.17+L/2,0,0);beam.userData.noPick=true;beam.visible=false;hd.add(beam);
+  const gt=ctex(64,64,(c,w,h)=>{const g2=c.createRadialGradient(32,32,0,32,32,32);g2.addColorStop(0,'rgba(255,250,235,1)');g2.addColorStop(.25,'rgba(255,240,200,.6)');g2.addColorStop(1,'rgba(255,240,200,0)');c.fillStyle=g2;c.fillRect(0,0,w,h);});
+  const glare=new T.Sprite(new T.SpriteMaterial({map:gt,color:0xffffff,transparent:true,opacity:0,blending:T.AdditiveBlending,depthWrite:false}));glare.position.set(.2,0,0);glare.scale.set(1.6,1.6,1);glare.userData.noPick=true;hd.add(glare);
   regItem(add('lampadaMorse',lm,{layer:'ext',clip:false}));
-  const rk=G();const so=cyl(.05,.05,.38,blk,73.45,y+1.18,12.25,rk,null,10);so.rotation.z=-.25;cyl(.06,.06,.05,blk,73.4,y+1.0,12.25,rk);
+  MLAMP.sl=sl;MLAMP.tr=tr;MLAMP.lens=lens;MLAMP.beam=beam;MLAMP.bm=bm;MLAMP.glare=glare;
+  /* foguetes: soquete de ferro preso por duas braçadeiras à face interna da proteção (x≈73,87), com a boca acima do topo; caixa no piso */
+  const rk=G();const so=cyl(.045,.05,.42,blk,73.79,y+1.36,12.25,rk,null,12);[y+1.22,y+1.46].forEach(yy=>{box(.1,.035,.11,blk,73.82,yy,12.25,rk);});
   box(.7,.3,.4,wdB,72.5,y+.15,12.1,rk);box(.72,.04,.42,M(0x5a3a1e,{roughness:.7}),72.5,y+.32,12.1,rk);for(let i=0;i<4;i++)cyl(.03,.03,.5,M(0xdedad0),72.32+i*.12,y+.16,12.1,rk,'x',8);
   regItem(add('foguetes',rk,{layer:'ext',clip:false}));}
+ /* sequenciador da lâmpada: unidade de 0,16 s (ritmo plausível de sinalização luminosa manual); ponto = 1, traço = 3, intervalo entre
+    sinais = 1, entre letras = 3, entre palavras = 7. SOS vai como um só sinal (...---...), sem pausa entre as letras. Demonstração, não reprodução de um sinal do Titanic. */
+ function lampSeq(groups){const u=.16,q=[];groups.forEach((w,wi)=>{if(wi)q.push([0,7*u]);w.forEach((ch,ci)=>{if(ci)q.push([0,3*u]);ch.split('').forEach((s,si)=>{if(si)q.push([0,u]);q.push([1,(s==='-'?3:1)*u]);});});});q.push([0,u]);return q;}
+ function lampPlay(k){const sos='...---...',aa=MORSE.A+MORSE.A;MLAMP.q=k==='sos'?lampSeq([[sos],[sos]]):lampSeq([[aa],[aa],[aa]]);MLAMP.i=0;MLAMP.t=0;MLAMP.k=k;ac();
+  if(S.walk==='ponte')flash(k==='sos'?'Lâmpada: SOS  ···−−−···  (demonstração)':'Lâmpada: chamada geral AA AA AA  (demonstração)');}
+ document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('[data-lamp]');if(b){e.preventDefault();lampPlay(b.dataset.lamp);}});
+ MLAMP.step=lampStep;
+ function lampClick(){if(!AC||!S.snd)return;try{lay({D:.035,ty:'bandpass',f:2200,q:3,v:.06,a:.002});}catch(_){}}
+ function lampStep(dt){const L=MLAMP;if(!L.sl)return;let want=0;if(L.q.length){L.t+=dt;while(L.i<L.q.length&&L.t>=L.q[L.i][1]){L.t-=L.q[L.i][1];L.i++;}if(L.i>=L.q.length){L.q=[];}else want=L.q[L.i][0];}
+  if(want!==L.on){L.on=want;lampClick();}const a0=L.a;L.a+=(want-L.a)*Math.min(1,dt*45);if(Math.abs(L.a-a0)<1e-4&&L.a<.002&&!want)return;
+  const a=L.a;L.sl.forEach(p=>p.rotation.z=a*PI/2);L.tr.rotation.z=-.35*a;L.lens.material.emissiveIntensity=.05+2.2*a;const nt=S.night?1.5:1;L.bm.opacity=.16*a*nt;L.beam.visible=a>.01;L.glare.material.opacity=Math.min(1,a*1.1);}
  /* ---- dica discreta perto de portas (substitui as placas grandes) ---- */
  const tip=document.createElement('div');tip.id='doorTip';tip.style.cssText='position:fixed;left:50%;bottom:132px;transform:translateX(-50%);padding:6px 12px;border-radius:8px;background:rgba(14,22,34,.72);color:#efe3c2;font:500 13px/1.2 Barlow,system-ui,sans-serif;letter-spacing:.03em;pointer-events:none;opacity:0;transition:opacity .35s;z-index:30';document.body.appendChild(tip);CMD.tip=tip;
 })();
@@ -166,7 +193,7 @@ function wtdToggle(force){const W=CMD.wtd;if(force!==undefined&&W.closed===force
  tone(120,.12,'square',.05);tone(85,.25,'sine',.12,.05);tone(2400,.03,'square',.02,.06);if(W.closed){cmdTrill(1,880,1060,18,.035);setTimeout(()=>{tone(48,1.2,'sine',.12);tone(62,.9,'triangle',.05,.1);},1300);}
  if(force===undefined)flash(W.closed?'Chave em CLOSED: o eletroímã solta as portas estanques das salas de caldeiras e máquinas, que descem pelo próprio peso.':'Chave em OPEN: as portas só se reabrem à mão, no local.');}
 function cmdReset(){if(CMD.ringN)CMD.ringN.stop();CMD.call=false;CMD.ring=0;CMD.wtd.closed=false;CMD.wtd.tg=0;}
-function cmdStep(dt){const now=performance.now(),k=Math.min(1,dt*7);
+function cmdStep(dt){const now=performance.now(),k=Math.min(1,dt*7);if(MLAMP.step)MLAMP.step(dt);
  /* portas: abrem com o visitante perto, fecham devagar quando ele se afasta */
  let tipS='';if(S.walk==='ponte'){CMD.doors.forEach(d=>{const r=Math.hypot(F.p.x-d.c.x,F.p.z-d.c.z);if(r<1.5&&d.lab)tipS=d.lab;if(d.h){const tg=r<1.55?d.open:(r>2.3?0:null);if(tg!==null)d.a+=(tg-d.a)*Math.min(1,dt*(tg?4:2.2));d.h.rotation.y=d.a;}});}
  else CMD.doors.forEach(d=>{if(d.h&&d.a){d.a+=(0-d.a)*k;d.h.rotation.y=d.a;}});
