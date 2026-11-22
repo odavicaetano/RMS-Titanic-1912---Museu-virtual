@@ -19,7 +19,7 @@ assets/audio/ship/              apito, sino e o hino tocado pelo botão do violi
 assets/images/historical/       imagens históricas das fichas, por tema (ver CREDITOS.md)
 ingresso/index.html             gerador de ingressos (página própria, aberta num painel do museu)
 assets/models/conves_nav.js     malha de navegação dos conveses (gerada; ver abaixo)
-src/                            módulos-fonte e build.mjs (gera o index.html)
+src/                            módulos-fonte (m3d_interiores.js: acabamentos dos interiores) e build.mjs
 tools/                          imagens históricas e gerador da malha de navegação
 CREDITOS.md                     autoria, licenças e fontes
 ```
