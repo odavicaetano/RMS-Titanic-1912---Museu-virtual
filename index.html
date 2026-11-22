@@ -2092,7 +2092,7 @@ function zoomHit(x,y){const now=performance.now();if(Math.abs(x-ZM.hx)<10&&Math.
  const rc=cv.getBoundingClientRect(),W=Math.max(1,rc.width|0),H=Math.max(1,rc.height|0),px=Math.max(0,Math.min(W-1,(x-rc.left)|0)),py=Math.max(0,Math.min(H-1,(y-rc.top)|0));
  const sv=[sky.visible,stars.visible],au=R.shadowMap.autoUpdate,ca=R.getClearAlpha();R.getClearColor(_zC);
  try{cam.setViewOffset(W,H,px,py,1,1);sky.visible=false;stars.visible=false;scene.overrideMaterial=_zDM;R.shadowMap.autoUpdate=false;R.setClearColor(0xffffff,1);R.setRenderTarget(_zRT);R.clear();R.render(scene,cam);R.readRenderTargetPixels(_zRT,0,0,1,1,_zPx);}
- catch(e){}finally{R.setRenderTarget(null);scene.overrideMaterial=null;R.shadowMap.autoUpdate=au;R.setClearColor(_zC,ca);sky.visible=sv[0];stars.visible=sv[1];cam.clearViewOffset();}
+ catch(e){}finally{R.setRenderTarget(null);scene.overrideMaterial=null;R.shadowMap.autoUpdate=au;R.setClearColor(_zC,ca);sky.visible=sv[0];stars.visible=sv[1];cam.clearViewOffset();voApply();}
  const d=.99609375*(_zPx[0]/255/16777216+_zPx[1]/255/65536+_zPx[2]/255/256+_zPx[3]/255);if(d>.99999)return null;
  ZM.hit=new T.Vector3((px+.5)/W*2-1,-((py+.5)/H*2-1),d*2-1).unproject(cam);return ZM.hit;}
 function zoomAt(k,x,y){if(S.fp)return;tween=null;const r0=C.r*Math.exp(ZM.lr),r1=Math.max(.35,Math.min(2500,r0*k));ZM.lr+=Math.log(r1/r0);ZM.on=true;
@@ -2859,8 +2859,14 @@ function animate(dt,time){const run=S.run;bergFadeStep(dt);
   if(S.tab==='tele'){const e=(id,v)=>{const x=document.getElementById(id);if(x)x.textContent=v;};e('kA',Math.round(sim.rpm));e('kT',Math.round(sim.trpm));e('kK',nf(Math.abs(sim.kn),1));e('kKm',nf(Math.abs(sim.kn)*1.852,1));e('kH',Math.round(((266+nav.h*180/PI)%360+360)%360)+'°');}}}
 
 /* ================= LAÇO ================= */
+/* deslocamento suave da vista (painel lateral no computador, painel de baixo no celular) */
+const VO={x:0,y:0,tx:0,ty:0,snap:true};
+function voApply(){const w=window.innerWidth,h=window.innerHeight;if(Math.abs(VO.x)<.5&&Math.abs(VO.y)<.5)cam.clearViewOffset();else cam.setViewOffset(w,h,VO.x,VO.y,w,h);}
+function voStep(dt){if(VO.x===VO.tx&&VO.y===VO.ty)return;const k=1-Math.exp(-Math.min(dt,.1)/.12);VO.x+=(VO.tx-VO.x)*k;VO.y+=(VO.ty-VO.y)*k;if(Math.abs(VO.tx-VO.x)<.5&&Math.abs(VO.ty-VO.y)<.5){VO.x=VO.tx;VO.y=VO.ty;}voApply();}
 function resize(){const w=window.innerWidth,h=window.innerHeight;R.setSize(w,h,false);cam.aspect=w/h;const bh=$('#bottom').offsetHeight;sheet.style.bottom=(w>=900?bh+12:bh)+'px';
- if(S.tab&&sheet.classList.contains('show')&&!S.fp){const r=sheet.getBoundingClientRect();if(r.width<w*.7)cam.setViewOffset(w,h,r.width/2,0,w,h);else cam.setViewOffset(w,h,0,Math.min(r.height,h*.5)/2,w,h);}else cam.clearViewOffset();
+ /* deslocamento da vista quando o painel abre: só define o alvo; voStep leva a câmera até lá aos poucos */
+ if(S.tab&&sheet.classList.contains('show')&&!S.fp){const r=sheet.getBoundingClientRect();if(r.width<w*.7){VO.tx=r.width/2;VO.ty=0;}else{VO.tx=0;VO.ty=Math.min(r.height,h*.5)/2;}}else{VO.tx=0;VO.ty=0;}
+ if(S.fp||VO.snap){VO.x=VO.tx;VO.y=VO.ty;VO.snap=false;}voApply();
  cam.updateProjectionMatrix();}
 window.addEventListener('resize',resize);
 /* hélices: micropartículas arrastadas em espiral pelo fluxo (só aparecem com a câmera dentro d'água) */
@@ -2895,7 +2901,7 @@ if(SHD.want){R.shadowMap.enabled=true;R.shadowMap.type=SHD.mob?T.PCFShadowMap:T.
  meshes.forEach(m=>{if(m.userData.keep||m.userData.fire||m.userData.glow)return;m.castShadow=true;m.receiveShadow=true;});}
 function shdSet(){const on=SHD.want&&!SHD.off&&GL&&!S.bp&&!S.ghost&&!S.cut&&S.mode!=='conveses'&&S.tab!=='sink'&&!S.visit&&!S.walk;if(sun.castShadow!==on)sun.castShadow=on;}
 let last=performance.now();
-function loop(now){requestAnimationFrame(loop);if(S.tk){last=now;return;}const rdt=Math.min(.3,(now-last)/1000),dt=Math.min(.05,rdt);last=now;animate(dt,now/1000);fxStep(dt,now/1000);camUpdate(rdt);root.updateWorldMatrix(true,false);/* etiquetas usam a pose atual do navio (sem atraso de um quadro nas curvas) */labelsUpdate();if(S.tab==='sink'&&sk.t>=SPL&&(sk.t<161.2||sk.t>=161.5))sinkRender();else R.render(scene,cam);}
+function loop(now){requestAnimationFrame(loop);if(S.tk){last=now;return;}const rdt=Math.min(.3,(now-last)/1000),dt=Math.min(.05,rdt);last=now;animate(dt,now/1000);fxStep(dt,now/1000);voStep(rdt);camUpdate(rdt);root.updateWorldMatrix(true,false);/* etiquetas usam a pose atual do navio (sem atraso de um quadro nas curvas) */labelsUpdate();if(S.tab==='sink'&&sk.t>=SPL&&(sk.t<161.2||sk.t>=161.5))sinkRender();else R.render(scene,cam);}
 resize();C.r=Math.max(185,rFor(105));applyLook();camUpdate(0);
 /* pré-aquecimento do fundo do mar: compila os shaders e envia à GPU leito, destroços, partículas e sedimentos ainda na tela de carga */
 function uwWarm(){const L=[bedG,snow].concat(sedi),vis=L.map(o=>o.visible),fc=[],rt=new T.WebGLRenderTarget(64,64);rt.texture.encoding=R.outputEncoding;
