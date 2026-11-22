@@ -87,7 +87,7 @@ mkRoom('corredor','Corredor da 1ª classe (convés B)',26,2.5,1.9,whiteT,carpetP
  wrap('escadaria',(g,s)=>{addDoor(g,s,-6.5,0,9,0,-1,'lounge');addDoor(g,s,-6.5,0,-9,0,1,'leitura');addDoor(g,s,5.5,0,9,0,-1,'corredor');addDoor(g,s,6.3,3.2,-9,0,1,'ginasio');addDoor(g,s,6.3,3.2,9,0,-1,'radio');addDoor(g,s,-8,3.2,6.5,1,0,'ponte');
   const gm=new T.MeshStandardMaterial({map:gT,transparent:true,alphaTest:.3,side:DS}),cars=[];[-2.4,0,2.4].forEach((z,i)=>{[0,3.2].forEach(y=>{const f=new T.Mesh(new T.PlaneGeometry(1.6,2.4),gm);f.position.set(6.55,y+1.25,z);f.rotation.y=-PI/2;f.userData.door='lift';g.add(f);});
    [-.85,.85].forEach(o=>pc(g,bx(.12,6.2,.12),km(0x6a4420),6.55,3.1,z+o));const c=G();c.position.set(7.3,0,z);pc(c,bx(1.3,.08,1.5),km(0x6e2f1c),0,.04,0);pc(c,bx(1.3,.08,1.5),km(0x6e2f1c),0,2.3,0);pc(c,bx(.06,2.3,1.5),mT(mahT,1,1),.62,1.17,0);sph(.08,glow(0xffe2a0),0,2.15,0,c);g.add(c);cars.push({o:c,ph:i*2.1});});
-  pc(g,bx(1.4,6.2,7.4),km(0x1a1512),7.32,3.1,0).material.side=T.BackSide;g.userData.cars=cars;(s.doors=s.doors||[]).push({p:[6.2,0,0],n:[-1,0],t:'lift'});(s.doors).push({p:[6.2,3.2,0],n:[-1,0],t:'lift'});});
+  pc(g,bx(1.4,6.17,7.4),km(0x1a1512),7.32,3.105,0).material.side=T.BackSide;g.userData.cars=cars;(s.doors=s.doors||[]).push({p:[6.2,0,0],n:[-1,0],t:'lift'});(s.doors).push({p:[6.2,3.2,0],n:[-1,0],t:'lift'});});
  if(!GL)wrap('ponte',(g,s)=>{addDoor(g,s,-5.84,0,2.6,1,0,'capitao');addDoor(g,s,-5.95,0,-8,1,0,'radio');addDoor(g,s,-5.95,0,8,1,0,'escadaria');});
  wrap('radio',(g,s)=>{addDoor(g,s,-3,0,1.2,1,0,'ponte');
  const pn=(w,h,fn)=>new T.MeshStandardMaterial({map:ctex(256,Math.round(256*h/w),fn),roughness:.45});
@@ -102,7 +102,7 @@ if(GL){SETS.ponte={n:'Ponte de comando',ship:true};
  {
   /* estrado de teca do timoneiro, atrás do timão principal */
   {const e=G(),tk=M(0x8a5a2e,{roughness:.7});for(let i=0;i<7;i++)box(.085,.035,.9,tk,70.02+i*.11,29.6,.02,e);box(.76,.03,.06,tk,70.35,29.575,-.36,e);box(.76,.03,.06,tk,70.35,29.575,.4,e);add('estrado',e,{layer:'ext',clip:false});}}}
-SETS.escadaria.ph='Titanic grand staircase';SETS.ponte.ph='Titanic bridge wheelhouse';SETS.radio.ph='Titanic Marconi wireless room';SETS.cabines.ph='Titanic stateroom';SETS.jantar.ph='Titanic dining saloon';
+SETS.escadaria.surf.solid=true;SETS.escadaria.ph='Titanic grand staircase';SETS.ponte.ph='Titanic bridge wheelhouse';SETS.radio.ph='Titanic Marconi wireless room';SETS.cabines.ph='Titanic stateroom';SETS.jantar.ph='Titanic dining saloon';
 Object.keys(SETS).forEach((k,i)=>{SETS[k].O=V((i%6)*160-400,-600-Math.floor(i/6)*200,0);});
 /* destinos do elevador (os elevadores da 1ª classe serviam dos conveses A ao E) */
 const LIFT=[['A','Convés A — Grande Escadaria','escadaria'],['B','Convés B — corredor, camarotes, restaurante','corredor'],['C','Convés C — camarotes de 1ª classe','cabines'],['D','Convés D — recepção e salão de jantar','jantar'],['E','Convés E — e escada até a piscina (F)','piscina']];

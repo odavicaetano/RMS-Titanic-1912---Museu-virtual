@@ -376,6 +376,8 @@ void main(){
   float wk=mix(s3*(.35+.75*sw),wide*.8,smoothstep(45.,190.,dw))*exp(-dw/420.)*smoothstep(4.,46.,dw);f+=wk*(.3+1.15*tur);col=mix(col,mix(vec3(.05,.33,.36),vec3(.02,.06,.08),uN),clamp(wk*.55,0.,.6));}
  /* carneirinhos raros nas cristas mais altas (cobertura de espuma do .blend), recortados por dois ruídos */
  f+=(1.-.55*uN)*.75*smoothstep(.5,.85,ah)*smoothstep(.55,.82,fbm(RT*mp*.11+nz))*smoothstep(1400.,200.,dist);
+ /* faixas de espuma alongadas no sentido do avanço: correm junto ao casco na velocidade do navio e dão a noção de deslocamento */
+ f+=(1.-.55*uN)*max(A,.4)*.62*smoothstep(.62,.8,fbm(mp*vec2(.5,.15)+vec2(nz*.5,nz*1.3)))*smoothstep(.0,.55,ah+.45)*smoothstep(420.,60.,dist);
  if(uB.w>0.){float bd=bergD(p),ne=exp(-max(bd,0.)/7.);col=mix(col,mix(vec3(.72,.82,.88),vec3(.08,.1,.13),uN),.32*ne*fr*smoothstep(-1.,1.5,bd));col*=1.-.12*ne*(1.-fr);}
  f=clamp(f-.28,0.,1.);f=smoothstep(0.,.75,f);col=mix(col,mix(vec3(.93,.96,.97),vec3(.3,.34,.4),uN),f);
  col=mix(col,mix(vec3(.6,.72,.84),vec3(.045,.06,.09),uN),smoothstep(500.,5200.,dist));

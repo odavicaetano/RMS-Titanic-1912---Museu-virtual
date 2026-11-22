@@ -4,9 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>RMS Titanic 1912 - Museu virtual 3D</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a1120">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Titanic 3D">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cline%20x1%3D%2232%22%20y1%3D%2232%22%20x2%3D%2261.0%22%20y2%3D%2232.0%22%20stroke%3D%22%23caa25a%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22/%3E%3Ccircle%20cx%3D%2261.0%22%20cy%3D%2232.0%22%20r%3D%223.4%22%20fill%3D%22%23caa25a%22/%3E%3Cline%20x1%3D%2232%22%20y1%3D%2232%22%20x2%3D%2252.5%22%20y2%3D%2252.5%22%20stroke%3D%22%23caa25a%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22/%3E%3Ccircle%20cx%3D%2252.5%22%20cy%3D%2252.5%22%20r%3D%223.4%22%20fill%3D%22%23caa25a%22/%3E%3Cline%20x1%3D%2232%22%20y1%3D%2232%22%20x2%3D%2232.0%22%20y2%3D%2261.0%22%20stroke%3D%22%23caa25a%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22/%3E%3Ccircle%20cx%3D%2232.0%22%20cy%3D%2261.0%22%20r%3D%223.4%22%20fill%3D%22%23caa25a%22/%3E%3Cline%20x1%3D%2232%22%20y1%3D%2232%22%20x2%3D%2211.5%22%20y2%3D%2252.5%22%20stroke%3D%22%23caa25a%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22/%3E%3Ccircle%20cx%3D%2211.5%22%20cy%3D%2252.5%22%20r%3D%223.4%22%20fill%3D%22%23caa25a%22/%3E%3Cline%20x1%3D%2232%22%20y1%3D%2232%22%20x2%3D%223.0%22%20y2%3D%2232.0%22%20stroke%3D%22%23caa25a%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22/%3E%3Ccircle%20cx%3D%223.0%22%20cy%3D%2232.0%22%20r%3D%223.4%22%20fill%3D%22%23caa25a%22/%3E%3Cline%20x1%3D%2232%22%20y1%3D%2232%22%20x2%3D%2211.5%22%20y2%3D%2211.5%22%20stroke%3D%22%23caa25a%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22/%3E%3Ccircle%20cx%3D%2211.5%22%20cy%3D%2211.5%22%20r%3D%223.4%22%20fill%3D%22%23caa25a%22/%3E%3Cline%20x1%3D%2232%22%20y1%3D%2232%22%20x2%3D%2232.0%22%20y2%3D%223.0%22%20stroke%3D%22%23caa25a%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22/%3E%3Ccircle%20cx%3D%2232.0%22%20cy%3D%223.0%22%20r%3D%223.4%22%20fill%3D%22%23caa25a%22/%3E%3Cline%20x1%3D%2232%22%20y1%3D%2232%22%20x2%3D%2252.5%22%20y2%3D%2211.5%22%20stroke%3D%22%23caa25a%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22/%3E%3Ccircle%20cx%3D%2252.5%22%20cy%3D%2211.5%22%20r%3D%223.4%22%20fill%3D%22%23caa25a%22/%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2232%22%20r%3D%2219%22%20fill%3D%22none%22%20stroke%3D%22%238a5a2e%22%20stroke-width%3D%226%22/%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2232%22%20r%3D%2219%22%20fill%3D%22none%22%20stroke%3D%22%23caa25a%22%20stroke-width%3D%221.5%22/%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2232%22%20r%3D%226%22%20fill%3D%22%23caa25a%22/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+#pwaI{position:fixed;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:60;display:none;align-items:center;gap:4px;background:var(--panel);border:1px solid var(--line2);border-radius:20px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font:600 12px "Barlow Condensed",sans-serif;letter-spacing:.04em}#pwaI.show{display:flex}#pwaI button{background:none;border:0;color:var(--ink);font:inherit;cursor:pointer;padding:8px 6px 8px 12px;letter-spacing:inherit}#pwaI button+button{padding:8px 10px 8px 4px;color:var(--dim)}
 :root{--bg:#0a1120;--ink:#e6eef8;--dim:#93a7bf;--line:#7fd1ff;--line2:rgba(127,209,255,.22);--panel:rgba(9,19,34,.82);--warn:#ffb347;--bad:#ff6b5e;--ok:#6fe0a5;--brass:#d9b36a}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:Barlow,system-ui,sans-serif;font-size:14px}
@@ -244,7 +252,9 @@ figure.hist{margin:12px 0 0;border:1px solid var(--line2);background:rgba(0,0,0,
 .rb.horn.hit .ic,.rb.bell.hit .ic{filter:drop-shadow(0 0 3px rgba(255,236,170,.9))}
 .shb{display:flex;align-items:center;gap:2px}#sheetE .ic{width:16px;height:16px}
 @media (max-width:899px){#sheet.tall{max-height:34vh}#sheet.tall.big{max-height:80vh}#sheet.tall:not(.big) .skTop .kv,#sheet.tall:not(.big) #skev>.note{display:none}#sheet.tall:not(.big) #sheetBody{padding:6px 10px 8px}#sheet.tall:not(.big) .ev p{font-size:12px;line-height:1.35;margin:2px 0 0}#sheet.tall:not(.big) .ev{padding:5px 8px}#sheet.tall:not(.big) .skch .btn{padding:4px 7px}}
-@media (min-width:900px){#sheetE{display:none!important}}
+@media (min-width:900px){#sheetE,.shc{display:none!important}}
+.shc{width:28px;height:28px;border-radius:50%!important;border:1px solid var(--line2)!important;background:rgba(255,255,255,.06)!important;padding:0!important;display:inline-flex;align-items:center;justify-content:center;margin-right:4px;transition:opacity .2s,background .2s}.shc .ic{width:15px;height:15px}.shc:active{background:rgba(255,255,255,.16)!important}.shc[disabled]{opacity:.3;pointer-events:none}
+@media (max-width:899px){#sheet:not(.tall).mini{max-height:20vh}#sheet:not(.tall).big{max-height:80vh}#sheet.tall.mini{max-height:none}#sheet.tall.mini #skev,#sheet.tall.mini .skTop .kv{display:none}#sheet.tall.mini #sheetBody{padding-bottom:8px}}
 .ambw{display:flex;flex-direction:column;align-items:center;width:40px;border-radius:21px;position:relative}.ambw.mut #bFx{opacity:.7}.ambw.mut #bFx:after{content:'';position:absolute;left:9px;right:9px;top:19px;height:2px;background:var(--ink);transform:rotate(-45deg)}#bFx{position:relative}
 .ambp{position:relative;width:40px;height:0;overflow:hidden;transition:height .22s ease,opacity .22s;opacity:0;border-radius:0 0 21px 21px;background:var(--panel)}.ambw.open .ambp{height:112px;opacity:1;border:1px solid var(--line2);border-top:0}.ambw.open #bFx{border-radius:21px 21px 0 0}
 #fxS{position:absolute;left:6px;right:6px;top:6px;height:88px;touch-action:none;cursor:pointer;outline:none}#fxS:before{content:'';position:absolute;left:50%;top:9px;bottom:9px;width:3px;margin-left:-1.5px;background:var(--line2);border-radius:2px}
@@ -356,7 +366,7 @@ figure.hist{margin:12px 0 0;border:1px solid var(--line2);background:rgba(0,0,0,
   <button class="rb" id="bPlay" title="Pausar animação" data-ic="pause"></button>
  </div>
  <div id="dpad"><div id="joyB"><i data-ic="up"></i><i data-ic="right"></i><i data-ic="down"></i><i data-ic="left"></i><div id="joyK"></div></div></div>
- <aside id="sheet"><div id="sheetHead"><h2 id="sheetT"></h2><span class="shb"><button id="sheetE" aria-label="Expandir painel" style="display:none"></button><button id="sheetX" aria-label="Fechar">×</button></span></div><div id="sheetBody"><div id="pDyn"></div></div></aside>
+ <aside id="sheet"><div id="sheetHead"><h2 id="sheetT"></h2><span class="shb"><button id="sheetD" class="shc" aria-label="Abaixar painel" style="display:none"></button><button id="sheetU" class="shc" aria-label="Subir painel" style="display:none"></button><button id="sheetX" aria-label="Fechar">×</button></span></div><div id="sheetBody"><div id="pDyn"></div></div></aside>
  <div id="hint">arraste: girar · pinça/roda: zoom · toque numa peça</div>
  <div id="bottom">
   <nav id="tools">
@@ -380,6 +390,29 @@ figure.hist{margin:12px 0 0;border:1px solid var(--line2);background:rgba(0,0,0,
  <div id="lb"><button aria-label="Fechar imagem" data-ic="x"></button><img alt=""><p></p></div>
  <div id="load"><svg class="helm" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="32" cy="32" r="17" stroke-width="4"/><circle cx="32" cy="32" r="4.5" stroke-width="3"/><g stroke-width="3"><path d="M32 27.5V3M32 36.5V61M27.5 32H3M36.5 32H61M28.8 28.8L11.5 11.5M35.2 35.2l17.3 17.3M35.2 28.8L52.5 11.5M28.8 35.2L11.5 52.5"/></g></g></svg><div id="loadT">CARREGANDO PLANOS…</div></div>
 </div>
+<div id="pwaI" role="region" aria-label="Instalar aplicativo"><button type="button" id="pwaB">Instalar app</button><button type="button" id="pwaX" aria-label="Dispensar">✕</button></div>
+<script>
+/* PWA: registro do Service Worker (cache-first, uso offline) e botão discreto de instalação */
+(function(){
+ var box=document.getElementById('pwaI'),btn=document.getElementById('pwaB'),x=document.getElementById('pwaX'),ev=null;
+ var standalone=function(){return window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;};
+ var ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
+ var off=function(){try{return localStorage.getItem('pwaX')==='1';}catch(e){return false;}};
+ function show(){if(!standalone()&&!off())box.classList.add('show');}
+ function hide(){box.classList.remove('show');}
+ window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();ev=e;show();});
+ window.addEventListener('appinstalled',function(){ev=null;hide();});
+ btn.addEventListener('click',function(){
+  if(ev){ev.prompt();ev.userChoice.then(function(){ev=null;hide();}).catch(function(){});}
+  else if(ios){alert('Para instalar: toque em Compartilhar e depois em "Adicionar à Tela de Início".');}
+ });
+ x.addEventListener('click',function(){hide();try{localStorage.setItem('pwaX','1');}catch(e){}});
+ if(ios&&!standalone()&&/safari/i.test(navigator.userAgent))show();
+ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')){
+  window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(e){console.warn('Service Worker não registrado:',e);});});
+ }
+})();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/meshopt_decoder.js"></script>

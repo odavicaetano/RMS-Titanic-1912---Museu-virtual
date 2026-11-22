@@ -1,5 +1,5 @@
 #!/bin/sh
-cd "$(dirname "$0")"
+cd /home/claude/titanic
 PERM=${1:-0.85}
 cat a_head.html m1_core.js m2_mach.js m3_sets.js m3b_rooms.js m4_data.js m5_app.js | sed "s/__PERM__/$PERM/" > index.html
 # iceberg e foguista vão embutidos na página: não dependem de arquivos separados na hospedagem

@@ -28,3 +28,8 @@ Altere os arquivos em `src/` e rode `sh build.sh` dentro de `src/` (gera `src/in
 
 ## Hospedagem
 O iceberg e os foguistas vão embutidos no `index.html`; os arquivos em `assets/models/` com esses nomes ficam só como fonte. Publique sempre a pasta inteira (o modelo do navio, os sons e as imagens continuam em `assets/`).
+
+## PWA (instalável e offline)
+- `manifest.json`, `sw.js` e a pasta `icons/` ficam na mesma pasta do `index.html`.
+- Funciona em HTTPS (GitHub Pages) ou em `localhost`; abrindo o arquivo direto (file://) o Service Worker não é registrado.
+- Cache-first: depois da primeira visita online, o museu abre sem internet. Ao publicar uma nova versão, altere `VERSION` no início de `sw.js`.
