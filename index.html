@@ -1593,10 +1593,48 @@ enrich('biblioteca',g=>{const d=9,cm=new T.MeshStandardMaterial({map:ctex(64,128
  [-3.5,0,3.5].forEach(x=>[[d/2-.06,PI],[-d/2+.06,0]].forEach(([z,ry])=>{[-1,1].forEach(sd=>{const m=new T.Mesh(new T.PlaneGeometry(.38,2.1),cm);m.position.set(x+sd*.78,1.72,z);m.rotation.y=ry;g.add(m);});
   const v=new T.Mesh(new T.PlaneGeometry(1.95,.28),cm);v.position.set(x,2.78,z+(z>0?-.01:.01));v.rotation.y=ry;g.add(v);}));});
 /* ---- sala geral da 3ª classe (convés C, popa): piano de armário, relógio e quadro de avisos ---- */
-enrich('geral3',g=>{const w=11,d=9;piano(g,w/2-.5,0,-PI/2);pc(g,bx(.5,.05,.4),km(0x3a2414),w/2-1.2,.47,0);
+enrich('geral3',g=>{const w=11,d=9;pianoUp(g,w/2-.4,0,-PI/2);cyl(.17,.17,.05,km(0x5a2a1c),w/2-1.15,.5,0,g,null,18);cyl(.025,.025,.48,km(0x2a1a10),w/2-1.15,.25,0,g,null,8);cyl(.16,.2,.03,km(0x2a1a10),w/2-1.15,.015,0,g,null,12);
  cyl(.2,.2,.05,km(0x6e2f1c),-w/2+.04,1.95,-2.8,g,'x',20);const f=new T.Mesh(new T.CircleGeometry(.17,24),new T.MeshStandardMaterial({color:0xf3efe2}));f.position.set(-w/2+.075,1.95,-2.8);f.rotation.y=PI/2;g.add(f);
  [[.12,.9],[.08,2.6]].forEach(([l,a])=>{const hd=pc(g,bx(.01,.02,l),km(0x111111),-w/2+.085,1.95,-2.8);hd.geometry=hd.geometry.clone();hd.geometry.translate(0,0,-l/2);hd.rotation.x=a;});
  const nb=new T.Mesh(new T.PlaneGeometry(1,.7),new T.MeshStandardMaterial({map:ctex(160,112,(c,W,H)=>{c.fillStyle='#6a4a2a';c.fillRect(0,0,W,H);c.fillStyle='#efe6cc';[[10,10],[60,14],[110,8],[22,60],[80,58]].forEach(p=>{c.fillRect(p[0],p[1],42,40);c.fillStyle='#888';for(let y=p[1]+8;y<p[1]+36;y+=6)c.fillRect(p[0]+4,y,34,1);c.fillStyle='#efe6cc';});})}));nb.position.set(0,1.6,d/2-.03);nb.rotation.y=PI;g.add(nb);});
+
+/* ---- piano de armário tocável (sala geral da 3ª classe): 88 teclas (lá 0 a dó 8) em duas instâncias, caixa de nogueira com
+   painel vazado, estante com partitura, pedais e rodízios. Toque/clique nas teclas toca a nota; o som sai pelo canal de efeitos. ---- */
+const PNO={keys:[],press:[],raf:0,voices:[]};
+function pianoUp(g,x,z,ry){const a=G();a.position.set(x,0,z);a.rotation.y=ry||0;
+ const wt=woodGrainT('#3b2416');wt.repeat.set(2,2);const wood=new T.MeshStandardMaterial({map:wt,roughness:.35,metalness:.05}),dark=M(0x1e130b,{roughness:.4}),brass=M(0xc9a24a,{metalness:.85,roughness:.3});
+ const W=1.48,KW=1.22,KY=.735;
+ /* caixa, tampo, rodapé e montantes laterais que sustentam o teclado */
+ pc(a,bx(W,1.28,.34),wood,0,.66,-.13);pc(a,bx(W+.04,.04,.4),wood,0,1.32,-.12);pc(a,bx(W,.1,.42),dark,0,.05,-.1);
+ [-1,1].forEach(s=>{pc(a,bx(.07,.82,.62),wood,s*(KW/2+.06),.41,.04);pc(a,bx(.09,.06,.66),wood,s*(KW/2+.06),.84,.05);pc(a,bx(.1,.12,.12),dark,s*(KW/2+.06),.06,.3);cyl(.025,.025,.03,brass,s*(KW/2+.06),.015,.33,a,'x',10);});
+ /* teclado: base, frente do teclado e régua de feltro atrás das teclas */
+ pc(a,bx(KW+.02,.05,.3),wood,0,KY-.035,.17);pc(a,bx(KW+.02,.05,.025),wood,0,KY-.02,.315);pc(a,bx(KW,.012,.02),M(0x7a1a1a,{roughness:.9}),0,KY+.022,.02);
+ /* painel superior vazado com fundo de seda e estante com partitura */
+ const fret=new T.MeshStandardMaterial({map:ctex(256,96,(c,w,h)=>{c.fillStyle='#6a1f1f';c.fillRect(0,0,w,h);c.strokeStyle='#2a170c';c.lineWidth=7;c.strokeRect(4,4,w-8,h-8);c.lineWidth=5;for(let i=0;i<5;i++){const cx=26+i*51;c.beginPath();c.ellipse(cx,h/2,20,30,0,0,PI*2);c.stroke();c.beginPath();c.moveTo(cx-20,h/2);c.quadraticCurveTo(cx,10,cx+20,h/2);c.quadraticCurveTo(cx,h-10,cx-20,h/2);c.stroke();}}),roughness:.6});
+ const fp=new T.Mesh(new T.PlaneGeometry(1.05,.36),fret);fp.position.set(0,1.08,.042);a.add(fp);pc(a,bx(1.12,.04,.03),wood,0,.88,.045);
+ const desk=pc(a,bx(.7,.02,.16),wood,0,.92,.1);desk.rotation.x=-.25;const sm=new T.Mesh(new T.PlaneGeometry(.42,.28),new T.MeshStandardMaterial({map:ctex(128,96,(c,w,h)=>{c.fillStyle='#efe6cc';c.fillRect(0,0,w,h);c.fillStyle='#333';for(let s=0;s<3;s++)for(let l=0;l<5;l++)c.fillRect(8,14+s*26+l*3,w-16,1);for(let i=0;i<24;i++)c.fillRect(10+i*4.5,12+(i%3)*26+(i*7%9),2.5,2.5);})}));sm.position.set(0,1.05,.07);sm.rotation.x=-.25;a.add(sm);
+ /* tampa do teclado aberta, encostada, e pedais de latão */
+ const fb=pc(a,bx(KW,.015,.12),wood,0,KY+.11,-.02);fb.rotation.x=-1.25;
+ [-.09,0,.09].forEach(px=>{pc(a,bx(.035,.015,.12),brass,px,.07,.27);});pc(a,bx(.3,.03,.05),dark,0,.05,.22);
+ /* teclas: 52 brancas e 36 pretas */
+ const bl=[1,3,6,8,10],ww=KW/52,wk=[],bk=[];let wi=0;for(let m=21;m<=108;m++){const isB=bl.includes(m%12);if(isB)bk.push([m,-KW/2+wi*ww]);else{wk.push([m,-KW/2+(wi+.5)*ww]);wi++;}}
+ const wm=new T.InstancedMesh(new T.BoxGeometry(ww*.93,.022,.15),new T.MeshStandardMaterial({color:0xf4efe2,roughness:.28}),wk.length),bm=new T.InstancedMesh(new T.BoxGeometry(ww*.56,.024,.092),new T.MeshStandardMaterial({color:0x14110e,roughness:.22}),bk.length),m4=new T.Matrix4();
+ wk.forEach((k,i)=>{m4.makeTranslation(k[1],KY,.235);wm.setMatrixAt(i,m4);});bk.forEach((k,i)=>{m4.makeTranslation(k[1],KY+.021,.19);bm.setMatrixAt(i,m4);});
+ wm.userData.pkey=wk;bm.userData.pkey=bk;wm.userData.base=[KY,.235];bm.userData.base=[KY+.021,.19];a.add(wm,bm);part(a,'piano3');g.add(a);PNO.keys=[wm,bm];return a;}
+/* tecla tocada: afunda 8 mm e volta; o som é sintetizado na hora */
+function pianoHit(o,id){const L=o.userData.pkey;if(!L||id===undefined||!L[id])return false;pianoNote(L[id][0]);PNO.press.push({o:o,i:id,t:0});if(!PNO.raf)PNO.raf=requestAnimationFrame(pianoAnim);return true;}
+function pianoAnim(){const m4=new T.Matrix4(),dt=1/60;PNO.press=PNO.press.filter(p=>{p.t+=dt;const b=p.o.userData.base,x=p.o.userData.pkey[p.i][1],d=p.t<.06?p.t/.06:p.t<.22?1:Math.max(0,1-(p.t-.22)/.1);m4.makeTranslation(x,b[0]-.008*d,b[1]);p.o.setMatrixAt(p.i,m4);p.o.instanceMatrix.needsUpdate=true;return p.t<.33;});PNO.raf=PNO.press.length?requestAnimationFrame(pianoAnim):0;}
+/* síntese de piano: duas cordas por nota levemente desafinadas, parciais inarmônicas com decaimento mais rápido nos agudos,
+   filtro que escurece ao longo da nota, batida curta do martelo e abafador depois de ~1,6 s. Sem efeitos além de um pouco de sala. */
+function pianoNote(m){if(!S.snd||!ac())return;const a=AC,t=a.currentTime+.005,f=440*Math.pow(2,(m-69)/12),B=.00035*Math.pow(f/261.6,1.2);
+ PNO.voices=PNO.voices.filter(v=>v.end>a.currentTime);if(PNO.voices.length>=14){const v=PNO.voices.shift();try{v.g.gain.cancelScheduledValues(a.currentTime);v.g.gain.setTargetAtTime(0,a.currentTime,.03);}catch(_){}}
+ const g=a.createGain(),lp=a.createBiquadFilter();lp.type='lowpass';lp.Q.value=.5;const br=Math.min(9000,f*9+600);lp.frequency.setValueAtTime(br,t);lp.frequency.exponentialRampToValueAtTime(Math.max(400,f*2.2),t+1.4);
+ const tau=Math.max(.35,Math.min(3.2,2.6*Math.sqrt(220/f))),hold=Math.min(1.6,tau*1.1),vol=.11*Math.min(1,Math.pow(261.6/f,.18));
+ g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.004);g.gain.setTargetAtTime(vol*.55,t+.004,.09);g.gain.setTargetAtTime(0,t+.25,tau);g.gain.setTargetAtTime(0,t+hold,.12);
+ const n=f>1800?3:f>700?5:7;for(let k=1;k<=n;k++){const fk=k*f*Math.sqrt(1+B*k*k);if(fk>14000)break;[-1,1].forEach(sg=>{const o=a.createOscillator(),og=a.createGain();o.frequency.value=fk*(1+sg*.0004);og.gain.setValueAtTime(.5/Math.pow(k,1.35),t);og.gain.setTargetAtTime(0,t,tau/(1+.55*(k-1)));o.connect(og);og.connect(lp);o.start(t);o.stop(t+hold+.6);});}
+ /* martelo: ruído curto filtrado */
+ try{const nb=a.createBuffer(1,a.sampleRate*.03|0,a.sampleRate),d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,3);const ns=a.createBufferSource(),nf=a.createBiquadFilter(),ng=a.createGain();ns.buffer=nb;nf.type='bandpass';nf.frequency.value=Math.min(5000,f*4+800);nf.Q.value=1.2;ng.gain.value=.05;ns.connect(nf);nf.connect(ng);ng.connect(lp);ns.start(t);}catch(_){}
+ lp.connect(g);g.connect(out());try{const r=a.createGain();r.gain.value=.12;g.connect(r);r.connect(rev());}catch(_){}PNO.voices.push({g:g,end:t+hold+.6});}
 /* ===== MÓDULO 4 — conteúdo: fichas, ambientes por convés, categorias, rota ===== */
 // tag: D = informação histórica documentada · R = reconstrução visual plausível · S = simplificação da simulação
 // [grupo, nome, inglês, tag, âncora, distância, texto]
@@ -1658,6 +1696,7 @@ cartas:['s','Mesa de cartas','Chart table','D',[-3.6,1,0],0,'Cartas do Atlântic
 relogioN:['s','Relógio de bordo','Ship’s clock','D',[-5.8,1.9,0],0,'A hora de bordo era ajustada todos os dias conforme a longitude; relógios-mestres comandavam os demais.'],
 chaveMorse:['s','Chave telegráfica','Morse key','D',[-.5,.9,-.95],0,'Manipulador com que o operador abre e fecha o circuito do transmissor, formando pontos e traços.'],
 receptor:['s','Receptor','Receiver','D',[.55,1.1,-1.3],0,'Detector magnético Marconi e sintonizador múltiplo. O sinal era ouvido como cliques e zumbidos nos fones — não havia alto-falante nem voz.'],
+piano3:['s','Piano de armário','Upright piano','D',[5,1,0],0,'Piano da sala geral da 3ª classe, espaço de música e convívio dos passageiros. Toque ou clique nas teclas para tocar; as notas saem pelo volume de efeitos sonoros. Modelo e som: reconstrução aproximada.'],
 fones:['s','Fones de ouvido','Headphones','D',[-1.05,.95,-1.0],0,'O operador passava horas com os fones, anotando letra por letra em formulários.'],
 transmissor:['s','Transmissor de centelha','Rotary spark transmitter','D',[3.6,1.1,-1.0],0,'Aparelho de 5 kW com centelhador rotativo, instalado numa “sala silenciosa” ao lado, forrada para abafar o ruído. Alcance garantido de cerca de 400 km de dia, muito maior à noite.'],
 cab1:['s','Camarote de 1ª classe','First-class stateroom','R',[0,1.2,0],0,'Cama de latão, sofá, guarda-roupa, lavatório de mármore com água corrente, aquecedor elétrico e painéis decorados em estilos de época. As suítes de luxo do convés B tinham ainda sala de estar, banheiro e passeio privativos.'],
@@ -1717,7 +1756,7 @@ const P={};Object.keys(PD).forEach(k=>{const d=PD[k];P[k]={g:d[0],n:d[1],en:d[2]
 const ZCOL={1:0xd9b36a,2:0x6fa8dc,3:0x7fc98f,t:0xb0b7bf};
 ZD.forEach(z=>{P[z[0]]={g:'z',n:z[7],en:'',tag:z[9],t:z[8],deck:z[1],cls:z[6],set:z[10]||null,zone:z.slice(2,6),a:[(z[2]+z[3])/2,DY[z[1]]+1.4,(z[4]+z[5])/2],r:Math.max(40,(z[3]-z[2])*2)};});
 ['cupula','relogio','querubim','balaustrada','elevador'].forEach(k=>P[k].set='escadaria');['timao','bussola','telegrafoP','telemotor','telefone','cartas','relogioN'].forEach(k=>P[k].set='ponte');
-['chaveMorse','receptor','fones','transmissor'].forEach(k=>P[k].set='radio');['cab1','cab2','cab3'].forEach(k=>P[k].set='cabines');P.jan1.set='jantar';P.ponte.set='ponte';
+['chaveMorse','receptor','fones','transmissor'].forEach(k=>P[k].set='radio');P.piano3.set='geral3';['cab1','cab2','cab3'].forEach(k=>P[k].set='cabines');P.jan1.set='jantar';P.ponte.set='ponte';
 const ORDER=Object.keys(P);ORDER.forEach((k,i)=>P[k].i=i+1);
 const TAGN={D:'Documentado',R:'Reconstrução visual',S:'Simplificação'};
 const CLSN={1:'1ª classe',2:'2ª classe',3:'3ª classe',t:'Tripulação e serviço'};
@@ -2035,7 +2074,7 @@ cv.addEventListener('wheel',e=>{e.preventDefault();window.__usr=performance.now(
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 const ray=new T.Raycaster(),ndc=new T.Vector2();
 function pick(x,y){histNav();const r=cv.getBoundingClientRect();ndc.set((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1);ray.setFromCamera(ndc,cam);
- if(S.visit){const hs=ray.intersectObjects(SETS[S.visit].meshes,false);for(let i=0;i<hs.length;i++){if(hs[i].object.userData.door){travel(hs[i].object.userData.door,S.visit);return;}let p=hs[i].object,id=null;while(p){if(p.userData.part){id=p.userData.part;break;}p=p.parent;}if(id&&P[id]){S.sel=[id];openTab('ficha');return;}if(hs[i].object.material.opacity>.5)break;}return;}
+ if(S.visit){const hs=ray.intersectObjects(SETS[S.visit].meshes,false);for(let i=0;i<hs.length;i++){if(hs[i].object.userData.pkey&&pianoHit(hs[i].object,hs[i].instanceId))return;if(hs[i].object.userData.door){travel(hs[i].object.userData.door,S.visit);return;}let p=hs[i].object,id=null;while(p){if(p.userData.part){id=p.userData.part;break;}p=p.parent;}if(id&&P[id]){S.sel=[id];openTab('ficha');return;}if(hs[i].object.material.opacity>.5)break;}return;}
  const hs=ray.intersectObjects(meshes,false),conv=S.mode==='conveses';
  for(let i=0;i<hs.length;i++){const h=hs[i],m=h.object,it=m.userData.it;if(m.userData.noPick||!m.visible||(!it.o.visible&&!it.hg))continue;if((S.ghost||conv)&&it.shell&&!S.bp&&!(conv&&it.deck===S.deck))continue;if(conv&&it.layer!=='zone'&&it.layer!=='maq')continue;
   if(it.clip&&S.cut&&clip.distanceToPoint(h.point)<0)continue;if(m.userData.door){travel(m.userData.door,m.userData.dfrom||S.walk);return;}let id=m.userData.pid;const lp=root.worldToLocal(h.point.clone());

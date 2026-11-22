@@ -59,6 +59,7 @@ cartas:['s','Mesa de cartas','Chart table','D',[-3.6,1,0],0,'Cartas do Atlântic
 relogioN:['s','Relógio de bordo','Ship’s clock','D',[-5.8,1.9,0],0,'A hora de bordo era ajustada todos os dias conforme a longitude; relógios-mestres comandavam os demais.'],
 chaveMorse:['s','Chave telegráfica','Morse key','D',[-.5,.9,-.95],0,'Manipulador com que o operador abre e fecha o circuito do transmissor, formando pontos e traços.'],
 receptor:['s','Receptor','Receiver','D',[.55,1.1,-1.3],0,'Detector magnético Marconi e sintonizador múltiplo. O sinal era ouvido como cliques e zumbidos nos fones — não havia alto-falante nem voz.'],
+piano3:['s','Piano de armário','Upright piano','D',[5,1,0],0,'Piano da sala geral da 3ª classe, espaço de música e convívio dos passageiros. Toque ou clique nas teclas para tocar; as notas saem pelo volume de efeitos sonoros. Modelo e som: reconstrução aproximada.'],
 fones:['s','Fones de ouvido','Headphones','D',[-1.05,.95,-1.0],0,'O operador passava horas com os fones, anotando letra por letra em formulários.'],
 transmissor:['s','Transmissor de centelha','Rotary spark transmitter','D',[3.6,1.1,-1.0],0,'Aparelho de 5 kW com centelhador rotativo, instalado numa “sala silenciosa” ao lado, forrada para abafar o ruído. Alcance garantido de cerca de 400 km de dia, muito maior à noite.'],
 cab1:['s','Camarote de 1ª classe','First-class stateroom','R',[0,1.2,0],0,'Cama de latão, sofá, guarda-roupa, lavatório de mármore com água corrente, aquecedor elétrico e painéis decorados em estilos de época. As suítes de luxo do convés B tinham ainda sala de estar, banheiro e passeio privativos.'],
@@ -118,7 +119,7 @@ const P={};Object.keys(PD).forEach(k=>{const d=PD[k];P[k]={g:d[0],n:d[1],en:d[2]
 const ZCOL={1:0xd9b36a,2:0x6fa8dc,3:0x7fc98f,t:0xb0b7bf};
 ZD.forEach(z=>{P[z[0]]={g:'z',n:z[7],en:'',tag:z[9],t:z[8],deck:z[1],cls:z[6],set:z[10]||null,zone:z.slice(2,6),a:[(z[2]+z[3])/2,DY[z[1]]+1.4,(z[4]+z[5])/2],r:Math.max(40,(z[3]-z[2])*2)};});
 ['cupula','relogio','querubim','balaustrada','elevador'].forEach(k=>P[k].set='escadaria');['timao','bussola','telegrafoP','telemotor','telefone','cartas','relogioN'].forEach(k=>P[k].set='ponte');
-['chaveMorse','receptor','fones','transmissor'].forEach(k=>P[k].set='radio');['cab1','cab2','cab3'].forEach(k=>P[k].set='cabines');P.jan1.set='jantar';P.ponte.set='ponte';
+['chaveMorse','receptor','fones','transmissor'].forEach(k=>P[k].set='radio');P.piano3.set='geral3';['cab1','cab2','cab3'].forEach(k=>P[k].set='cabines');P.jan1.set='jantar';P.ponte.set='ponte';
 const ORDER=Object.keys(P);ORDER.forEach((k,i)=>P[k].i=i+1);
 const TAGN={D:'Documentado',R:'Reconstrução visual',S:'Simplificação'};
 const CLSN={1:'1ª classe',2:'2ª classe',3:'3ª classe',t:'Tripulação e serviço'};

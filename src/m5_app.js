@@ -248,7 +248,7 @@ cv.addEventListener('wheel',e=>{e.preventDefault();window.__usr=performance.now(
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 const ray=new T.Raycaster(),ndc=new T.Vector2();
 function pick(x,y){histNav();const r=cv.getBoundingClientRect();ndc.set((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1);ray.setFromCamera(ndc,cam);
- if(S.visit){const hs=ray.intersectObjects(SETS[S.visit].meshes,false);for(let i=0;i<hs.length;i++){if(hs[i].object.userData.door){travel(hs[i].object.userData.door,S.visit);return;}let p=hs[i].object,id=null;while(p){if(p.userData.part){id=p.userData.part;break;}p=p.parent;}if(id&&P[id]){S.sel=[id];openTab('ficha');return;}if(hs[i].object.material.opacity>.5)break;}return;}
+ if(S.visit){const hs=ray.intersectObjects(SETS[S.visit].meshes,false);for(let i=0;i<hs.length;i++){if(hs[i].object.userData.pkey&&pianoHit(hs[i].object,hs[i].instanceId))return;if(hs[i].object.userData.door){travel(hs[i].object.userData.door,S.visit);return;}let p=hs[i].object,id=null;while(p){if(p.userData.part){id=p.userData.part;break;}p=p.parent;}if(id&&P[id]){S.sel=[id];openTab('ficha');return;}if(hs[i].object.material.opacity>.5)break;}return;}
  const hs=ray.intersectObjects(meshes,false),conv=S.mode==='conveses';
  for(let i=0;i<hs.length;i++){const h=hs[i],m=h.object,it=m.userData.it;if(m.userData.noPick||!m.visible||(!it.o.visible&&!it.hg))continue;if((S.ghost||conv)&&it.shell&&!S.bp&&!(conv&&it.deck===S.deck))continue;if(conv&&it.layer!=='zone'&&it.layer!=='maq')continue;
   if(it.clip&&S.cut&&clip.distanceToPoint(h.point)<0)continue;if(m.userData.door){travel(m.userData.door,m.userData.dfrom||S.walk);return;}let id=m.userData.pid;const lp=root.worldToLocal(h.point.clone());
