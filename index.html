@@ -1691,17 +1691,16 @@ window.addEventListener('keyup',e=>{if(S.pianoLock&&PKM[e.key.toLowerCase()]!==u
 document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('[data-piano]');if(b){e.preventDefault();const s=S.visit&&SETS[S.visit];let a=null;if(s&&s.g)s.g.traverse(o=>{if(o.userData.keys)a=o;});if(a)pianoEnter(a);}});
 /* ---- modo contemplação: esconde toda a interface e deixa só o navio ----
    Entrar: botão de moldura na coluna da esquerda. Dentro: girar e aproximar continuam; ao mexer o mouse ou tocar na tela aparece
-   um único botão “Mostrar interface”, que some sozinho depois de 2,5 s parado. Esc também sai. Toques no navio não abrem fichas. */
+   um único botão circular com ícone de retorno à interface, que some sozinho depois de 2,5 s parado. Esc também sai. Toques no navio não abrem fichas. */
 {const st=document.createElement('style');st.textContent=`
  #top,#hud,#cutbar,#deckbar,#where,#side,#dpad,#sheet,#hint,#bottom,#labels,#pwaI,#pnoUI{transition:opacity .6s ease}
  body.zen #top,body.zen #hud,body.zen #cutbar,body.zen #deckbar,body.zen #where,body.zen #side,body.zen #dpad,body.zen #sheet,body.zen #hint,body.zen #bottom,body.zen #labels,body.zen #pwaI{opacity:0!important;pointer-events:none!important}
- #zenB{position:fixed;left:0;right:0;bottom:calc(26px + env(safe-area-inset-bottom));margin:0 auto;width:max-content;z-index:60;display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;
-  min-height:44px;background:rgba(12,20,36,.3);color:#fbf7ec;border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(10px) saturate(1.2);-webkit-backdrop-filter:blur(10px) saturate(1.2);text-shadow:0 1px 2px rgba(0,0,0,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.18);font:600 14px Barlow,system-ui,sans-serif;letter-spacing:.02em;
-  cursor:pointer;opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .45s ease,transform .45s ease,background .3s ease,border-color .3s ease}
- #zenB svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
- body.zen.zenAct #zenB{opacity:.6;pointer-events:auto;transform:none}
- body.zen.zenAct #zenB:hover,body.zen.zenAct #zenB:focus-visible{opacity:1;background:rgba(12,20,36,.5);border-color:rgba(255,255,255,.42)}
- @media (hover:none){body.zen.zenAct #zenB{opacity:.72}}
+ #zenB{position:fixed;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));width:44px;height:44px;min-height:44px;padding:0;z-index:60;display:flex;align-items:center;justify-content:center;border-radius:50%;
+  background:rgba(12,20,36,.24);color:#fbf7ec;border:1px solid rgba(255,255,255,.24);backdrop-filter:blur(10px) saturate(1.2);-webkit-backdrop-filter:blur(10px) saturate(1.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.14);cursor:pointer;opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .45s ease,transform .45s ease,background .3s ease,border-color .3s ease}
+ #zenB svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+ body.zen.zenAct #zenB{opacity:.42;pointer-events:auto;transform:none}
+ body.zen.zenAct #zenB:hover,body.zen.zenAct #zenB:focus-visible{opacity:.92;background:rgba(12,20,36,.5);border-color:rgba(255,255,255,.42)}
+ @media (hover:none){body.zen.zenAct #zenB{opacity:.6}}
  /* botão de moldura (Wallpaper) com o mesmo acabamento 3D dos botões escuros da coluna */
  #bZen{background:radial-gradient(circle at 35% 28%,#46597a 0%,#1f2e49 48%,#0a1220 100%);border-color:rgba(170,205,240,.5);color:#eaf3ff;box-shadow:inset 0 1px 0 rgba(200,225,255,.35),inset 0 -2px 4px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.35);transition:transform .15s ease,filter .2s ease}
  #bZen:hover{filter:brightness(1.12)}#bZen:active{transform:scale(.94)}
@@ -1710,7 +1709,7 @@ document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.targ
  #side.scr{width:292px;align-items:flex-start;overflow-y:auto;overflow-x:hidden;pointer-events:none;scrollbar-width:none;overscroll-behavior:contain;touch-action:pan-y;padding:2px 0 4px;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 var(--mt,0px),#000 calc(100% - var(--mb,0px)),transparent 100%);mask-image:linear-gradient(to bottom,transparent 0,#000 var(--mt,0px),#000 calc(100% - var(--mb,0px)),transparent 100%)}#side.scr::-webkit-scrollbar{display:none}#side.scr>*{pointer-events:auto;flex:none}
  #zenTip{position:fixed;left:0;right:0;top:40%;margin:0 auto;width:max-content;max-width:86vw;text-align:center;z-index:60;padding:10px 16px;border-radius:12px;background:rgba(10,17,32,.5);color:#efe6cc;
   font:500 14px Barlow,system-ui,sans-serif;opacity:0;pointer-events:none;transition:opacity .6s ease}#zenTip.on{opacity:1}`;document.head.appendChild(st);
- const b=document.createElement('button');b.id='zenB';b.type='button';b.innerHTML='<svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Mostrar interface';document.body.appendChild(b);
+ const b=document.createElement('button');b.id='zenB';b.type='button';b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';b.setAttribute('aria-label','Mostrar interface');b.title='Mostrar interface';document.body.appendChild(b);
  const tip=document.createElement('div');tip.id='zenTip';tip.textContent=(matchMedia('(pointer:fine)').matches?'Mova o mouse':'Toque na tela')+' para trazer o botão de voltar';document.body.appendChild(tip);
  let tm=0;const wake=()=>{if(!S.zen)return;document.body.classList.add('zenAct');clearTimeout(tm);tm=setTimeout(()=>document.body.classList.remove('zenAct'),2500);};
  ['pointermove','pointerdown','wheel','touchstart'].forEach(v=>window.addEventListener(v,wake,{passive:true}));
