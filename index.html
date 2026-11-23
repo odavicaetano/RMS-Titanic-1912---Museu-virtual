@@ -1617,7 +1617,7 @@ enrich('geral3',g=>{const w=11,d=9;
 
 /* ---- piano de armário tocável (sala geral da 3ª classe): 88 teclas (lá 0 a dó 8) em duas instâncias, caixa de nogueira com
    painel vazado, estante com partitura, pedais e rodízios. Toque/clique nas teclas toca a nota; o som sai pelo canal de efeitos. ---- */
-const PNO={keys:[],press:[],raf:0,voices:[]};
+const PNO={keys:[],press:[],raf:0,voices:[],songId:'nearer'};
 function pianoUp(g,x,z,ry){const a=G();a.position.set(x,0,z);a.rotation.y=ry||0;
  const wt=woodGrainT('#3b2416');wt.repeat.set(2,2);const wood=new T.MeshStandardMaterial({map:wt,roughness:.35,metalness:.05}),dark=M(0x1e130b,{roughness:.4}),brass=M(0xc9a24a,{metalness:.85,roughness:.3});
  const W=1.48,KW=1.22,KY=.735;
@@ -1659,20 +1659,30 @@ function pianoNote(m){if(!S.snd||!ac())return;const a=AC,t=a.currentTime+.005,f=
  max-width:min(94vw,640px);padding:8px 10px;border-radius:12px;background:rgba(10,17,32,.92);border:1px solid rgba(201,162,74,.55);box-shadow:0 6px 24px rgba(0,0,0,.45);font-family:Barlow,system-ui,sans-serif;color:#efe6cc}
  #pnoUI.show{display:flex}#pnoUI.inv{bottom:auto;top:92px;flex-wrap:nowrap}#pnoUI button{font:600 14px Barlow,system-ui,sans-serif;color:#0a1120;background:#c9a24a;border:0;border-radius:8px;padding:9px 14px;cursor:pointer;min-height:40px}
  #pnoUI button.sec{background:rgba(255,255,255,.1);color:#efe6cc;border:1px solid rgba(255,255,255,.18)}#pnoUI small{flex-basis:100%;text-align:center;font-size:12px;color:#b9c3d0;line-height:1.35}
+ #pnoUI .pnoPlay{display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}#pnoUI .pnoPlay svg{width:16px;height:16px;flex:none;display:block;fill:currentColor}
+ #pnoUI select{font:500 13px Barlow,system-ui,sans-serif;color:#efe6cc;background:#202c3a;border:1px solid rgba(201,162,74,.5);border-radius:8px;padding:9px 8px;min-height:40px;min-width:0;max-width:285px;cursor:pointer}
+ @media (max-width:600px){#pnoUI{bottom:calc(118px + env(safe-area-inset-bottom,0px));gap:6px;padding:8px}#pnoUI select{flex:1 1 165px;max-width:58vw}#pnoUI [data-p="out"]{padding:9px 11px}}
  body.pnoOn #dpad{display:none!important}body.pnoOn #hint{opacity:0!important}`;document.head.appendChild(st);
  const ui=document.createElement('div');ui.id='pnoUI';document.body.appendChild(ui);PNO.ui=ui;
  ui.addEventListener('pointerdown',e=>e.stopPropagation());ui.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.p;
-  if(k==='go')pianoEnter(PNO.last);else if(k==='x'){ui.classList.remove('show');}else if(k==='out')pianoExit();else if(k==='song')pianoSong();});}
+  if(k==='go')pianoEnter(PNO.last);else if(k==='x'){ui.classList.remove('show');}else if(k==='out')pianoExit();else if(k==='song')pianoSong();});
+ ui.addEventListener('change',e=>{if(e.target.matches('[data-p="choose"]')){const playing=!!PNO.songT;pianoSongStop();PNO.songId=e.target.value;pianoUI('lock');if(playing)pianoSong();}});}
 function pianoUI(mode){const u=PNO.ui;clearTimeout(PNO.uiT);if(!mode){u.classList.remove('show');return;}u.classList.toggle('inv',mode==='invite');
  if(mode==='invite'){u.innerHTML='<button data-p="go"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px;margin-right:6px"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>Tocar o piano</button><button class="sec" data-p="x" aria-label="Fechar">✕</button>';PNO.uiT=setTimeout(()=>{if(!S.pianoLock)u.classList.remove('show');},12000);}
- else u.innerHTML='<button class="sec" data-p="song">'+(PNO.songT?'■ Parar':'<svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px;margin-right:6px"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>Nearer, My God, to Thee')+'</button><button data-p="out">Sair do piano</button><small>Toque nas teclas para tocar</small>';
+ else{const opts=PSONGS.map(s=>'<option value="'+s.id+'"'+(s.id===PNO.songId?' selected':'')+'>'+s.name+' ('+s.year+')</option>').join('');
+  const ico=PNO.songT?'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.5" y="5.5" width="13" height="13" rx="1"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4v16l12-8z"/></svg>';
+  u.innerHTML='<select data-p="choose" aria-label="Escolher canção de época">'+opts+'</select><button class="sec pnoPlay" data-p="song">'+ico+'<span>'+(PNO.songT?'Parar':'Tocar')+'</span></button><button data-p="out">Sair do piano</button><small>Toque nas teclas para tocar · repertório em trechos simplificados</small>';}
  u.classList.add('show');}
-/* nota → [malha, índice] para o teclado do computador */
+ /* nota → [malha, índice] para o teclado do computador */
 function pianoFind(a,m){for(const o of a.userData.keys){const L=o.userData.pkey;for(let i=0;i<L.length;i++)if(L[i][0]===m)return [o,i];}return null;}
 function pianoKeyX(a,m){const r=pianoFind(a,m);return r?r[0].userData.pkey[r[1]][1]:0;}
-function pianoCam(){const a=PNO.cur;if(!a)return;a.updateMatrixWorld(true);const x=pianoKeyX(a,60+12*PNO.oct)+.08,dz=cam.aspect<1?1.15:.72,ey=cam.aspect<1?1.5:1.28,eye=a.localToWorld(new T.Vector3(x,ey,.235+dz)),fr=new T.Vector3(0,0,1).transformDirection(a.matrixWorld);
- F.p.set(eye.x,eye.y-1.62,eye.z);F.ys=F.p.y;F.yaw=Math.atan2(fr.x,fr.z);F.pitch=Math.atan2(.735-ey,dz);F.fovT=cam.aspect<1?44:50;}
-function pianoEnter(a){if(!a||S.pianoLock)return;PNO.cur=a;PNO.prev={p:F.p.clone(),yaw:F.yaw,pitch:F.pitch,fov:F.fovT,fp:S.fp,ys:F.ys};if(window.__joyEnd)window.__joyEnd();keys.w=keys.a=keys.s=keys.d=false;
+function pianoCam(){const a=PNO.cur;if(!a)return;a.updateMatrixWorld(true);
+ /* Retrato: enquadrar a largura inteira das 88 teclas; evitar o corte nas bordas do celular. */
+ const portrait=cam.aspect<.85,mobile=window.innerWidth<900,fov=portrait?72:mobile?62:50;
+ const dz=portrait?Math.max(2.15,1.7/(2*Math.tan(fov*PI/360)*Math.max(.2,cam.aspect))):mobile?Math.max(1.15,1.7/(2*Math.tan(fov*PI/360)*cam.aspect)):.72;
+ const ey=portrait?1.44:1.28,eye=a.localToWorld(new T.Vector3(0,ey,.235+dz)),fr=new T.Vector3(0,0,1).transformDirection(a.matrixWorld);
+ F.p.set(eye.x,eye.y-1.62,eye.z);F.ys=F.p.y;F.yaw=Math.atan2(fr.x,fr.z);F.pitch=Math.atan2(.735-ey,dz);F.fovT=fov;}
+ function pianoEnter(a){if(!a||S.pianoLock)return;PNO.cur=a;PNO.prev={p:F.p.clone(),yaw:F.yaw,pitch:F.pitch,fov:F.fovT,fp:S.fp,ys:F.ys};if(window.__joyEnd)window.__joyEnd();keys.w=keys.a=keys.s=keys.d=false;
  if(S.tab)closeSheet();S.fp=true;S.pianoLock=true;PNO.oct=0;pianoCam();document.body.classList.add('pnoOn');applyLook();pianoUI('lock');}
 function pianoExit(quiet){if(!S.pianoLock)return;pianoSongStop();S.pianoLock=false;document.body.classList.remove('pnoOn');pianoUI(null);const p=PNO.prev;PNO.act=null;
  if(!quiet&&p){F.p.copy(p.p);F.yaw=p.yaw;F.pitch=p.pitch;F.fovT=p.fov;F.ys=undefined;S.fp=p.fp;applyLook();}}
@@ -1719,15 +1729,26 @@ document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.targ
  b.addEventListener('pointerdown',e=>e.stopPropagation());b.addEventListener('click',e=>{e.stopPropagation();zenOff();});
  window.addEventListener('keydown',e=>{if(S.zen&&e.key==='Escape'){zenOff();e.preventDefault();}});
  $('#bZen').addEventListener('click',()=>zenOn());}
-/* “Nearer, My God, to Thee”, melodia Bethany (Lowell Mason, 1856, domínio público), com um baixo simples.
-   Relatos de sobreviventes dizem que a banda tocou hinos no fim; se este foi tocado, e em qual melodia, é debatido. */
-const PSONG=(()=>{const G4=67,A4=69,B4=71,E4=64,D4=62,G2=43,C3=48,D3=50,G3=55;const ph=[[B4,2,G2],[A4,1],[G4,2],[G4,1],[E4,2,C3],[D4,4,D3],[D4,1],[G4,2,G2],[B4,1],[A4,3,D3]];
+/* Repertório que já existia antes de 1912; trechos simplificados para demonstração ao piano.
+   Não há alegação de que estas peças tenham sido tocadas a bordo durante a viagem. */
+const PSONG=(()=>{const G4=67,A4=69,B4=71,E4=64,D4=62,G2=43,C3=48,D3=50;const ph=[[B4,2,G2],[A4,1],[G4,2],[G4,1],[E4,2,C3],[D4,4,D3],[D4,1],[G4,2,G2],[B4,1],[A4,3,D3]];
  return ph.concat([[G4,3,G2]],ph,[[G4,6,G2]]);})();
+/* Pequenos excertos melódicos e acompanhamento simplificado, sem áudio gravado nem dependências externas. */
+function pianoExcerpt(notes,bass){return notes.map((m,i)=>[m,i%8===3?1.5:1,i%4===0?bass:0]);}
+const PSONGS=[
+ {id:'nearer',name:'Nearer, My God, to Thee',year:1856,beat:.58,notes:PSONG},
+ {id:'entertainer',name:'The Entertainer',year:1902,beat:.24,notes:pianoExcerpt([86,88,84,81,81,83,79,74,76,72,69,69,71,67,74,76,72,69,69,71,67,74,75,76,72,76,72,76,72,74,75,76,72,74,76,76,71,74,72],48)},
+ {id:'maple',name:'Maple Leaf Rag',year:1899,beat:.22,notes:pianoExcerpt([68,63,68,72,63,67,63,67,70,63,63,68,63,68,72,63,67,63,67,70,63,63,63,68,71,76,75,75,68,71,76,75,68,71,68,68,71,68],44)},
+ {id:'elise',name:'Für Elise',year:1810,beat:.29,notes:pianoExcerpt([76,75,76,75,76,71,74,72,69,60,64,69,71,64,68,71,72,64,76,75,76,75,76,71,74,72,69,60,64,69,71,64,72,71,69],45)}
+];
 function pianoSongStop(){clearTimeout(PNO.songT);PNO.songT=0;}
-function pianoSong(){if(PNO.songT){pianoSongStop();pianoUI('lock');return;}const a=PNO.cur;if(!a)return;let i=0;const q=.58;
- const step=()=>{if(i>=PSONG.length||!S.pianoLock){pianoSongStop();if(S.pianoLock)pianoUI('lock');return;}const n=PSONG[i++];[n[0],n[2]].forEach(m=>{if(!m)return;const k=pianoFind(a,m);if(k)pianoHit(k[0],k[1],true);});PNO.songT=setTimeout(step,n[1]*q*1000);};
+function pianoSong(){if(PNO.songT){pianoSongStop();pianoUI('lock');return;}const a=PNO.cur;if(!a)return;
+ const song=PSONGS.find(s=>s.id===PNO.songId)||PSONGS[0];let i=0;
+ const step=()=>{if(i>=song.notes.length||!S.pianoLock){pianoSongStop();if(S.pianoLock)pianoUI('lock');return;}
+  const n=song.notes[i++];[n[0],n[2]].forEach(m=>{if(!m)return;const k=pianoFind(a,m);if(k)pianoHit(k[0],k[1],true);});
+  PNO.songT=setTimeout(step,n[1]*song.beat*1000);};
  PNO.songT=1;pianoUI('lock');step();}
-/* ===== MÓDULO 4 — conteúdo: fichas, ambientes por convés, categorias, rota ===== */
+ /* ===== MÓDULO 4 — conteúdo: fichas, ambientes por convés, categorias, rota ===== */
 // tag: D = informação histórica documentada · R = reconstrução visual plausível · S = simplificação da simulação
 // [grupo, nome, inglês, tag, âncora, distância, texto]
 const PD={
@@ -2924,7 +2945,7 @@ function animate(dt,time){const run=S.run;bergFadeStep(dt);
 const VO={x:0,y:0,tx:0,ty:0,snap:true};
 function voApply(){const w=window.innerWidth,h=window.innerHeight;if(Math.abs(VO.x)<.5&&Math.abs(VO.y)<.5)cam.clearViewOffset();else cam.setViewOffset(w,h,VO.x,VO.y,w,h);}
 function voStep(dt){if(VO.x===VO.tx&&VO.y===VO.ty)return;const k=1-Math.exp(-Math.min(dt,.1)/.12);VO.x+=(VO.tx-VO.x)*k;VO.y+=(VO.ty-VO.y)*k;if(Math.abs(VO.tx-VO.x)<.5&&Math.abs(VO.ty-VO.y)<.5){VO.x=VO.tx;VO.y=VO.ty;}voApply();}
-function resize(){const w=window.innerWidth,h=window.innerHeight;R.setSize(w,h,false);cam.aspect=w/h;const bh=$('#bottom').offsetHeight;sheet.style.bottom=(w>=900?bh+12:bh)+'px';
+function resize(){const w=window.innerWidth,h=window.innerHeight;R.setSize(w,h,false);cam.aspect=w/h;if(S.pianoLock)pianoCam();const bh=$('#bottom').offsetHeight;sheet.style.bottom=(w>=900?bh+12:bh)+'px';
  /* deslocamento da vista quando o painel abre: só define o alvo; voStep leva a câmera até lá aos poucos */
  if(S.tab&&sheet.classList.contains('show')&&!S.fp){const r=sheet.getBoundingClientRect();if(r.width<w*.7){VO.tx=r.width/2;VO.ty=0;}else{VO.tx=0;VO.ty=Math.min(r.height,h*.5)/2;}}else{VO.tx=0;VO.ty=0;}
  if(S.fp||VO.snap){VO.x=VO.tx;VO.y=VO.ty;VO.snap=false;}voApply();
