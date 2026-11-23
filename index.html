@@ -1618,7 +1618,7 @@ enrich('geral3',g=>{const w=11,d=9;
 
 /* ---- piano de armário tocável (sala geral da 3ª classe): 88 teclas (lá 0 a dó 8) em duas instâncias, caixa de nogueira com
    painel vazado, estante com partitura, pedais e rodízios. Toque/clique nas teclas toca a nota; o som sai pelo canal de efeitos. ---- */
-const PNO={keys:[],press:[],raf:0,voices:[],songId:'nearer'};
+const PNO={keys:[],press:[],raf:0,voices:[],songId:'nearer',songPlaying:false,songT:0,songToken:0,songIndex:0,songPosMs:0,songStartedAt:0};
 function pianoUp(g,x,z,ry){const a=G();a.position.set(x,0,z);a.rotation.y=ry||0;
  const wt=woodGrainT('#3b2416');wt.repeat.set(2,2);const wood=new T.MeshStandardMaterial({map:wt,roughness:.35,metalness:.05}),dark=M(0x1e130b,{roughness:.4}),brass=M(0xc9a24a,{metalness:.85,roughness:.3});
  const W=1.48,KW=1.22,KY=.735;
@@ -1660,19 +1660,23 @@ function pianoNote(m){if(!S.snd||!ac())return;const a=AC,t=a.currentTime+.005,f=
  max-width:min(94vw,640px);padding:8px 10px;border-radius:12px;background:rgba(10,17,32,.92);border:1px solid rgba(201,162,74,.55);box-shadow:0 6px 24px rgba(0,0,0,.45);font-family:Barlow,system-ui,sans-serif;color:#efe6cc}
  #pnoUI.show{display:flex}#pnoUI.inv{bottom:auto;top:92px;flex-wrap:nowrap}#pnoUI button{font:600 14px Barlow,system-ui,sans-serif;color:#0a1120;background:#c9a24a;border:0;border-radius:8px;padding:9px 14px;cursor:pointer;min-height:40px}
  #pnoUI button.sec{background:rgba(255,255,255,.1);color:#efe6cc;border:1px solid rgba(255,255,255,.18)}#pnoUI small{flex-basis:100%;text-align:center;font-size:12px;color:#b9c3d0;line-height:1.35}
- #pnoUI .pnoPlay{display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}#pnoUI .pnoPlay svg{width:16px;height:16px;flex:none;display:block;fill:currentColor}
+ #pnoUI .pnoPlay{display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}#pnoUI .pnoPlay svg{width:16px;height:16px;flex:none;display:block;fill:currentColor}#pnoUI button:disabled{opacity:.42;cursor:default}
  #pnoUI select{font:500 13px Barlow,system-ui,sans-serif;color:#efe6cc;background:#202c3a;border:1px solid rgba(201,162,74,.5);border-radius:8px;padding:9px 8px;min-height:40px;min-width:0;max-width:285px;cursor:pointer}
- @media (max-width:600px){#pnoUI{bottom:calc(118px + env(safe-area-inset-bottom,0px));gap:6px;padding:8px}#pnoUI select{flex:1 1 165px;max-width:58vw}#pnoUI [data-p="out"]{padding:9px 11px}}
+ @media (max-width:600px){#pnoUI{bottom:calc(118px + env(safe-area-inset-bottom,0px));gap:6px;padding:8px}#pnoUI select{flex:1 1 100%;max-width:none}#pnoUI .pnoPlay{flex:1 1 70px;padding:9px 8px}#pnoUI [data-p="out"]{flex:1 1 96px;padding:9px 8px}}
  body.pnoOn #dpad{display:none!important}body.pnoOn #hint{opacity:0!important}`;document.head.appendChild(st);
  const ui=document.createElement('div');ui.id='pnoUI';document.body.appendChild(ui);PNO.ui=ui;
  ui.addEventListener('pointerdown',e=>e.stopPropagation());ui.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.p;
-  if(k==='go')pianoEnter(PNO.last);else if(k==='x'){ui.classList.remove('show');}else if(k==='out')pianoExit();else if(k==='song')pianoSong();});
- ui.addEventListener('change',e=>{if(e.target.matches('[data-p="choose"]')){const playing=!!PNO.songT;pianoSongStop();PNO.songId=e.target.value;pianoUI('lock');if(playing)pianoSong();}});}
+  if(k==='go')pianoEnter(PNO.last);else if(k==='x'){ui.classList.remove('show');}else if(k==='out')pianoExit();else if(k==='play')pianoSongPlay();else if(k==='pause')pianoSongPause();});
+ ui.addEventListener('change',e=>{if(e.target.matches('[data-p="choose"]')){const playing=PNO.songPlaying;pianoSongStop();PNO.songId=e.target.value;pianoUI('lock');if(playing)pianoSongPlay();}});}
 function pianoUI(mode){const u=PNO.ui;clearTimeout(PNO.uiT);if(!mode){u.classList.remove('show');return;}u.classList.toggle('inv',mode==='invite');
  if(mode==='invite'){u.innerHTML='<button data-p="go"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px;margin-right:6px"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>Tocar o piano</button><button class="sec" data-p="x" aria-label="Fechar">✕</button>';PNO.uiT=setTimeout(()=>{if(!S.pianoLock)u.classList.remove('show');},12000);}
  else{const opts=PSONGS.map(s=>'<option value="'+s.id+'"'+(s.id===PNO.songId?' selected':'')+'>'+s.name+' ('+s.year+')</option>').join('');
-  const ico=PNO.songT?'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.5" y="5.5" width="13" height="13" rx="1"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4v16l12-8z"/></svg>';
-  u.innerHTML='<select data-p="choose" aria-label="Escolher canção de época">'+opts+'</select><button class="sec pnoPlay" data-p="song">'+ico+'<span>'+(PNO.songT?'Parar':'Tocar')+'</span></button><button data-p="out">Sair do piano</button><small>Toque nas teclas para tocar · trechos clássicos simplificados · músicas do filme em MIDI</small>';}
+  const playIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4v16l12-8z"/></svg>';
+  const pauseIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="4" height="16" rx="1"/><rect x="15" y="4" width="4" height="16" rx="1"/></svg>';
+  u.innerHTML='<select data-p="choose" aria-label="Escolher música">'+opts+'</select>'+
+   '<button class="sec pnoPlay" data-p="play" aria-label="Reproduzir ou continuar música"'+(PNO.songPlaying?' disabled':'')+'>'+playIcon+'<span>Play</span></button>'+
+   '<button class="sec pnoPlay" data-p="pause" aria-label="Pausar música"'+(!PNO.songPlaying?' disabled':'')+'>'+pauseIcon+'<span>Pausar</span></button>'+
+   '<button data-p="out">Sair do piano</button><small>Toque nas teclas para tocar</small>';}
  u.classList.add('show');}
  /* nota → [malha, índice] para o teclado do computador */
 function pianoFind(a,m){for(const o of a.userData.keys){const L=o.userData.pkey;for(let i=0;i<L.length;i++)if(L[i][0]===m)return [o,i];}return null;}
@@ -1759,37 +1763,73 @@ async function pianoMidiNotes(id){
  let at=0;for(let i=0;i+2<raw.length;i+=3){at+=((raw[i]<<8)|raw[i+1])*20;notes.push([at,raw[i+2]]);}
  PMIDI_CACHE[id]=notes;return notes;
 }
-function pianoSongStop(){clearTimeout(PNO.songT);PNO.songT=0;PNO.songToken=(PNO.songToken||0)+1;}
-function pianoSong(){
- if(PNO.songT){pianoSongStop();pianoUI('lock');return;}
- const a=PNO.cur;if(!a)return;
- const song=PSONGS.find(s=>s.id===PNO.songId)||PSONGS[0];
- const token=(PNO.songToken||0)+1;PNO.songToken=token;
- if(song.midi){
-  PNO.songT=-1;pianoUI('lock');
-  pianoMidiNotes(song.id).then(events=>{
-   if(token!==PNO.songToken||!S.pianoLock)return;
-   if(!events||!events.length){pianoSongStop();pianoUI('lock');return;}
-   let i=0;const start=performance.now();
-   const step=()=>{
-    if(token!==PNO.songToken||!S.pianoLock)return;
-    const now=performance.now()-start;let played=0;
-    while(i<events.length&&events[i][0]<=now+8){
-     if(events[i][0]>=now-350&&played<8){const k=pianoFind(a,events[i][1]);if(k){pianoHit(k[0],k[1],true);played++;}}
-     i++;
-    }
-    if(i>=events.length){pianoSongStop();pianoUI('lock');return;}
-    const wait=Math.max(0,Math.min(50,events[i][0]-(performance.now()-start)));
-    PNO.songT=setTimeout(step,wait);
-   };step();
-  }).catch(err=>{console.warn('MIDI não disponível:',err);if(token===PNO.songToken){pianoSongStop();pianoUI('lock');}});
-  return;
+/* Play e Pause independentes, com posição guardada para cada pausa.
+   Ao trocar de faixa ou sair do piano, volta ao começo. */
+function pianoSongSilence(){
+ if(typeof AC==='undefined'||!AC)return;
+ const now=AC.currentTime;
+ PNO.voices.forEach(v=>{if(v.end<=now)return;try{
+   const gain=v.g.gain;gain.cancelScheduledValues(now);gain.setTargetAtTime(0,now,.015);
+ }catch(_){}});
+}
+function pianoSongStop(){
+ clearTimeout(PNO.songT);PNO.songT=0;PNO.songToken++;
+ PNO.songPlaying=false;PNO.songPosMs=0;PNO.songStartedAt=0;PNO.songIndex=0;
+ pianoSongSilence();
+}
+function pianoSongPause(){
+ if(!PNO.songPlaying)return;
+ if(PNO.songStartedAt>0)PNO.songPosMs=Math.max(0,performance.now()-PNO.songStartedAt);
+ PNO.songPlaying=false;PNO.songToken++;
+ clearTimeout(PNO.songT);PNO.songT=0;PNO.songStartedAt=0;
+ pianoSongSilence();
+ if(S.pianoLock)pianoUI('lock');
+}
+function pianoTimedNotes(song){
+ const events=[];let at=0;
+ for(const n of song.notes){
+  if(n[0])events.push([Math.round(at),n[0]]);
+  if(n[2])events.push([Math.round(at),n[2]]);
+  at+=n[1]*song.beat*1000;
  }
- let i=0;
- const step=()=>{if(token!==PNO.songToken||i>=song.notes.length||!S.pianoLock){if(token===PNO.songToken){pianoSongStop();if(S.pianoLock)pianoUI('lock');}return;}
-  const n=song.notes[i++];[n[0],n[2]].forEach(m=>{if(!m)return;const k=pianoFind(a,m);if(k)pianoHit(k[0],k[1],true);});
-  PNO.songT=setTimeout(step,n[1]*song.beat*1000);};
- PNO.songT=-1;pianoUI('lock');step();}
+ return events;
+}
+function pianoSongPlay(){
+ if(PNO.songPlaying||!S.pianoLock||!PNO.cur)return;
+ const a=PNO.cur,song=PSONGS.find(s=>s.id===PNO.songId)||PSONGS[0];
+ const token=++PNO.songToken;
+ PNO.songPlaying=true;PNO.songStartedAt=0;
+ pianoUI('lock');
+ const ready=song.midi?pianoMidiNotes(song.id):Promise.resolve(pianoTimedNotes(song));
+ ready.then(events=>{
+  if(token!==PNO.songToken||!PNO.songPlaying||!S.pianoLock)return;
+  if(!events||!events.length){pianoSongStop();pianoUI('lock');return;}
+  let i=Math.min(PNO.songIndex,events.length);
+  PNO.songStartedAt=performance.now()-PNO.songPosMs;
+  const step=()=>{
+   if(token!==PNO.songToken||!PNO.songPlaying||!S.pianoLock)return;
+   const now=performance.now()-PNO.songStartedAt;
+   let played=0;
+   while(i<events.length&&events[i][0]<=now+8){
+    if(events[i][0]>=now-350&&played<8){
+     const k=pianoFind(a,events[i][1]);if(k){pianoHit(k[0],k[1],true);played++;}
+    }
+    i++;
+   }
+   PNO.songIndex=i;
+   if(i>=events.length){
+    PNO.songPlaying=false;PNO.songT=0;PNO.songPosMs=0;PNO.songStartedAt=0;PNO.songIndex=0;
+    if(S.pianoLock)pianoUI('lock');
+    return;
+   }
+   PNO.songT=setTimeout(step,Math.max(0,Math.min(50,events[i][0]-(performance.now()-PNO.songStartedAt))));
+  };
+  step();
+ }).catch(err=>{
+  console.warn('Música do piano não disponível:',err);
+  if(token===PNO.songToken){pianoSongStop();if(S.pianoLock)pianoUI('lock');}
+ });
+}
 /* ===== MÓDULO 4 — conteúdo: fichas, ambientes por convés, categorias, rota ===== */
 // tag: D = informação histórica documentada · R = reconstrução visual plausível · S = simplificação da simulação
 // [grupo, nome, inglês, tag, âncora, distância, texto]
@@ -2470,6 +2510,7 @@ function renderTab(){const t=S.tab;let h='';
   '<h4>Limites desta versão</h4><p class="note"><b>Passagens:</b> cada porta leva diretamente ao ambiente vizinho; os corredores intermediários não são percorridos, com exceção de um trecho do corredor do convés B. As ligações são plausíveis, não a planta exata.<br><b>Imagens históricas:</b> sete imagens em domínio público do Wikimedia Commons aparecem nas fichas correspondentes, com legenda, autoria e fonte; a ficha diz quando se trata de desenho ou do navio gêmeo. O museu procura primeiro o arquivo na pasta assets/images/historical e, se não o achar, busca a imagem no Commons; onde imagens externas são bloqueadas, fica o atalho para a fonte.<br><b>Modelo do navio:</b> há um único Titanic na cena — o modelo “RMS Titanic 1912”, de Renan_1912 (<a href=\"https://sketchfab.com/3d-models/rms-titanic-1912-fe1019b8f4bf46eea28cdb7a866f05e0\" target=\"_blank\" rel=\"noopener\">Sketchfab</a>, licença <a href=\"http://creativecommons.org/licenses/by/4.0/\" target=\"_blank\" rel=\"noopener\">CC BY 4.0</a>). É exibido com a geometria completa (sem simplificação), as texturas originais e as faces com a orientação definida pelo autor; o arquivo foi apenas comprimido e dividido pelo museu em partes articuladas: duas metades do casco, superestrutura, quatro chaminés, dois mastros, cordame, 16 botes, três hélices e leme; o casco foi escurecido, as janelas ganharam luz noturna e 18 molduras triangulares soltas nas laterais do convés A, sem correspondência identificada no navio real, foram retiradas. Conveses internos, anteparas, caldeiras e máquinas são gerados por código e ajustados à forma desse casco. Se o modelo não puder ser carregado, o museu usa um casco gerado por código no lugar (nunca os dois).<br><b>Sons:</b> o mar, a água no casco, as máquinas (com batida ligada às rotações), os ruídos do naufrágio e a colisão são sintetizados no navegador. O apito e o sino usam as gravações do autor do museu quando presentes em assets/audio/ship; na falta delas, sons sintetizados. Abaixo da superfície, o som ambiente e os efeitos ficam abafados (filtro passa-baixas). O botão das ondas abre o volume do som ambiente (mar, água no casco, máquinas), que começa em 10% e tem um botão de mudo próprio; apito, sinos, telégrafo e Morse não dependem dele.<br><b>Ponte:</b> o timão gira com o leme e as alavancas dos cinco telégrafos acompanham a ordem dada; todas se movem juntas, o que é uma simplificação.<br><b>Oceano:</b> ondulação, ondas de proa e de esteira (padrão de Kelvin, com comprimento de onda ligado à velocidade) e espuma são calculados por shader; é uma aproximação visual, não uma simulação de fluidos.<br><b>Naufrágio:</b> ruptura, queda das chaminés, posição dos botes, ondas e espuma da ruptura e a descida das duas metades são representações esquemáticas, não reconstituições exatas. No fundo, as luzes âmbar são de observação (como as dos submersíveis que visitam os destroços), um recurso visual.<br><b>Ingressos:</b> o gerador de ingressos é uma ferramenta à parte, aberta num painel sobre o museu; o ingresso desenhado segue o modelo original do gerador.<br><b>Ainda sem cenário:</b> escadaria de ré, Verandah Café, sala de fumar da 2ª classe.</p>'+
   '<h4>Fontes para consulta</h4><p class="note"><a href="https://www.encyclopedia-titanica.org/" target="_blank" rel="noopener">Encyclopedia Titanica</a> · <a href="https://www.titanicinquiry.org/" target="_blank" rel="noopener">Titanic Inquiry Project</a> (inquéritos de 1912) · <a href="https://www.norwayheritage.com/p_ship.asp?sh=titan" target="_blank" rel="noopener">Norway Heritage</a> (descrição técnica de época) · <a href="https://en.wikipedia.org/wiki/Titanic" target="_blank" rel="noopener">Wikipedia — Titanic</a> · revista The Shipbuilder, número especial de 1911.</p>'+
   '<h4>Autoria</h4><p class="note" style="color:var(--ink)"><b style="color:var(--brass);font-size:14px">Desenvolvido por Davi Caetano</b><br>Projeto independente de museu virtual e simulação tridimensional do RMS Titanic, dedicado à exploração interativa, à história naval e à visualização de estruturas e acontecimentos relacionados à embarcação.</p><p class="note"><a class="lnk" href="https://www.linkedin.com/in/davicaetanosilva/" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3.5"/><path d="M8 10.5V17M8 7.4v.1M11.5 17v-6.5M11.5 13.2c0-1.6 1-2.7 2.4-2.7s2.1 1 2.1 2.6V17"/></svg>Contato profissional: LinkedIn</a></p>'+
+  '<h4>Piano interativo</h4><p class="note">O piano oferece trechos clássicos simplificados, gerados pelo sintetizador do navegador, e músicas da trilha do filme Titanic em arquivos MIDI fornecidos para este projeto. Esses arranjos são recursos de demonstração e não representam gravações feitas a bordo em 1912.</p>'+ 
   '<h4>Música</h4><p class="note">“Nearer, My God, to Thee” — letra de Sarah Flower Adams (1841); melodia tradicional (as versões mais conhecidas são “Bethany”, de Lowell Mason, e “Horbury”, de John Bacchus Dykes). Gravação: regência de Randy Miller, álbum <i>Titanic: The Ultimate Collection</i> (Varèse Sarabande, 1998), distribuição Universal Music Group — dados dos metadados do YouTube informados pelo autor do museu, não conferidos na fonte original. A atribuição não substitui a autorização para usar a gravação.</p>';}
  if(hist.length)h='<div class="navr"><button class="back" data-back="1">'+ic('back')+' Voltar</button>'+((hist.some(q=>q.tab==='explorar'||q.tab==='cat')&&hist[hist.length-1].tab!=='explorar'&&t!=='explorar')?'<button class="back" data-home="1">'+ic('compass')+' Explorar</button>':'')+'</div>'+h;
  pDyn.innerHTML=h;
