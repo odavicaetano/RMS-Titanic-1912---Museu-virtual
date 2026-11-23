@@ -1,10 +1,11 @@
 /* Service Worker — Titanic 3D. Estratégia Cache-First: tudo que já foi baixado vem do cache (carregamento imediato e uso offline);
    o que não está no cache é buscado na rede e guardado. Para publicar uma nova versão, altere VERSION. */
-const VERSION='v12';
+const VERSION='v13';
 const CACHE='titanic3d-'+VERSION;
 const CORE=['./','index.html','manifest.json','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png','icons/apple-touch-icon.png',
  'assets/models/titanic_glb.js','assets/models/querubim_glb.js','assets/models/conves_nav.js','assets/models/iceberg.js','assets/models/foguista.js',
  'assets/audio/ship/sino-titanic.mp3','assets/audio/ship/apito-titanic.mp3','assets/audio/ship/nearer-my-god-to-thee.mp3',
+ 'assets/audio/piano-midi-songs.js',
  'assets/images/historical/blueprints/titanic-perfil-planos-1911.jpg','assets/images/historical/engineering/popa-leme-dique-seco.jpg',
  'ingresso/index.html'];
 const EXT=['https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
