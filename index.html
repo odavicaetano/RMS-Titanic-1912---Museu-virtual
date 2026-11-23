@@ -1685,9 +1685,9 @@ function pianoCam(){const a=PNO.cur;if(!a)return;a.updateMatrixWorld(true);
  /* Mobile retrato: trazer as 88 teclas até perto das bordas, sem cortá-las, e retirar o banquinho do foco.
     O cálculo usa a largura real do teclado (1,22 m), a proporção da tela e uma margem de segurança. */
  const portrait=cam.aspect<.85,mobile=window.innerWidth<900,fov=portrait?68:mobile?62:50;
- const pianoKeysWidth=1.22,keyboardFrameWidth=pianoKeysWidth+(.18);
- const dz=portrait?Math.max(1.90,keyboardFrameWidth/(2*Math.tan(fov*PI/360)*Math.max(.2,cam.aspect))):mobile?Math.max(1.15,1.7/(2*Math.tan(fov*PI/360)*cam.aspect)):.72;
- const ey=portrait?1.32:1.28,eye=a.localToWorld(new T.Vector3(0,ey,.235+dz)),fr=new T.Vector3(0,0,1).transformDirection(a.matrixWorld);
+ const pianoKeysWidth=1.22,keyboardFill=.92;
+ const dz=portrait?Math.max(1.75,pianoKeysWidth/(2*keyboardFill*Math.tan(fov*PI/360)*Math.max(.2,cam.aspect))):mobile?Math.max(1.15,1.7/(2*Math.tan(fov*PI/360)*cam.aspect)):.72;
+ const ey=portrait?1.36:1.28,eye=a.localToWorld(new T.Vector3(0,ey,.235+dz)),fr=new T.Vector3(0,0,1).transformDirection(a.matrixWorld);
  F.p.set(eye.x,eye.y-1.62,eye.z);F.ys=F.p.y;F.yaw=Math.atan2(fr.x,fr.z);F.pitch=Math.atan2(.76-ey,dz);F.fovT=fov;}
  function pianoEnter(a){if(!a||S.pianoLock)return;PNO.cur=a;PNO.prev={p:F.p.clone(),yaw:F.yaw,pitch:F.pitch,fov:F.fovT,fp:S.fp,ys:F.ys};if(window.__joyEnd)window.__joyEnd();keys.w=keys.a=keys.s=keys.d=false;
  if(S.tab)closeSheet();S.fp=true;S.pianoLock=true;PNO.oct=0;pianoCam();document.body.classList.add('pnoOn');applyLook();pianoUI('lock');}
@@ -3104,8 +3104,10 @@ setTimeout(()=>{const t0=performance.now();uwWarm();window.__uwWarmMs=performanc
  let hintVisible=true;
  const dismissHint=()=>{if(!hintVisible)return;hintVisible=false;h.style.display='none';h.style.opacity='0';};
  document.addEventListener('pointerdown',dismissHint,{capture:true,passive:true});
+ document.addEventListener('touchstart',dismissHint,{capture:true,passive:true});
  document.addEventListener('click',dismissHint,true);
  document.addEventListener('focusin',dismissHint,true);
+ document.addEventListener('change',dismissHint,true);
  document.addEventListener('keydown',dismissHint,true);
  document.addEventListener('wheel',dismissHint,{capture:true,passive:true});
  setTimeout(()=>{if(hintVisible)h.style.opacity=0;},9000);}
