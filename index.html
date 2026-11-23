@@ -1678,11 +1678,13 @@ function pianoUI(mode){const u=PNO.ui;clearTimeout(PNO.uiT);if(!mode){u.classLis
 function pianoFind(a,m){for(const o of a.userData.keys){const L=o.userData.pkey;for(let i=0;i<L.length;i++)if(L[i][0]===m)return [o,i];}return null;}
 function pianoKeyX(a,m){const r=pianoFind(a,m);return r?r[0].userData.pkey[r[1]][1]:0;}
 function pianoCam(){const a=PNO.cur;if(!a)return;a.updateMatrixWorld(true);
- /* Retrato: enquadrar a largura inteira das 88 teclas; evitar o corte nas bordas do celular. */
- const portrait=cam.aspect<.85,mobile=window.innerWidth<900,fov=portrait?72:mobile?62:50;
- const dz=portrait?Math.max(2.15,1.7/(2*Math.tan(fov*PI/360)*Math.max(.2,cam.aspect))):mobile?Math.max(1.15,1.7/(2*Math.tan(fov*PI/360)*cam.aspect)):.72;
- const ey=portrait?1.44:1.28,eye=a.localToWorld(new T.Vector3(0,ey,.235+dz)),fr=new T.Vector3(0,0,1).transformDirection(a.matrixWorld);
- F.p.set(eye.x,eye.y-1.62,eye.z);F.ys=F.p.y;F.yaw=Math.atan2(fr.x,fr.z);F.pitch=Math.atan2(.735-ey,dz);F.fovT=fov;}
+ /* Mobile retrato: trazer as 88 teclas até perto das bordas, sem cortá-las, e retirar o banquinho do foco.
+    O cálculo usa a largura real do teclado (1,22 m), a proporção da tela e uma margem de segurança. */
+ const portrait=cam.aspect<.85,mobile=window.innerWidth<900,fov=portrait?68:mobile?62:50;
+ const pianoKeysWidth=1.22,keyboardFrameWidth=pianoKeysWidth+(.18);
+ const dz=portrait?Math.max(1.90,keyboardFrameWidth/(2*Math.tan(fov*PI/360)*Math.max(.2,cam.aspect))):mobile?Math.max(1.15,1.7/(2*Math.tan(fov*PI/360)*cam.aspect)):.72;
+ const ey=portrait?1.32:1.28,eye=a.localToWorld(new T.Vector3(0,ey,.235+dz)),fr=new T.Vector3(0,0,1).transformDirection(a.matrixWorld);
+ F.p.set(eye.x,eye.y-1.62,eye.z);F.ys=F.p.y;F.yaw=Math.atan2(fr.x,fr.z);F.pitch=Math.atan2(.76-ey,dz);F.fovT=fov;}
  function pianoEnter(a){if(!a||S.pianoLock)return;PNO.cur=a;PNO.prev={p:F.p.clone(),yaw:F.yaw,pitch:F.pitch,fov:F.fovT,fp:S.fp,ys:F.ys};if(window.__joyEnd)window.__joyEnd();keys.w=keys.a=keys.s=keys.d=false;
  if(S.tab)closeSheet();S.fp=true;S.pianoLock=true;PNO.oct=0;pianoCam();document.body.classList.add('pnoOn');applyLook();pianoUI('lock');}
 function pianoExit(quiet){if(!S.pianoLock)return;pianoSongStop();S.pianoLock=false;document.body.classList.remove('pnoOn');pianoUI(null);const p=PNO.prev;PNO.act=null;
@@ -3035,7 +3037,17 @@ setTimeout(()=>{const t0=performance.now();uwWarm();window.__uwWarmMs=performanc
  MOUSE='<rect x="7" y="3" width="10" height="16" rx="5"/><path d="M12 3v5"/>',WHEEL='<rect x="7" y="3" width="10" height="16" rx="5"/><path d="M12 6v3"/><path d="M12 21v1M9.5 21.5L12 23l2.5-1.5"/>',RIGHT='<rect x="7" y="3" width="10" height="16" rx="5"/><path d="M12 3v5h5"/>',KEYS='<rect x="2.5" y="7" width="19" height="11" rx="2"/><path d="M6 11h1M9.5 11h1M13 11h1M16.5 11h1M7 14.5h10"/>',
  DRAG='<path d="M9 13V6a1.5 1.5 0 0 1 3 0v5M12 10V5a1.5 1.5 0 0 1 3 0v6M15 10a1.5 1.5 0 0 1 3 0v4a6 6 0 0 1-6 6h-1a6 6 0 0 1-4.4-2l-2.3-2.6a1.5 1.5 0 0 1 2.2-2L9 13"/><path d="M3 6h3M4.5 4.5L3 6l1.5 1.5"/>',PINCH='<circle cx="7" cy="17" r="2"/><circle cx="17" cy="7" r="2"/><path d="M9 15l2.5-2.5M15 9l-2.5 2.5M4 20l1.5-1.5M20 4l-1.5 1.5"/>',TAP='<path d="M9 13V6a1.5 1.5 0 0 1 3 0v5M12 10V5a1.5 1.5 0 0 1 3 0v6M15 10a1.5 1.5 0 0 1 3 0v4a6 6 0 0 1-6 6h-1a6 6 0 0 1-4.4-2l-2.3-2.6a1.5 1.5 0 0 1 2.2-2L9 13"/><circle cx="10.5" cy="3.5" r="2.5" stroke-dasharray="2 2"/>',JOY='<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/>';
  const L=touch?[[DRAG,'Arraste o dedo para girar'],[PINCH,'Pinça para aproximar · dois dedos para deslocar'],[TAP,'Toque numa peça para abrir a ficha'],[JOY,'Ao caminhar, use o controle analógico']]:[[MOUSE,'Arraste para girar'],[WHEEL,'Roda do mouse para aproximar'],[RIGHT,'Botão direito ou Shift + arrastar para deslocar'],[KEYS,'← → leme · ↑ ↓ telégrafo · H apito · setas/WASD ao caminhar']];
- const h=$('#hint');h.innerHTML=L.map(q=>'<span>'+I(q[0])+q[1]+'</span>').join('');setTimeout(()=>{h.style.opacity=0;},9000);}
+ const h=$('#hint');h.innerHTML=L.map(q=>'<span>'+I(q[0])+q[1]+'</span>').join('');
+ /* Ao abrir qualquer menu, tocar no cenário, pesquisar, usar o teclado ou rolar,
+    remover imediatamente o tutorial, antes de ele se sobrepor ao painel acionado. */
+ let hintVisible=true;
+ const dismissHint=()=>{if(!hintVisible)return;hintVisible=false;h.style.display='none';h.style.opacity='0';};
+ document.addEventListener('pointerdown',dismissHint,{capture:true,passive:true});
+ document.addEventListener('click',dismissHint,true);
+ document.addEventListener('focusin',dismissHint,true);
+ document.addEventListener('keydown',dismissHint,true);
+ document.addEventListener('wheel',dismissHint,{capture:true,passive:true});
+ setTimeout(()=>{if(hintVisible)h.style.opacity=0;},9000);}
 const MLAMP={q:[],i:0,t:0,on:0,a:0};/* estado da lâmpada de sinais da asa de boreste */
 /* ================= COMANDO: casa do leme, salas de cartas e de navegação, asas da ponte, telefones, portas estanques ================= */
 /* Os espaços ficam no lugar real, dentro do modelo: entra-se pelas portas do próprio navio, que se abrem quando o visitante se aproxima.
