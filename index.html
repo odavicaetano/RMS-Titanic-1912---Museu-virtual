@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>RMS Titanic 1912 - Museu virtual 3D</title>
+<script src="assets/audio/piano-midi-songs.js"></script>
 <!-- Compartilhamento em WhatsApp, LinkedIn, Facebook e outras redes -->
 <meta name="description" content="Explore o RMS Titanic em um museu virtual 3D interativo. Caminhe pelos conveses, descubra ambientes internos e acompanhe uma simulação do naufrágio.">
 <link rel="canonical" href="https://odavicaetano.github.io/RMS-Titanic-1912---Museu-virtual/">
@@ -1671,7 +1672,7 @@ function pianoUI(mode){const u=PNO.ui;clearTimeout(PNO.uiT);if(!mode){u.classLis
  if(mode==='invite'){u.innerHTML='<button data-p="go"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px;margin-right:6px"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>Tocar o piano</button><button class="sec" data-p="x" aria-label="Fechar">✕</button>';PNO.uiT=setTimeout(()=>{if(!S.pianoLock)u.classList.remove('show');},12000);}
  else{const opts=PSONGS.map(s=>'<option value="'+s.id+'"'+(s.id===PNO.songId?' selected':'')+'>'+s.name+' ('+s.year+')</option>').join('');
   const ico=PNO.songT?'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.5" y="5.5" width="13" height="13" rx="1"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4v16l12-8z"/></svg>';
-  u.innerHTML='<select data-p="choose" aria-label="Escolher canção de época">'+opts+'</select><button class="sec pnoPlay" data-p="song">'+ico+'<span>'+(PNO.songT?'Parar':'Tocar')+'</span></button><button data-p="out">Sair do piano</button><small>Toque nas teclas para tocar · repertório em trechos simplificados</small>';}
+  u.innerHTML='<select data-p="choose" aria-label="Escolher canção de época">'+opts+'</select><button class="sec pnoPlay" data-p="song">'+ico+'<span>'+(PNO.songT?'Parar':'Tocar')+'</span></button><button data-p="out">Sair do piano</button><small>Toque nas teclas para tocar · trechos clássicos simplificados · músicas do filme em MIDI</small>';}
  u.classList.add('show');}
  /* nota → [malha, índice] para o teclado do computador */
 function pianoFind(a,m){for(const o of a.userData.keys){const L=o.userData.pkey;for(let i=0;i<L.length;i++)if(L[i][0]===m)return [o,i];}return null;}
@@ -1739,16 +1740,55 @@ const PSONGS=[
  {id:'nearer',name:'Nearer, My God, to Thee',year:1856,beat:.58,notes:PSONG},
  {id:'entertainer',name:'The Entertainer',year:1902,beat:.24,notes:pianoExcerpt([86,88,84,81,81,83,79,74,76,72,69,69,71,67,74,76,72,69,69,71,67,74,75,76,72,76,72,76,72,74,75,76,72,74,76,76,71,74,72],48)},
  {id:'maple',name:'Maple Leaf Rag',year:1899,beat:.22,notes:pianoExcerpt([68,63,68,72,63,67,63,67,70,63,63,68,63,68,72,63,67,63,67,70,63,63,63,68,71,76,75,75,68,71,76,75,68,71,68,68,71,68],44)},
- {id:'elise',name:'Für Elise',year:1810,beat:.29,notes:pianoExcerpt([76,75,76,75,76,71,74,72,69,60,64,69,71,64,68,71,72,64,76,75,76,75,76,71,74,72,69,60,64,69,71,64,72,71,69],45)}
+ {id:'elise',name:'Für Elise',year:1810,beat:.29,notes:pianoExcerpt([76,75,76,75,76,71,74,72,69,60,64,69,71,64,68,71,72,64,76,75,76,75,76,71,74,72,69,60,64,69,71,64,72,71,69],45)},
+ {id:'portrait',name:'The Portrait (Titanic)',year:1997,midi:true},
+ {id:'rose',name:'Rose (Titanic)',year:1997,midi:true},
+ {id:'myheart',name:'My Heart Will Go On',year:1997,midi:true}
 ];
-function pianoSongStop(){clearTimeout(PNO.songT);PNO.songT=0;}
-function pianoSong(){if(PNO.songT){pianoSongStop();pianoUI('lock');return;}const a=PNO.cur;if(!a)return;
- const song=PSONGS.find(s=>s.id===PNO.songId)||PSONGS[0];let i=0;
- const step=()=>{if(i>=song.notes.length||!S.pianoLock){pianoSongStop();if(S.pianoLock)pianoUI('lock');return;}
+/* Decodifica os eventos das partituras MIDI fornecidas pelo usuário. Dados comprimidos em deflate, notas absolutas em passos de 20 ms. */
+const PMIDI_CACHE={};
+async function pianoMidiNotes(id){
+ if(PMIDI_CACHE[id])return PMIDI_CACHE[id];
+ const src=window.TITANIC_PIANO_MIDI&&window.TITANIC_PIANO_MIDI[id];
+ if(!src||typeof DecompressionStream==='undefined')return null;
+ const zipped=Uint8Array.from(atob(src.data),c=>c.charCodeAt(0));
+ const stream=new Blob([zipped]).stream().pipeThrough(new DecompressionStream('deflate'));
+ const raw=new Uint8Array(await new Response(stream).arrayBuffer()),notes=[];
+ let at=0;for(let i=0;i+2<raw.length;i+=3){at+=((raw[i]<<8)|raw[i+1])*20;notes.push([at,raw[i+2]]);}
+ PMIDI_CACHE[id]=notes;return notes;
+}
+function pianoSongStop(){clearTimeout(PNO.songT);PNO.songT=0;PNO.songToken=(PNO.songToken||0)+1;}
+function pianoSong(){
+ if(PNO.songT){pianoSongStop();pianoUI('lock');return;}
+ const a=PNO.cur;if(!a)return;
+ const song=PSONGS.find(s=>s.id===PNO.songId)||PSONGS[0];
+ const token=(PNO.songToken||0)+1;PNO.songToken=token;
+ if(song.midi){
+  PNO.songT=-1;pianoUI('lock');
+  pianoMidiNotes(song.id).then(events=>{
+   if(token!==PNO.songToken||!S.pianoLock)return;
+   if(!events||!events.length){pianoSongStop();pianoUI('lock');return;}
+   let i=0;const start=performance.now();
+   const step=()=>{
+    if(token!==PNO.songToken||!S.pianoLock)return;
+    const now=performance.now()-start;let played=0;
+    while(i<events.length&&events[i][0]<=now+8){
+     if(events[i][0]>=now-350&&played<8){const k=pianoFind(a,events[i][1]);if(k){pianoHit(k[0],k[1],true);played++;}}
+     i++;
+    }
+    if(i>=events.length){pianoSongStop();pianoUI('lock');return;}
+    const wait=Math.max(0,Math.min(50,events[i][0]-(performance.now()-start)));
+    PNO.songT=setTimeout(step,wait);
+   };step();
+  }).catch(err=>{console.warn('MIDI não disponível:',err);if(token===PNO.songToken){pianoSongStop();pianoUI('lock');}});
+  return;
+ }
+ let i=0;
+ const step=()=>{if(token!==PNO.songToken||i>=song.notes.length||!S.pianoLock){if(token===PNO.songToken){pianoSongStop();if(S.pianoLock)pianoUI('lock');}return;}
   const n=song.notes[i++];[n[0],n[2]].forEach(m=>{if(!m)return;const k=pianoFind(a,m);if(k)pianoHit(k[0],k[1],true);});
   PNO.songT=setTimeout(step,n[1]*song.beat*1000);};
- PNO.songT=1;pianoUI('lock');step();}
- /* ===== MÓDULO 4 — conteúdo: fichas, ambientes por convés, categorias, rota ===== */
+ PNO.songT=-1;pianoUI('lock');step();}
+/* ===== MÓDULO 4 — conteúdo: fichas, ambientes por convés, categorias, rota ===== */
 // tag: D = informação histórica documentada · R = reconstrução visual plausível · S = simplificação da simulação
 // [grupo, nome, inglês, tag, âncora, distância, texto]
 const PD={
