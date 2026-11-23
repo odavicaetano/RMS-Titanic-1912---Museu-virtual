@@ -1779,7 +1779,7 @@ function pianoSongStop(){
 }
 function pianoSongPause(){
  if(!PNO.songPlaying)return;
- if(PNO.songStartedAt>0)PNO.songPosMs=Math.max(0,performance.now()-PNO.songStartedAt);
+ if(PNO.songStartedAt!==0)PNO.songPosMs=Math.max(0,performance.now()-PNO.songStartedAt);
  PNO.songPlaying=false;PNO.songToken++;
  clearTimeout(PNO.songT);PNO.songT=0;PNO.songStartedAt=0;
  pianoSongSilence();
